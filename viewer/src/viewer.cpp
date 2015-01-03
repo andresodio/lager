@@ -131,7 +131,9 @@ void populateSensorVertexBuffers(int aSensorIndex, const vector<string>& aMoveme
 
 void populateSensorColorBuffers(GLfloat* aSensor0ColorBufferData, GLfloat* aSensor1ColorBufferData, int aNumVertexBufferElems)
 {
-	float colorIntensityInterval = 1.0f / (aNumVertexBufferElems / 3);
+	int numMovements = aNumVertexBufferElems / 3;
+	int numColorIntensityJumps = numMovements - 1;
+	float colorIntensityInterval = 1.0f / numColorIntensityJumps;
 
 	GLfloat sensor0TempIntensities[3] = { 0.0f, 0.0f, 0.0f }; // R,G,B
 	GLfloat sensor1TempIntensities[3] = { 0.0f, 0.0f, 0.0f }; // R,G,B
