@@ -21,16 +21,21 @@
 
 #include "spherical_coordinates.hpp"
 #include "coordinates_letter.hpp"
+#include "math_utilities.hpp"
+#include "string_tokenizer.hpp"
+
+#define RECOGNIZER_ERROR -1
+#define RECOGNIZER_NO_ERROR 0
 
 #define SENSOR_SERVER "Tracker0@localhost"
 
-#define DISTANCE_INTERVAL_SQUARED 0.0005f //0.5 * 1 cm^2
+#define DISTANCE_INTERVAL_SQUARED 0.0004f //0.4 * (1 cm)^2
 
 #define MAIN_SLEEP_INTERVAL_MICROSECONDS 1000 // 1ms
 #define MAIN_SLEEP_INTERVAL_MILLISECONDS MAIN_SLEEP_INTERVAL_MICROSECONDS/1000
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define GESTURE_GROUPING_TIME_MILLISECONDS 200
-#define GESTURE_DISTANCE_THRESHOLD 20
+#define GESTURE_DISTANCE_THRESHOLD_PCT 25
 
 using namespace std;
 
@@ -273,66 +278,127 @@ int dldist2(const char *s, const char* t, int n, int m){
 	return cost;
 }
 
+/* New size must be a multiple of the original string size */
+string expandString(const string& aInputString, int aNewSize)
+{
+	stringstream outputString;
+	int lengthMultiplier = aNewSize / aInputString.length();
+
+	vector<string> movementPairs;
+	tokenizeString(aInputString, movementPairs, ".");
+
+	for (vector<string>::iterator it = movementPairs.begin(); it < movementPairs.end(); ++it) {
+		for (int i = 0; i < lengthMultiplier; i++) {
+			outputString << *it << ".";
+		}
+	}
+
+	return outputString.str();
+}
+
 struct gestureEntry {
 	string name;
 	string movements;
 	int dlDistance;
+	float dlDistancePct;
 };
 
 bool gestureEntryLessThan (gestureEntry i, gestureEntry j)
 {
-	return (i.dlDistance < j.dlDistance);
+	return (i.dlDistancePct < j.dlDistancePct);
 }
 
-void recognizeGesture()
+int readAndCompareGesturesFromFile(vector<gestureEntry>& aGestures)
 {
 	ifstream gestureFile;
-	string currentLine, currentName, currentMovements;
-	vector<gestureEntry> gestures;
-	int lowestDistance;
+	string currentLine;
+
+	cout << "Current gesture" << endl << "\t" << gestureString.str() << endl << endl;;
 
 	gestureFile.open("gestures.dat");
 	if (!gestureFile.is_open()) {
-		return;
+		return RECOGNIZER_ERROR;
 	}
 
 	while (getline(gestureFile, currentLine)) {
 		//cout << "Line: " << currentLine << endl;
 		stringstream ss(currentLine);
-		const string& gestureTemp = gestureString.str();
+		const string& inputGesture = gestureString.str();
 
-		gestureEntry newGesture;
-		ss >> newGesture.name >> newGesture.movements;
-		newGesture.dlDistance = dldist2(newGesture.movements.c_str(), gestureTemp.c_str(), newGesture.movements.length(), gestureTemp.length());
+		gestureEntry newGestureEntry;
+		ss >> newGestureEntry.name >> newGestureEntry.movements;
 
-		cout << "Current gesture" << endl << "\t" << gestureString.str() << endl;
-		cout << newGesture.name << endl << "\t" << newGesture.movements << endl;
+		int gestureLengthLeastCommonMultiple = leastCommonMultiple(inputGesture.length(), newGestureEntry.movements.length());
+		string expandedInputString = expandString(inputGesture, gestureLengthLeastCommonMultiple);
+		string expandedNewGestureEntryString = expandString(newGestureEntry.movements, gestureLengthLeastCommonMultiple);
 
-		gestures.push_back(newGesture);
+		newGestureEntry.dlDistance = dldist2(expandedInputString.c_str(), expandedNewGestureEntryString.c_str(), expandedInputString.length(), expandedNewGestureEntryString.length());
+		newGestureEntry.dlDistancePct = (newGestureEntry.dlDistance * 100.0f) / expandedNewGestureEntryString.length();
+
+		cout << newGestureEntry.name << endl << "\t" << newGestureEntry.movements << endl;
+		cout << "Distance: " << newGestureEntry.dlDistancePct << "% (" << newGestureEntry.dlDistance << " D-L ops)" << endl;
+		cout << endl;
+
+		aGestures.push_back(newGestureEntry);
 	}
 
-	cout << endl;
+	return RECOGNIZER_NO_ERROR;
+}
+
+void drawMatchingGestures(const gestureEntry& closestGesture) {
+	stringstream viewerCommand;
+	string viewerCommandPrefix =
+			"cd ~/lager/viewer/src/ && ../build/viewer --gesture ";
+	string hideOutputSuffix = " > /dev/null";
+
+	cout << "Drawing input gesture..." << endl;
+
+	viewerCommand << viewerCommandPrefix << gestureString.str()
+			<< hideOutputSuffix;
+	system(viewerCommand.str().c_str());
+
+	cout << "Drawing gesture match..." << endl;
+
+	viewerCommand.str("");
+	viewerCommand << viewerCommandPrefix << closestGesture.movements
+			<< hideOutputSuffix;
+	system(viewerCommand.str().c_str());
+}
+
+void recognizeGesture()
+{
+	vector<gestureEntry> gestures;
+	int lowestDistance;
+
+	cout << " ________________________________ " << endl;
+	cout << "|                                |" << endl;
+	cout << "|         RECOGNIZING...         |" << endl;
+	cout << "|________________________________|" << endl;
+	cout << "                                  " << endl;
+
+	if (readAndCompareGesturesFromFile(gestures) != RECOGNIZER_NO_ERROR) {
+		cout << "Error reading gestures from file." << endl;
+		return;
+	}
 
 	gestureEntry closestGesture = *min_element(gestures.begin(), gestures.end(), gestureEntryLessThan);
-	if (closestGesture.dlDistance <= GESTURE_DISTANCE_THRESHOLD) {
-		string viewerCommandPrefix = "cd ~/lager/viewer/src/ && ../build/viewer --gesture ";
-		stringstream viewerCommand;
+	cout << endl;
+	cout << "Closest gesture:\t" << closestGesture.name << endl;
+	cout << "Distance:\t\t" << closestGesture.dlDistancePct << "% (" << closestGesture.dlDistance << " D-L ops)" << endl;
+	cout << "Threshold:\t\t" << GESTURE_DISTANCE_THRESHOLD_PCT << "%" << endl;
 
-		viewerCommand << viewerCommandPrefix << gestureString.str();
-		system(viewerCommand.str().c_str());
-
-		viewerCommand.str("");
-		viewerCommand << viewerCommandPrefix << closestGesture.movements;
-		system(viewerCommand.str().c_str());
-
-		cout << "/********************************/" << endl;
-		cout << "Closest gesture is " << closestGesture.name << endl;
-		cout << "/********************************/" << endl;
+	if (closestGesture.dlDistancePct <= GESTURE_DISTANCE_THRESHOLD_PCT) {
+		cout << " ________________________________ " << endl;
+		cout << "|                                |" << endl;
+		cout << "|          MATCH FOUND!          |" << endl;
+		cout << "|________________________________|" << endl;
+		cout << "                                  " << endl;
+		drawMatchingGestures(closestGesture);
 	} else {
-		cout << "Closest gesture distance (" << closestGesture.dlDistance << ") is above distance threshold (" << GESTURE_DISTANCE_THRESHOLD << ")." << endl;
+		cout << "NO MATCH." << endl;
 	}
 
-	cout << endl;
+	cout << endl << endl;;
 }
 
 /*****************************************************************************
@@ -426,6 +492,12 @@ int main(int argc, char *argv[])
 	tracker->register_change_handler(NULL, handle_tracker_change);
 	button->register_change_handler(&done, handle_button_change);
 
+	cout << " ________________________________ " << endl;
+	cout << "|                                |" << endl;
+	cout << "|       COLLECTING DATA...       |" << endl;
+	cout << "|________________________________|" << endl;
+	cout << "                                  " << endl;
+
 	// Main loop
 	while (! done ) {
 
@@ -435,8 +507,22 @@ int main(int argc, char *argv[])
 		button->mainloop();
 
 		// If gesture buildup pauses, attempt to recognize it
-		if (gesturePaused() && gestureString.str().length() > 0) {
-			recognizeGesture();
+		int gestureStringLength = gestureString.str().length();
+		if (gesturePaused() && gestureStringLength > 0) {
+			/*
+			 * Only try to recognize gestures with more than one movement pair.
+			 * This reduces spurious recognitions from inadvertent movements.
+			 */
+			if (gestureStringLength > 3) {
+				recognizeGesture();
+			}
+
+			cout << " ________________________________ " << endl;
+			cout << "|                                |" << endl;
+			cout << "|       COLLECTING DATA...       |" << endl;
+			cout << "|________________________________|" << endl;
+			cout << "                                  " << endl;
+
 			resetGestureString();
 		}
 
