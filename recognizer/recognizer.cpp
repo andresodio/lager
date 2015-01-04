@@ -315,6 +315,16 @@ void recognizeGesture()
 
 	gestureEntry closestGesture = *min_element(gestures.begin(), gestures.end(), gestureEntryLessThan);
 	if (closestGesture.dlDistance <= GESTURE_DISTANCE_THRESHOLD) {
+		string viewerCommandPrefix = "cd ~/lager/viewer/src/ && ../build/viewer --gesture ";
+		stringstream viewerCommand;
+
+		viewerCommand << viewerCommandPrefix << gestureString.str();
+		system(viewerCommand.str().c_str());
+
+		viewerCommand.str("");
+		viewerCommand << viewerCommandPrefix << closestGesture.movements;
+		system(viewerCommand.str().c_str());
+
 		cout << "/********************************/" << endl;
 		cout << "Closest gesture is " << closestGesture.name << endl;
 		cout << "/********************************/" << endl;
@@ -393,6 +403,7 @@ void VRPN_CALLBACK dummy_handle_tracker_change(void *aUserdata, const vrpn_TRACK
 int main(int argc, char *argv[])
 {
 	printf("Generates strings for movement of tracker %s\n\n", SENSOR_SERVER);
+
 	int numReportsReceived = 0;
 	int done = 0;
 	vrpn_Tracker_Remote *tracker;
