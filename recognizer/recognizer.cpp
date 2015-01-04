@@ -220,56 +220,56 @@ void updateTimers(const vrpn_TRACKERCB& aTracker) {
 #define min3(a,b,c) ((a)< (b) ? min((a),(c)) : min((b),(c)))
 #define min4(a,b,c,d) ((a)< (b) ? min3((a),(c),(d)) : min3((b),(c),(d)))
 
-int dprint(int* dd, int n,int m){
- int i,j;
- for (i=0; i < n+2;i++){
-    for (j=0;j < m+2; j++){
-        printf("%02d ",d(i,j));
-    }
-    printf("\n");
- }
- printf("\n");
- return 0;
+int dprint(int* dd, int n,int m) {
+	int i,j;
+	for (i=0; i < n+2;i++){
+		for (j=0;j < m+2; j++){
+			printf("%02d ",d(i,j));
+		}
+		printf("\n");
+	}
+	printf("\n");
+	return 0;
 }
 
 int dldist2(const char *s, const char* t, int n, int m){
-    int *dd, *DA;
-    int i, j, cost, k, i1,j1,DB;
-    int infinity = n + m;
+	int *dd, *DA;
+	int i, j, cost, k, i1,j1,DB;
+	int infinity = n + m;
 
-    DA = (int*) malloc( 256 * sizeof(int));
-    dd = (int*) malloc ((n+2)*(m+2)*sizeof(int));
+	DA = (int*) malloc( 256 * sizeof(int));
+	dd = (int*) malloc ((n+2)*(m+2)*sizeof(int));
 
-    d(0,0) = infinity;
-    for(i = 0; i < n+1; i++) {
-      d(i+1,1) = i ;
-      d(i+1,0) = infinity;
-    }
-    for(j = 0; j<m+1; j++) {
-      d(1,j+1) = j ;
-      d(0,j+1) = infinity;
-    }
-    //dprint(dd,n,m);
-    for(k = 0; k < 256; k++) DA[k] = 0;
-    for(i = 1; i< n+1; i++) {
-      DB = 0;
-      for(j = 1; j< m+1; j++) {
-        i1 = DA[t[j-1]];
-        j1 = DB;
-        cost = ((s[i-1]==t[j-1])?0:1);
-        if(cost==0) DB = j;
-        d(i+1,j+1) =
-          min4(d(i,j)+cost,
-              d(i+1,j) + 1,
-              d(i,j+1)+1,
-              d(i1,j1) + (i-i1-1) + 1 + (j-j1-1));
-      }
-      DA[s[i-1]] = i;
-      //dprint(dd,n,m);
-    }
-    cost = d(n+1,m+1);
-    free(dd);
-    return cost;
+	d(0,0) = infinity;
+	for(i = 0; i < n+1; i++) {
+		d(i+1,1) = i ;
+		d(i+1,0) = infinity;
+	}
+	for(j = 0; j<m+1; j++) {
+		d(1,j+1) = j ;
+		d(0,j+1) = infinity;
+	}
+	//dprint(dd,n,m);
+	for(k = 0; k < 256; k++) DA[k] = 0;
+	for(i = 1; i< n+1; i++) {
+		DB = 0;
+		for(j = 1; j< m+1; j++) {
+			i1 = DA[t[j-1]];
+			j1 = DB;
+			cost = ((s[i-1]==t[j-1])?0:1);
+			if(cost==0) DB = j;
+			d(i+1,j+1) =
+					min4(d(i,j)+cost,
+						 d(i+1,j) + 1,
+						 d(i,j+1)+1,
+						 d(i1,j1) + (i-i1-1) + 1 + (j-j1-1));
+		}
+		DA[s[i-1]] = i;
+		//dprint(dd,n,m);
+	}
+	cost = d(n+1,m+1);
+	free(dd);
+	return cost;
 }
 
 struct gestureEntry {
@@ -287,14 +287,6 @@ void recognizeGesture()
 {
 	ifstream gestureFile;
 	string currentLine, currentName, currentMovements;
-#if 0
-	vector<string> gestureNames;
-	vector<string> gestureMovements;
-	vector<int> gestureDistances;
-	int lowestDistance;
-	int lowestDistanceIndex;
-#endif
-
 	vector<gestureEntry> gestures;
 	int lowestDistance;
 
@@ -306,27 +298,15 @@ void recognizeGesture()
 	while (getline(gestureFile, currentLine)) {
 		//cout << "Line: " << currentLine << endl;
 		stringstream ss(currentLine);
-		//ss >> currentName >> currentMovements;
-		//cout << "currentName: " << currentName << " currentMovements: " << currentMovements;
-		//gestureNames.push_back(currentName);
-		//gestureMovements.push_back(currentMovements);
-
 		const string& gestureTemp = gestureString.str();
-		//int dlDistance = dldist2(currentMovements.c_str(), gestureTemp.c_str(), currentMovements.length(), gestureTemp.length());
 
 		gestureEntry newGesture;
 		ss >> newGesture.name >> newGesture.movements;
-		cout << "new name: " << newGesture.name << endl;
 		newGesture.dlDistance = dldist2(newGesture.movements.c_str(), gestureTemp.c_str(), newGesture.movements.length(), gestureTemp.length());
 
-		//cout << "Current gesture: " << gestureString.str() << endl;
-		//cout << "Candidate:       " << currentMovements << endl;
-		//cout << "DL distance: " << dlDistance << endl;
+		cout << "Current gesture" << endl << "\t" << gestureString.str() << endl;
+		cout << newGesture.name << endl << "\t" << newGesture.movements << endl;
 
-		cout << "Current gesture" << endl << "  " << gestureString.str() << endl;
-		cout << newGesture.name << endl << "  " << newGesture.movements << endl;
-
-		//gestureDistances.push_back(dlDistance);
 		gestures.push_back(newGesture);
 	}
 

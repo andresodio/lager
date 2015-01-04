@@ -14,13 +14,15 @@ using namespace glm;
 glm::mat4 ViewMatrix;
 glm::mat4 ProjectionMatrix;
 
-glm::mat4 getViewMatrix(){
+glm::mat4 getViewMatrix()
+{
 	return ViewMatrix;
 }
-glm::mat4 getProjectionMatrix(){
+
+glm::mat4 getProjectionMatrix()
+{
 	return ProjectionMatrix;
 }
-
 
 // Initial position : on +Y and +Z
 glm::vec3 position = glm::vec3( 0, 0.1, 1.25 );
@@ -34,10 +36,8 @@ float initialFoV = 45.0f;
 float speed = 1.0f; // 1 unit / second
 float mouseSpeed = 0.002f;
 
-
-
-void computeMatricesFromInputs(){
-
+void computeMatricesFromInputs()
+{
 	// glfwGetTime is called only once, the first time this function is called
 	static double lastTime = glfwGetTime();
 
@@ -94,16 +94,16 @@ void computeMatricesFromInputs(){
 		position += right * deltaTime * speed;
 	}
 
-	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
+	float FoV = initialFoV; // - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	ProjectionMatrix = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
 	// Camera matrix
-	ViewMatrix       = glm::lookAt(
+	ViewMatrix = glm::lookAt(
 								position,           // Camera is here
 								position+direction, // and looks here : at the same position, plus "direction"
 								up                  // Head is up (set to 0,1,0)
-						   );
+							);
 
 	// For the next frame, the "last time" will be "now"
 	lastTime = currentTime;
