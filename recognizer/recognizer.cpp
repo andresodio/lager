@@ -30,6 +30,7 @@
 #define MAIN_SLEEP_INTERVAL_MILLISECONDS MAIN_SLEEP_INTERVAL_MICROSECONDS/1000
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define GESTURE_GROUPING_TIME_MILLISECONDS 200
+#define GESTURE_DISTANCE_THRESHOLD 20
 
 using namespace std;
 
@@ -310,8 +311,18 @@ void recognizeGesture()
 		gestures.push_back(newGesture);
 	}
 
+	cout << endl;
+
 	gestureEntry closestGesture = *min_element(gestures.begin(), gestures.end(), gestureEntryLessThan);
-	cout << "Closest gesture is " << closestGesture.name << endl;
+	if (closestGesture.dlDistance <= GESTURE_DISTANCE_THRESHOLD) {
+		cout << "/********************************/" << endl;
+		cout << "Closest gesture is " << closestGesture.name << endl;
+		cout << "/********************************/" << endl;
+	} else {
+		cout << "Closest gesture distance (" << closestGesture.dlDistance << ") is above distance threshold (" << GESTURE_DISTANCE_THRESHOLD << ")." << endl;
+	}
+
+	cout << endl;
 }
 
 /*****************************************************************************
