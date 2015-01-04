@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <cstring>
 
 #include "letter_coordinates.hpp"
 
@@ -28,6 +29,7 @@ using namespace glm;
 
 /* Constants */
 #define STD_RADIUS 0.1
+#define NO_ERROR 0
 
 /* Forward declarations */
 GLfloat getXVector (const double aPhi, const double aTheta);
@@ -159,7 +161,31 @@ void populateSensorColorBuffers(GLfloat* aSensor0ColorBufferData, GLfloat* aSens
 	}
 }
 
-int main( void )
+void readGestureFromArguments(char* argv[], vector<string>& movementPairs) {
+	string gesture(argv[2]);
+
+	Tokenize(gesture, movementPairs, ".");
+	cout << "Gesture: " << gesture << endl;
+}
+
+int readGestureFromFile(vector<string>& movementPairs) {
+	ifstream gestureFile;
+	gestureFile.open("gesture.dat");
+	if (!gestureFile.is_open()) {
+		return EXIT_FAILURE;
+	}
+	string line;
+	if (!getline(gestureFile, line)) {
+		return EXIT_FAILURE;
+	}
+
+	Tokenize(line, movementPairs, ".");
+	cout << "Gesture: " << line << endl;
+
+	return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[])
 {
 	// Initialise GLFW
 	if( !glfwInit() )
@@ -221,21 +247,17 @@ int main( void )
 	// Get a handle for our "myTextureSampler" uniform
 	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
 
-	ifstream gestureFile;
-	gestureFile.open("gesture.dat");
-	if (!gestureFile.is_open()) {
-		return 0;
-	}
-
-	string line;
-	if (!getline(gestureFile, line)) {
-		return 0;
-	}
-
 	vector<string> movementPairs;
-	Tokenize(line, movementPairs, ".");
 
-	cout << "String: " << line << endl;
+	if ((argc > 2) && (strncmp(argv[1], "--gesture", strlen("--gesture")) == 0)) {
+		readGestureFromArguments(argv, movementPairs);
+	} else {
+		if (readGestureFromFile(movementPairs) != NO_ERROR) {
+			cout << "Error reading gesture from file, exiting." << endl;
+			return -1;
+		}
+	}
+
 	long int numVertexBufferElems = (movementPairs.size()+1) * 3; // One extra entry at the beginning for coordinate {0.0f, 0.0f, 0.0f}
 
 	GLfloat* sensor0VertexBufferData = new GLfloat[numVertexBufferElems];
