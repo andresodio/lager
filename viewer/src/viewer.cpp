@@ -127,7 +127,6 @@ void populateSensorColorBuffers(GLfloat* aSensor0ColorBufferData, GLfloat* aSens
 	}
 
 	for (int i = 3; i < (aNumVertexBufferElems-2); i+=3) {
-		cout << "i: " << i << endl;
 		sensor0TempIntensities[0] += colorIntensityInterval; // Intensify red for sensor 0
 		sensor1TempIntensities[2] += colorIntensityInterval; // Intensify blue for sensor 1
 
