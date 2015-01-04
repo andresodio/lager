@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include "letter_coordinates.hpp"
+#include "string_tokenizer.hpp"
 
 using namespace std;
 
@@ -35,27 +36,6 @@ using namespace glm;
 GLfloat getXVector (const double aPhi, const double aTheta);
 GLfloat getYVector (const double aPhi, const double aTheta);
 GLfloat getZVector (const double aTheta);
-
-/* Obtained from http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html */
-void Tokenize(const string& str,
-				vector<string>& tokens,
-				const string& delimiters)
-{
-	// Skip delimiters at beginning.
-	string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-	// Find first "non-delimiter".
-	string::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-	while (string::npos != pos || string::npos != lastPos)
-	{
-		// Found a token, add it to the vector.
-		tokens.push_back(str.substr(lastPos, pos - lastPos));
-		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
-		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
-	}
-}
 
 /*
  * Standard convention is:
@@ -164,7 +144,7 @@ void populateSensorColorBuffers(GLfloat* aSensor0ColorBufferData, GLfloat* aSens
 void readGestureFromArguments(char* argv[], vector<string>& movementPairs) {
 	string gesture(argv[2]);
 
-	Tokenize(gesture, movementPairs, ".");
+	tokenizeString(gesture, movementPairs, ".");
 	cout << "Gesture: " << gesture << endl;
 }
 
@@ -179,7 +159,7 @@ int readGestureFromFile(vector<string>& movementPairs) {
 		return EXIT_FAILURE;
 	}
 
-	Tokenize(line, movementPairs, ".");
+	tokenizeString(line, movementPairs, ".");
 	cout << "Gesture: " << line << endl;
 
 	return EXIT_SUCCESS;
