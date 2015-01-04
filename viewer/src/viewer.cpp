@@ -349,8 +349,13 @@ int main( void )
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
 
-	// Cleanup VBO and shader
+	// Clean up buffers and shader
+	glDeleteBuffers(1, &sensor0VertexBuffer);
 	glDeleteBuffers(1, &sensor1VertexBuffer);
+
+	glDeleteBuffers(1, &sensor0ColorBuffer);
+	glDeleteBuffers(1, &sensor1ColorBuffer);
+
 	glDeleteProgram(programID);
 	glDeleteTextures(1, &TextureID);
 
