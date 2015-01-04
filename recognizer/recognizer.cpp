@@ -27,7 +27,7 @@
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0
 
-#define SENSOR_SERVER "Tracker0@localhost"
+#define SENSOR_SERVER "Filter0@localhost"
 
 #define DISTANCE_INTERVAL_SQUARED 0.0006f //0.6 * (1 cm)^2
 
