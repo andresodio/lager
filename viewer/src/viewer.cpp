@@ -39,20 +39,20 @@ void Tokenize(const string& str,
 				vector<string>& tokens,
 				const string& delimiters)
 {
-    // Skip delimiters at beginning.
-    string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    // Find first "non-delimiter".
-    string::size_type pos     = str.find_first_of(delimiters, lastPos);
+	// Skip delimiters at beginning.
+	string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+	// Find first "non-delimiter".
+	string::size_type pos     = str.find_first_of(delimiters, lastPos);
 
-    while (string::npos != pos || string::npos != lastPos)
-    {
-        // Found a token, add it to the vector.
-        tokens.push_back(str.substr(lastPos, pos - lastPos));
-        // Skip delimiters.  Note the "not_of"
-        lastPos = str.find_first_not_of(delimiters, pos);
-        // Find next "non-delimiter"
-        pos = str.find_first_of(delimiters, lastPos);
-    }
+	while (string::npos != pos || string::npos != lastPos)
+	{
+		// Found a token, add it to the vector.
+		tokens.push_back(str.substr(lastPos, pos - lastPos));
+		// Skip delimiters.  Note the "not_of"
+		lastPos = str.find_first_not_of(delimiters, pos);
+		// Find next "non-delimiter"
+		pos = str.find_first_of(delimiters, lastPos);
+	}
 }
 
 /*
@@ -243,59 +243,9 @@ int main( void )
 	GLfloat* sensor1VertexBufferData = new GLfloat[numVertexBufferElems];
 	GLfloat* sensor1ColorBufferData = new GLfloat[numVertexBufferElems];
 
-	//printf("sizeof(sensor0VertexBufferData): %li\n", sizeof(sensor0VertexBufferData));
-	//printf("numVertexBufferElems: %li\n", numVertexBufferElems);
-
 	populateSensorVertexBuffers(0, movementPairs, sensor0VertexBufferData);
 	populateSensorVertexBuffers(1, movementPairs, sensor1VertexBufferData);
 	populateSensorColorBuffers(sensor0ColorBufferData, sensor1ColorBufferData, numVertexBufferElems);
-
-#if 0
-	for (int i = 0; i < numVertexBufferElems; i+=3)
-	{
-		printf("sensor1VertexBufferData[%i, %i, %i] = %f, %f, %f\n", i, i+1, i+2, sensor1VertexBufferData[i], sensor1VertexBufferData[i+1], sensor1VertexBufferData[i+2]);
-	}
-
-	//printf("sizeof(sensor1VertexBufferData): %li\n", sizeof(sensor1VertexBufferData));
-	printf("numVertexBufferElems: %li, sizeof(GLfloat): %li\n", numVertexBufferElems, sizeof(GLfloat));
-	printf("numVertexBufferElems * sizeof(GLfloat): %li\n", numVertexBufferElems * sizeof(GLfloat));
-#endif
-
-#if 0
-	static const GLfloat sensor1VertexBufferData[] = {
-			 0.0f,  0.0f, -2.0f,
-			 0.0f,  0.0f, 0.0f,
-			 0.1f,  0.0f, 0.0f,
-			 0.2f,  0.0f, 0.0f,
-			 0.3f,  0.0f, 0.0f,
-			 0.4f,  0.0f, 0.0f,
-			 0.4f,  0.1f, 0.0f,
-			 0.4f,  0.2f, 0.0f,
-			 0.4f,  0.3f, 0.0f,
-			 0.4f,  0.4f, 0.0f,
-			 0.5f,  0.4f, 0.0f,
-			 0.6f,  0.4f, 0.0f,
-			 0.7f,  0.4f, 0.0f,
-			 0.8f,  0.4f, 0.0f,
-			 0.8f,  0.4f, 0.1f,
-			//0.8f,  0.4f, 0.2f,
-			//0.8f,  0.4f, 0.3f,
-			//0.8f,  0.4f, 0.4f,
-	};
-
-	printf("sizeof(sensor1VertexBufferData): %li\n", sizeof(sensor1VertexBufferData));
-	printf("sizeof(sensor1VertexBufferData) / sizeof(sensor1VertexBufferData[0]): %li\n", sizeof(sensor1VertexBufferData) / sizeof(sensor1VertexBufferData[0]));
-
-	for (int i = 0; i < sizeof(sensor1VertexBufferData) / sizeof(sensor1VertexBufferData[0]); i+=3)
-	{
-		printf("sensor1VertexBufferData[%i, %i, %i] = %f, %f, %f\n", i, i+1, i+2, sensor1VertexBufferData[i], sensor1VertexBufferData[i+1], sensor1VertexBufferData[i+2]);
-	}
-
-	GLuint vertexbuffer;
-	glGenBuffers(1, &sensor1VertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, sensor1VertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(sensor1VertexBufferData), sensor1VertexBufferData, GL_STATIC_DRAW);
-#endif
 
 	/* Vertex buffers */
 
@@ -387,7 +337,6 @@ int main( void )
 		);
 
 		// Draw the gesture for sensor 1
-		//glDrawArrays(GL_LINE_STRIP, 0, sizeof(sensor1VertexBufferData) / sizeof(sensor1VertexBufferData[0]) / 3); // Initial position + movement pairs read from the file
 		glDrawArrays(GL_LINE_STRIP, 0, movementPairs.size()+1); // Initial position + movement pairs read from the file
 
 		glDisableVertexAttribArray(vertexPosition_modelspaceID);
@@ -402,7 +351,6 @@ int main( void )
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &sensor1VertexBuffer);
-	//glDeleteBuffers(1, &uvbuffer);
 	glDeleteProgram(programID);
 	glDeleteTextures(1, &TextureID);
 
