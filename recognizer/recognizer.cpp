@@ -52,10 +52,10 @@ stringstream gestureString;
 chrono::system_clock::time_point globalLastMovementTime = chrono::system_clock::now();
 
 chrono::system_clock::time_point sensor0LastMovementTime = chrono::system_clock::now();
-chrono::system_clock::time_point lastSensor0GroupingTime = chrono::system_clock::now();
+chrono::system_clock::time_point sensor0LastGroupedMovementTime = chrono::system_clock::now();
 
 chrono::system_clock::time_point sensor1LastMovementTime = chrono::system_clock::now();
-chrono::system_clock::time_point lastSensor1GroupingTime = chrono::system_clock::now();
+chrono::system_clock::time_point sensor1LastGroupedMovementTime = chrono::system_clock::now();
 
 char lastSensor0Letter = '_';
 char lastSensor1Letter = '_';
@@ -164,40 +164,53 @@ void moveHeadToBeginningOfLetterPair() {
 	}
 }
 
+chrono::system_clock::time_point getCurrentMovementTime(const vrpn_TRACKERCB& aTracker) {
+	chrono::system_clock::time_point currentMovementTime(chrono::seconds(aTracker.msg_time.tv_sec) + chrono::microseconds(aTracker.msg_time.tv_usec));
+	return currentMovementTime;
+}
+
 void updateGestureString(const vrpn_TRACKERCB& aTracker, const int aSnapTheta, const int aSnapPhi) {
+	int timeSinceSensor0LastMovement = 0;
+	int timeSinceSensor1LastMovement = 0;
 	char currentLetter = getCurrentLetter(aSnapPhi, aSnapTheta);
-	//cout << "Letter: " << currentLetter << endl;
-
-	int timeSinceSensor0 = getMillisecondsSinceTrackerTime(aTracker, sensor0LastMovementTime);
-	int timeSinceSensor1 = getMillisecondsSinceTrackerTime(aTracker, sensor1LastMovementTime);
-
-	//printf("timeSince0: %i, timeSince1: %i\n", timeSinceSensor0, timeSinceSensor1);
 
 	if (aTracker.sensor == 0) {
 		lastSensor0Letter = currentLetter;
-		if ((lastSensor1GroupingTime != sensor1LastMovementTime)
-				&& (timeSinceSensor1 < GESTURE_GROUPING_TIME_MILLISECONDS)) {
+		timeSinceSensor1LastMovement = getMillisecondsSinceTrackerTime(aTracker, sensor1LastMovementTime);
+
+		/*
+		 * If sensor 1 reported new movements since the last time it was grouped,
+		 * and if it moved not too long ago, group its letter with sensor 0's.
+		 */
+		if ((sensor1LastGroupedMovementTime != sensor1LastMovementTime)
+				&& (timeSinceSensor1LastMovement < GESTURE_GROUPING_TIME_MILLISECONDS)) {
 			//printf("S0: Grouping with previous S1. Current: %c, last: %c\n", currentLetter, lastSensor1Letter);
-			lastSensor0GroupingTime = sensor0LastMovementTime;
-			lastSensor1GroupingTime = sensor1LastMovementTime;
+			sensor0LastGroupedMovementTime = getCurrentMovementTime(aTracker);
+			sensor1LastGroupedMovementTime = sensor1LastMovementTime;
 			moveHeadToBeginningOfLetterPair();
 			gestureString << currentLetter << lastSensor1Letter;
 		} else {
-			//printf("S0 ELSE. GroupingT=MovementT?: %i, tSS1: %i\n", lastSensor1GroupingTime == sensor1LastMovementTime, timeSinceSensor1);
+			//printf("S0 ELSE. GroupingT=MovementT?: %i, tSS1: %i\n", sensor1LastGroupedMovementTime == sensor1LastMovementTime, timeSinceSensor1);
 			lastSensor1Letter = '_';
 			gestureString << currentLetter << lastSensor1Letter;
 		}
 	} else {
 		lastSensor1Letter = currentLetter;
-		if ((lastSensor0GroupingTime != sensor0LastMovementTime)
-				&& (timeSinceSensor0 < GESTURE_GROUPING_TIME_MILLISECONDS)) {
+		timeSinceSensor0LastMovement = getMillisecondsSinceTrackerTime(aTracker, sensor0LastMovementTime);
+
+		/*
+		 * If sensor 0 reported new movements since the last time it was grouped,
+		 * and if it moved not too long ago, group its letter with sensor 1's.
+		 */
+		if ((sensor0LastGroupedMovementTime != sensor0LastMovementTime)
+				&& (timeSinceSensor0LastMovement < GESTURE_GROUPING_TIME_MILLISECONDS)) {
 			//printf("S1: Grouping with previous S0. Current: %c, last: %c\n", currentLetter, lastSensor0Letter);
-			lastSensor0GroupingTime = sensor0LastMovementTime;
-			lastSensor1GroupingTime = sensor1LastMovementTime;
+			sensor0LastGroupedMovementTime = sensor0LastMovementTime;
+			sensor1LastGroupedMovementTime = getCurrentMovementTime(aTracker);
 			moveHeadToBeginningOfLetterPair();
 			gestureString << lastSensor0Letter << currentLetter;
 		} else {
-			//printf("S1 ELSE. GroupingT=MovementT?: %i, tSS0: %i\n", lastSensor0GroupingTime == sensor0LastMovementTime, timeSinceSensor0);
+			//printf("S1 ELSE. GroupingT=MovementT?: %i, tSS0: %i\n", sensor0LastGroupedMovementTime == sensor0LastMovementTime, timeSinceSensor0);
 			lastSensor0Letter = '_';
 			gestureString << lastSensor0Letter << currentLetter;
 		}
@@ -209,7 +222,7 @@ void updateGestureString(const vrpn_TRACKERCB& aTracker, const int aSnapTheta, c
 }
 
 void updateTimers(const vrpn_TRACKERCB& aTracker) {
-	chrono::system_clock::time_point currentMovementTime(chrono::seconds(aTracker.msg_time.tv_sec) + chrono::microseconds(aTracker.msg_time.tv_usec));
+	chrono::system_clock::time_point currentMovementTime = getCurrentMovementTime(aTracker);
 	updateTimePoint(globalLastMovementTime, currentMovementTime);
 
 	if (aTracker.sensor == 0) {
