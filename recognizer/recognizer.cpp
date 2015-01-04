@@ -35,7 +35,8 @@
 #define MAIN_SLEEP_INTERVAL_MILLISECONDS MAIN_SLEEP_INTERVAL_MICROSECONDS/1000
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define GESTURE_GROUPING_TIME_MILLISECONDS 200
-#define GESTURE_DISTANCE_THRESHOLD_PCT 25
+#define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 25
+#define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 50
 
 using namespace std;
 
@@ -378,10 +379,39 @@ void drawMatchingGestures(const gestureEntry& closestGesture) {
 	system(viewerCommand.str().c_str());
 }
 
+bool isSingleSensorGesture()
+{
+	vector<string> movementPairs;
+	tokenizeString(gestureString.str(), movementPairs, ".");
+	bool sensor0Moved = false;
+	bool sensor1Moved = false;
+
+	for (vector<string>::iterator it = movementPairs.begin(); it < movementPairs.end(); ++it) {
+		// Check if sensor 0 movement is present
+		if ((*it).c_str()[0] != '_') {
+			sensor0Moved = true;
+		}
+
+		// Check if sensor 0 movement is present
+		if ((*it).c_str()[0] != '_') {
+			sensor1Moved = true;
+		}
+
+		// If we already found movement on both sensors, there is no need to keep checking
+		if (sensor0Moved && sensor1Moved) {
+			break;
+		}
+	}
+
+	return (!sensor0Moved || !sensor1Moved);
+}
+
 void recognizeGesture()
 {
 	vector<gestureEntry> gestures;
 	int lowestDistance;
+	int gestureDistanceThresholdPct =
+			isSingleSensorGesture() ? SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT : DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT;
 
 	cout << " ________________________________ " << endl;
 	cout << "|                                |" << endl;
@@ -398,9 +428,9 @@ void recognizeGesture()
 	cout << endl;
 	cout << "Closest gesture:\t" << closestGesture.name << endl;
 	cout << "Distance:\t\t" << closestGesture.dlDistancePct << "% (" << closestGesture.dlDistance << " D-L ops)" << endl;
-	cout << "Threshold:\t\t" << GESTURE_DISTANCE_THRESHOLD_PCT << "%" << endl;
+	cout << "Threshold:\t\t" << gestureDistanceThresholdPct << "%" << endl;
 
-	if (closestGesture.dlDistancePct <= GESTURE_DISTANCE_THRESHOLD_PCT) {
+	if (closestGesture.dlDistancePct <= gestureDistanceThresholdPct) {
 		cout << " ________________________________ " << endl;
 		cout << "|                                |" << endl;
 		cout << "|          MATCH FOUND!          |" << endl;
@@ -408,6 +438,7 @@ void recognizeGesture()
 		cout << "                                  " << endl;
 		drawMatchingGestures(closestGesture);
 	} else {
+		cout << endl;
 		cout << "NO MATCH." << endl;
 	}
 
