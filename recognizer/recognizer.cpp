@@ -108,7 +108,13 @@ char getCurrentLetter(int aSnapPhi, int aSnapTheta) {
 	return coordinatesLetter[currentCoordinates];
 }
 
-int getMillisecondsSince(const vrpn_TRACKERCB& aTracker, const chrono::system_clock::time_point &aLastTime)
+int getMillisecondsSinceNow(const chrono::system_clock::time_point &aLastTime)
+{
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	return chrono::duration<double, std::milli>(now - aLastTime).count();
+}
+
+int getMillisecondsSinceTrackerTime(const vrpn_TRACKERCB& aTracker, const chrono::system_clock::time_point &aLastTime)
 {
 	chrono::system_clock::time_point currentMovementTime(chrono::seconds(aTracker.msg_time.tv_sec) + chrono::microseconds(aTracker.msg_time.tv_usec));
 	return chrono::duration<double, std::milli>(currentMovementTime - aLastTime).count();
@@ -118,8 +124,8 @@ void updateTimePoint(chrono::system_clock::time_point& aTimePoint, chrono::syste
 	aTimePoint = aNewTime;
 }
 
-bool gesturePaused(const vrpn_TRACKERCB& aTracker) {
-	return (getMillisecondsSince(aTracker, globalLastMovementTime) > GESTURE_PAUSE_TIME_MILLISECONDS);
+bool gesturePaused() {
+	return (getMillisecondsSinceNow(globalLastMovementTime) > GESTURE_PAUSE_TIME_MILLISECONDS);
 }
 
 void resetGestureString() {
@@ -156,8 +162,8 @@ void updateGestureString(const vrpn_TRACKERCB& aTracker, const int aSnapTheta, c
 	char currentLetter = getCurrentLetter(aSnapPhi, aSnapTheta);
 	//cout << "Letter: " << currentLetter << endl;
 
-	int timeSinceSensor0 = getMillisecondsSince(aTracker, sensor0LastMovementTime);
-	int timeSinceSensor1 = getMillisecondsSince(aTracker, sensor1LastMovementTime);
+	int timeSinceSensor0 = getMillisecondsSinceTrackerTime(aTracker, sensor0LastMovementTime);
+	int timeSinceSensor1 = getMillisecondsSinceTrackerTime(aTracker, sensor1LastMovementTime);
 
 	//printf("timeSince0: %i, timeSince1: %i\n", timeSinceSensor0, timeSinceSensor1);
 
@@ -206,7 +212,7 @@ void updateTimers(const vrpn_TRACKERCB& aTracker) {
 		updateTimePoint(sensor1LastMovementTime, currentMovementTime);
 	}
 
-	//printf("Updated. GLMT: %i, S0LMT: %i, S1LMT: %i\n", getMillisecondsSince(aTracker, globalLastMovementTime), getMillisecondsSince(aTracker, sensor0LastMovementTime), getMillisecondsSince(aTracker, sensor1LastMovementTime));
+	//printf("Updated. GLMT: %i, S0LMT: %i, S1LMT: %i\n", getMillisecondsSinceTrackerTime(aTracker, globalLastMovementTime), getMillisecondsSinceTrackerTime(aTracker, sensor0LastMovementTime), getMillisecondsSinceTrackerTime(aTracker, sensor1LastMovementTime));
 }
 
 #define d(i,j) dd[(i) * (m+2) + (j) ]
@@ -350,18 +356,12 @@ void VRPN_CALLBACK handle_tracker_change(void *aUserdata, const vrpn_TRACKERCB a
 
 	if (getDistanceSquared(*lastReport, aTracker) > dist_interval_sq) {
 		printf("Update for sensor: %i at time: %ld.%06ld\n", aTracker.sensor, aTracker.msg_time.tv_sec, aTracker.msg_time.tv_usec);
-		//printf("GLMT: %i, S0LMT: %i, S1LMT: %i\n", getMillisecondsSince(aTracker, globalLastMovementTime), getMillisecondsSince(aTracker, sensor0LastMovementTime), getMillisecondsSince(aTracker, sensor1LastMovementTime));
-		if (gesturePaused(aTracker)) {
-			printf("\n\nGESTURE PAUSED\n\n");
-			recognizeGesture();
-			resetGestureString();
-		}
-		updateTimers(aTracker);
-
+		//printf("GLMT: %i, S0LMT: %i, S1LMT: %i\n", getMillisecondsSinceTrackerTime(aTracker, globalLastMovementTime), getMillisecondsSinceTrackerTime(aTracker, sensor0LastMovementTime), getMillisecondsSinceTrackerTime(aTracker, sensor1LastMovementTime));
 		//printSensorCoordinates(lastReport, aTracker);
 
-		calculateMovementDeltas(aTracker, lastReport, deltaX, deltaY, deltaZ);
+		updateTimers(aTracker);
 
+		calculateMovementDeltas(aTracker, lastReport, deltaX, deltaY, deltaZ);
 		calculateMovementAngles(theta, phi, snapTheta, snapPhi, deltaX, deltaY, deltaZ);
 
 		updateGestureString(aTracker, snapTheta, snapPhi);
@@ -424,13 +424,22 @@ int main(int argc, char *argv[])
 	tracker->register_change_handler(NULL, handle_tracker_change);
 	button->register_change_handler(&done, handle_button_change);
 
-	// main loop
+	// Main loop
 	while (! done ) {
-		nanosleep(&sleepInterval, NULL);
+
 		// Let tracker receive position information from remote tracker
 		tracker->mainloop();
 		// Let button receive button status from remote button
 		button->mainloop();
+
+		// If gesture buildup pauses, attempt to recognize it
+		if (gesturePaused() && gestureString.str().length() > 0) {
+			recognizeGesture();
+			resetGestureString();
+		}
+
+		// Sleep so we don't take up 100% of CPU
+		nanosleep(&sleepInterval, NULL);
 	}
 
 }	/* main */
