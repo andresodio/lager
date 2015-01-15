@@ -38,7 +38,20 @@
 #define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 20
 #define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 30
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::string;
+using std::stringstream;
+using std::vector;
+
+using std::chrono::duration;
+using std::chrono::microseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+using std::chrono::time_point;
+
+using namespace boost::interprocess;
 
 /* Forward declarations */
 int snapAngle(double angle);
@@ -50,13 +63,13 @@ static vrpn_TRACKERCB lastReport1; // last report for sensor 1
 
 stringstream gestureString;
 
-chrono::system_clock::time_point globalLastMovementTime = chrono::system_clock::now();
+time_point<system_clock> globalLastMovementTime = system_clock::now();
 
-chrono::system_clock::time_point sensor0LastMovementTime = chrono::system_clock::now();
-chrono::system_clock::time_point sensor0LastGroupedMovementTime = chrono::system_clock::now();
+time_point<system_clock> sensor0LastMovementTime = system_clock::now();
+time_point<system_clock> sensor0LastGroupedMovementTime = system_clock::now();
 
-chrono::system_clock::time_point sensor1LastMovementTime = chrono::system_clock::now();
-chrono::system_clock::time_point sensor1LastGroupedMovementTime = chrono::system_clock::now();
+time_point<system_clock> sensor1LastMovementTime = system_clock::now();
+time_point<system_clock> sensor1LastGroupedMovementTime = system_clock::now();
 
 char lastSensor0Letter = '_';
 char lastSensor1Letter = '_';
@@ -115,19 +128,19 @@ char getCurrentLetter(int aSnapPhi, int aSnapTheta) {
 	return coordinatesLetter[currentCoordinates];
 }
 
-int getMillisecondsSinceNow(const chrono::system_clock::time_point &aLastTime)
+int getMillisecondsSinceNow(const time_point<system_clock> &aLastTime)
 {
-	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-	return chrono::duration<double, std::milli>(now - aLastTime).count();
+	time_point<system_clock> now = system_clock::now();
+	return duration<double, std::milli>(now - aLastTime).count();
 }
 
-int getMillisecondsSinceTrackerTime(const vrpn_TRACKERCB& aTracker, const chrono::system_clock::time_point &aLastTime)
+int getMillisecondsSinceTrackerTime(const vrpn_TRACKERCB& aTracker, const time_point<system_clock> &aLastTime)
 {
-	chrono::system_clock::time_point currentMovementTime(chrono::seconds(aTracker.msg_time.tv_sec) + chrono::microseconds(aTracker.msg_time.tv_usec));
-	return chrono::duration<double, std::milli>(currentMovementTime - aLastTime).count();
+	time_point<system_clock> currentMovementTime(seconds(aTracker.msg_time.tv_sec) + microseconds(aTracker.msg_time.tv_usec));
+	return duration<double, std::milli>(currentMovementTime - aLastTime).count();
 }
 
-void updateTimePoint(chrono::system_clock::time_point& aTimePoint, chrono::system_clock::time_point aNewTime) {
+void updateTimePoint(time_point<system_clock>& aTimePoint, time_point<system_clock> aNewTime) {
 	aTimePoint = aNewTime;
 }
 
@@ -165,8 +178,8 @@ void moveHeadToBeginningOfLetterPair() {
 	}
 }
 
-chrono::system_clock::time_point getCurrentMovementTime(const vrpn_TRACKERCB& aTracker) {
-	chrono::system_clock::time_point currentMovementTime(chrono::seconds(aTracker.msg_time.tv_sec) + chrono::microseconds(aTracker.msg_time.tv_usec));
+time_point<system_clock> getCurrentMovementTime(const vrpn_TRACKERCB& aTracker) {
+	time_point<system_clock> currentMovementTime(seconds(aTracker.msg_time.tv_sec) + microseconds(aTracker.msg_time.tv_usec));
 	return currentMovementTime;
 }
 
@@ -223,7 +236,7 @@ void updateGestureString(const vrpn_TRACKERCB& aTracker, const int aSnapTheta, c
 }
 
 void updateTimers(const vrpn_TRACKERCB& aTracker) {
-	chrono::system_clock::time_point currentMovementTime = getCurrentMovementTime(aTracker);
+	time_point<system_clock> currentMovementTime = getCurrentMovementTime(aTracker);
 	updateTimePoint(globalLastMovementTime, currentMovementTime);
 
 	if (aTracker.sensor == 0) {
