@@ -1,5 +1,5 @@
-#ifndef SPHERICAL_COORDINATES_HPP
-#define SPHERICAL_COORDINATES_HPP
+#ifndef LAGER_COMMON_SPHERICAL_COORDINATES_H
+#define LAGER_COMMON_SPHERICAL_COORDINATES_H
 
 /*
  * Code based on:
@@ -37,4 +37,4 @@ double DegreesToRadians(double degrees)
 	return (degrees/180 * M_PI);
 }
 
-#endif /* SPHERICAL_COORDINATES_HPP */
+#endif /* LAGER_COMMON_SPHERICAL_COORDINATES_H */

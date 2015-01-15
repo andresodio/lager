@@ -1,3 +1,6 @@
+#ifndef LAGER_COMMON_STRING_TOKENIZER_H
+#define LAGER_COMMON_STRING_TOKENIZER_H
+
 #include <string>
 
 /* Obtained from http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html */
@@ -20,3 +23,5 @@ void TokenizeString(const std::string& str,
 		pos = str.find_first_of(delimiters, last_pos);
 	}
 }
+
+#endif /* LAGER_COMMON_STRING_TOKENIZER_H */

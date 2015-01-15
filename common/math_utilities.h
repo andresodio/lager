@@ -1,3 +1,6 @@
+#ifndef LAGER_COMMON_MATH_UTILITIES_H
+#define LAGER_COMMON_MATH_UTILITIES_H
+
 /*
  * Based on code from:
  * http://stackoverflow.com/questions/4229870/c-algorithm-to-calculate-least-common-multiple-for-multiple-numbers/4229930#4229930
@@ -23,3 +26,5 @@ int LeastCommonMultiple(int a, int b)
 
 	return temp ? (a / temp * b) : 0;
 }
+
+#endif /* LAGER_COMMON_MATH_UTILITIES_H */

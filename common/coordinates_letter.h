@@ -1,3 +1,6 @@
+#ifndef LAGER_COMMON_COORDINATES_LETTER_H
+#define LAGER_COMMON_COORDINATES_LETTER_H
+
 #include "spherical_coordinates.h"
 #include <unordered_map>
 
@@ -40,3 +43,5 @@ std::unordered_map<struct SphericalCoordinates, char> coordinates_letter =
 	 {{360, 0},   'a'}, {{360, 45},  'b'}, {{360, 90},  'c'},
 	 {{360, 135}, 'd'}, {{360, 180}, 'e'}, {{360, 225}, 'f'},
 	 {{360, 270}, 'g'}, {{360, 315}, 'h'}, {{360, 360}, 'a'},};
+
+#endif /* LAGER_COMMON_COORDINATES_LETTER_H */
