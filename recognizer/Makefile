@@ -131,7 +131,7 @@ endif
 override CFLAGS := -I../ -I../quat -I${INCLUDE_DIR} $(DEBUG_FLAGS) $(CFLAGS)
 override CXXFLAGS := -I../ -I../quat -I${INCLUDE_DIR} -std=c++11 $(DEBUG_FLAGS) $(CXXFLAGS)
 
-.SUFFIXES:	.cpp
+.SUFFIXES:	.cc
 
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
@@ -139,8 +139,8 @@ override CXXFLAGS := -I../ -I../quat -I${INCLUDE_DIR} -std=c++11 $(DEBUG_FLAGS) 
 .C.o:
 	$(CC) $(CXXFLAGS) -c $*.C
 
-.cpp.o:
-	$(CC) $(CXXFLAGS) -c $*.cpp
+.cc.o:
+	$(CC) $(CXXFLAGS) -c $*.cc
 
 OBJ_DIR := $(HW_OS)$(OBJECT_DIR_SUFFIX)
 LIB_DIR := ../$(OBJ_DIR)
@@ -156,7 +156,7 @@ $(OBJ_DIR)/%.o: %.C
 	@[ -d $(OBJ_DIR) ] || mkdir -p $(OBJ_DIR)
 	$(CC) $(CXXFLAGS) -o $@ -c $<
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cc
 	@[ -d $(OBJ_DIR) ] || mkdir -p $(OBJ_DIR)
 	$(CC) $(CXXFLAGS) -o $@ -c $<
 

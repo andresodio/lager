@@ -1,4 +1,4 @@
-#include "spherical_coordinates.hpp"
+#include "spherical_coordinates.h"
 #include <unordered_map>
 
 std::unordered_map<struct sphericalCoordinates, char> coordinatesLetter =

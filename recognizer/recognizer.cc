@@ -19,10 +19,10 @@
 #include "vrpn_ForceDevice.h"           // for vrpn_ForceDevice_Remote, etc
 #include "vrpn_Types.h"                 // for vrpn_float64
 
-#include "spherical_coordinates.hpp"
-#include "coordinates_letter.hpp"
-#include "math_utilities.hpp"
-#include "string_tokenizer.hpp"
+#include "spherical_coordinates.h"
+#include "coordinates_letter.h"
+#include "math_utilities.h"
+#include "string_tokenizer.h"
 
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0

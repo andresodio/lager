@@ -7,8 +7,8 @@
 #include <math.h>
 #include <cstring>
 
-#include "letter_coordinates.hpp"
-#include "string_tokenizer.hpp"
+#include "letter_coordinates.h"
+#include "string_tokenizer.h"
 
 using namespace std;
 
@@ -24,9 +24,9 @@ GLFWwindow* window;
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
-#include <common/shader.hpp>
-//#include <common/texture.hpp>
-#include <common/controls.hpp>
+#include <common/shader.h>
+//#include <common/texture.h>
+#include <common/controls.h>
 
 /* Constants */
 #define STD_RADIUS 0.1

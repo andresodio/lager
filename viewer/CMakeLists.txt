@@ -66,13 +66,13 @@ add_definitions(
 
 # Gesture viewer
 add_executable(viewer
-	src/viewer.cpp
-	common/shader.cpp
-	common/shader.hpp
-	common/controls.cpp
-	common/controls.hpp
-	common/texture.cpp
-	common/texture.hpp
+	src/viewer.cc
+	common/shader.cc
+	common/shader.h
+	common/controls.cc
+	common/controls.h
+	common/texture.cc
+	common/texture.h
 	
 	src/TransformVertexShader.vertexshader
 	src/TextureFragmentShader.fragmentshader
