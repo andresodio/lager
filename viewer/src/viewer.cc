@@ -17,7 +17,7 @@ using namespace std;
 
 // Include GLFW
 #include <glfw3.h>
-GLFWwindow* window;
+GLFWwindow* g_window;
 
 // Include GLM
 #include <glm/glm.hpp>
@@ -33,9 +33,9 @@ using namespace glm;
 #define NO_ERROR 0
 
 /* Forward declarations */
-GLfloat getXVector (const double aPhi, const double aTheta);
-GLfloat getYVector (const double aPhi, const double aTheta);
-GLfloat getZVector (const double aTheta);
+GLfloat GetXVector (const double phi, const double theta);
+GLfloat GetYVector (const double phi, const double theta);
+GLfloat GetZVector (const double theta);
 
 /*
  * Standard convention is:
@@ -50,115 +50,115 @@ GLfloat getZVector (const double aTheta);
  *  z  --->   y
  */
 
-void getVectors(GLfloat &aDeltaX, GLfloat &aDeltaY, GLfloat &aDeltaZ, const double aPhi, const double aTheta)
+void getVectors(GLfloat &delta_x, GLfloat &delta_y, GLfloat &delta_z, const double phi, const double theta)
 {
-	aDeltaX = getYVector(aPhi, aTheta);
-	aDeltaY = getZVector(aTheta);
-	aDeltaZ = getXVector(aPhi, aTheta);
+	delta_x = GetYVector(phi, theta);
+	delta_y = GetZVector(theta);
+	delta_z = GetXVector(phi, theta);
 }
 
-GLfloat getXVector (const double aPhi, const double aTheta)
+GLfloat GetXVector (const double phi, const double theta)
 {
-	return STD_RADIUS * sin(aTheta) * cos(aPhi);
+	return STD_RADIUS * sin(theta) * cos(phi);
 }
 
-GLfloat getYVector (const double aPhi, const double aTheta)
+GLfloat GetYVector (const double phi, const double theta)
 {
-	return STD_RADIUS * sin(aTheta) * sin(aPhi);
+	return STD_RADIUS * sin(theta) * sin(phi);
 }
 
-GLfloat getZVector (const double aTheta)
+GLfloat GetZVector (const double theta)
 {
-	return STD_RADIUS * cos(aTheta);
+	return STD_RADIUS * cos(theta);
 }
 
-void populateSensorVertexBuffers(int aSensorIndex, const vector<string>& aMovementsPairs, GLfloat* aSensorVertexBufferData) {
-	//printf("sizeof(aSensorVertexBufferData): %li\n", sizeof(aSensorVertexBufferData));
-	//printf("numVertexBufferElems: %li\n", numVertexBufferElems);
-	GLfloat tempCoordinates[3] = { 0.0f, 0.0f, 0.0f };
-	aSensorVertexBufferData[0] = 0.0f;
-	aSensorVertexBufferData[1] = 0.0f;
-	aSensorVertexBufferData[2] = 0.0f;
-	for (int i = 0; i < aMovementsPairs.size(); i++) {
+void PopulateSensorVertexBuffers(int sensor_index, const vector<string>& movement_pairs, GLfloat* sensor_vertex_buffer_data) {
+	//printf("sizeof(sensor_vertex_buffer_data): %li\n", sizeof(sensor_vertex_buffer_data));
+	//printf("num_vertex_buffer_elems: %li\n", num_vertex_buffer_elems);
+	GLfloat temp_coordinates[3] = { 0.0f, 0.0f, 0.0f };
+	sensor_vertex_buffer_data[0] = 0.0f;
+	sensor_vertex_buffer_data[1] = 0.0f;
+	sensor_vertex_buffer_data[2] = 0.0f;
+	for (int i = 0; i < movement_pairs.size(); i++) {
 		int j = i * 3;
-		string currentMovementPair = aMovementsPairs[i];
-		//cout << currentMovementPair << endl;
-		char currentMovement = currentMovementPair.c_str()[aSensorIndex];
-		//cout << currentMovement << endl;
+		string current_movement_pair = movement_pairs[i];
+		//cout << current_movement_pair << endl;
+		char current_movement = current_movement_pair.c_str()[sensor_index];
+		//cout << current_movement << endl;
 		/*
 		 * Spherical gesture coordinates in PHI, THETA format
 		 */
-		GLfloat deltaX, deltaY, deltaZ;
-		if (currentMovement == '_') {
-			deltaX = 0.0f;
-			deltaY = 0.0f;
-			deltaZ = 0.0f;
+		GLfloat delta_x, delta_y, delta_z;
+		if (current_movement == '_') {
+			delta_x = 0.0f;
+			delta_y = 0.0f;
+			delta_z = 0.0f;
 		} else {
-			struct SphericalCoordinates currentCoordinates =
-					letter_coordinates[currentMovement];
-			getVectors(deltaX, deltaY, deltaZ,
-					DegreesToRadians(currentCoordinates.phi),
-					DegreesToRadians(currentCoordinates.theta));
+			struct SphericalCoordinates current_coordinates =
+					letter_coordinates[current_movement];
+			getVectors(delta_x, delta_y, delta_z,
+					DegreesToRadians(current_coordinates.phi),
+					DegreesToRadians(current_coordinates.theta));
 		}
 		//cout << "movement " << currentS1Movement << " dx: " << deltaX << " dy: " << deltaY << " dz: " << deltaZ << endl;
-		tempCoordinates[0] += deltaX;
-		tempCoordinates[1] += deltaY;
-		tempCoordinates[2] += deltaZ;
-		aSensorVertexBufferData[j + 3] = tempCoordinates[0];
-		aSensorVertexBufferData[j + 4] = tempCoordinates[1];
-		aSensorVertexBufferData[j + 5] = tempCoordinates[2];
-		//printf("vertex[%i, %i, %i] = {%f, %f, %f}\n", j+3, j+4, j+5, tempCoordinates[0], tempCoordinates[1], tempCoordinates[2]);
+		temp_coordinates[0] += delta_x;
+		temp_coordinates[1] += delta_y;
+		temp_coordinates[2] += delta_z;
+		sensor_vertex_buffer_data[j + 3] = temp_coordinates[0];
+		sensor_vertex_buffer_data[j + 4] = temp_coordinates[1];
+		sensor_vertex_buffer_data[j + 5] = temp_coordinates[2];
+		//printf("vertex[%i, %i, %i] = {%f, %f, %f}\n", j+3, j+4, j+5, tempCoordinates[0], tempCoordinates[1], temp_coordinates[2]);
 	}
 }
 
-void populateSensorColorBuffers(GLfloat* aSensor0ColorBufferData, GLfloat* aSensor1ColorBufferData, int aNumVertexBufferElems)
+void PopulateSensorColorBuffers(GLfloat* asensor_0_color_buffer_data, GLfloat* asensor_1_color_buffer_data, int anum_vertex_buffer_elems)
 {
-	int numMovements = aNumVertexBufferElems / 3;
-	int numColorIntensityJumps = numMovements - 1;
-	float colorIntensityInterval = 1.0f / numColorIntensityJumps;
+	int num_movements = anum_vertex_buffer_elems / 3;
+	int num_color_intensity_jumps = num_movements - 1;
+	float color_intensity_interval = 1.0f / num_color_intensity_jumps;
 
-	GLfloat sensor0TempIntensities[3] = { 0.0f, 0.0f, 0.0f }; // R,G,B
-	GLfloat sensor1TempIntensities[3] = { 0.0f, 0.0f, 0.0f }; // R,G,B
+	GLfloat sensor_0_temp_intensities[3] = { 0.0f, 0.0f, 0.0f }; // R,G,B
+	GLfloat sensor_1_temp_intensities[3] = { 0.0f, 0.0f, 0.0f }; // R,G,B
 
 	/* Origin is colored with intensity 0.0f */
 	for (int i = 0; i < 3; i++) {
-		aSensor0ColorBufferData[i] = 0.0f;
-		aSensor1ColorBufferData[i] = 0.0f;
+		asensor_0_color_buffer_data[i] = 0.0f;
+		asensor_1_color_buffer_data[i] = 0.0f;
 	}
 
-	for (int i = 3; i < (aNumVertexBufferElems-2); i+=3) {
-		sensor0TempIntensities[0] += colorIntensityInterval; // Intensify red for sensor 0
-		sensor1TempIntensities[2] += colorIntensityInterval; // Intensify blue for sensor 1
+	for (int i = 3; i < (anum_vertex_buffer_elems-2); i+=3) {
+		sensor_0_temp_intensities[0] += color_intensity_interval; // Intensify red for sensor 0
+		sensor_1_temp_intensities[2] += color_intensity_interval; // Intensify blue for sensor 1
 
-		aSensor0ColorBufferData[i] = sensor0TempIntensities[0];
-		aSensor0ColorBufferData[i+1] = sensor0TempIntensities[1];
-		aSensor0ColorBufferData[i+2] = sensor0TempIntensities[2];
+		asensor_0_color_buffer_data[i] = sensor_0_temp_intensities[0];
+		asensor_0_color_buffer_data[i+1] = sensor_0_temp_intensities[1];
+		asensor_0_color_buffer_data[i+2] = sensor_0_temp_intensities[2];
 
-		aSensor1ColorBufferData[i] = sensor1TempIntensities[0];
-		aSensor1ColorBufferData[i+1] = sensor1TempIntensities[1];
-		aSensor1ColorBufferData[i+2] = sensor1TempIntensities[2];
+		asensor_1_color_buffer_data[i] = sensor_1_temp_intensities[0];
+		asensor_1_color_buffer_data[i+1] = sensor_1_temp_intensities[1];
+		asensor_1_color_buffer_data[i+2] = sensor_1_temp_intensities[2];
 	}
 }
 
-void readGestureFromArguments(char* argv[], vector<string>& movementPairs) {
+void ReadGestureFromArguments(char* argv[], vector<string>& movement_pairs) {
 	string gesture(argv[2]);
 
-	TokenizeString(gesture, movementPairs, ".");
+	TokenizeString(gesture, movement_pairs, ".");
 	cout << "Gesture: " << gesture << endl;
 }
 
-int readGestureFromFile(vector<string>& movementPairs) {
-	ifstream gestureFile;
-	gestureFile.open("gesture.dat");
-	if (!gestureFile.is_open()) {
+int ReadGestureFromFile(vector<string>& movement_pairs) {
+	ifstream gesture_file;
+	gesture_file.open("gesture.dat");
+	if (!gesture_file.is_open()) {
 		return EXIT_FAILURE;
 	}
 	string line;
-	if (!getline(gestureFile, line)) {
+	if (!getline(gesture_file, line)) {
 		return EXIT_FAILURE;
 	}
 
-	TokenizeString(line, movementPairs, ".");
+	TokenizeString(line, movement_pairs, ".");
 	cout << "Gesture: " << line << endl;
 
 	return EXIT_SUCCESS;
@@ -179,13 +179,13 @@ int main(int argc, char *argv[])
 
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 1280, 1024, "Gesture visualizer", NULL, NULL);
-	if( window == NULL ){
+	g_window = glfwCreateWindow( 1280, 1024, "Gesture visualizer", NULL, NULL);
+	if( g_window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window.\n" );
 		glfwTerminate();
 		return -1;
 	}
-	glfwMakeContextCurrent(window);
+	glfwMakeContextCurrent(g_window);
 
 	// Initialize GLEW
 	if (glewInit() != GLEW_OK) {
@@ -194,8 +194,8 @@ int main(int argc, char *argv[])
 	}
 
 	// Ensure we can capture the escape key being pressed below
-	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetCursorPos(window, 1280/2, 1024/2);
+	glfwSetInputMode(g_window, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetCursorPos(g_window, 1280/2, 1024/2);
 
 	// White background
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
@@ -213,90 +213,90 @@ int main(int argc, char *argv[])
 	glEnable(GL_CULL_FACE);
 
 	// Create and compile our GLSL program from the shaders
-	GLuint programID = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
+	GLuint program_id = LoadShaders( "TransformVertexShader.vertexshader", "TextureFragmentShader.fragmentshader" );
 
 	// Get a handle for our "MVP" uniform
-	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	GLuint matrix_id = glGetUniformLocation(program_id, "MVP");
 
 	// Get a handle for our buffers
-	GLuint vertexPosition_modelspaceID = glGetAttribLocation(programID, "vertexPosition_modelspace");
-	GLuint colorIntensityID = glGetAttribLocation(programID, "colorIntensity");
-	//GLuint vertexUVID = glGetAttribLocation(programID, "vertexUV");
+	GLuint vertex_position_model_space_id = glGetAttribLocation(program_id, "vertexPosition_modelspace");
+	GLuint color_intensity_id = glGetAttribLocation(program_id, "colorIntensity");
+	//GLuint vertex_uv_id = glGetAttribLocation(programID, "vertexUV");
 	
 	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+	GLuint texture_id  = glGetUniformLocation(program_id, "myTextureSampler");
 
-	vector<string> movementPairs;
+	vector<string> movement_pairs;
 
 	if ((argc > 2) && (strncmp(argv[1], "--gesture", strlen("--gesture")) == 0)) {
-		readGestureFromArguments(argv, movementPairs);
+		ReadGestureFromArguments(argv, movement_pairs);
 	} else {
-		if (readGestureFromFile(movementPairs) != NO_ERROR) {
+		if (ReadGestureFromFile(movement_pairs) != NO_ERROR) {
 			cout << "Error reading gesture from file, exiting." << endl;
 			return -1;
 		}
 	}
 
-	long int numVertexBufferElems = (movementPairs.size()+1) * 3; // One extra entry at the beginning for coordinate {0.0f, 0.0f, 0.0f}
+	long int num_vertex_buffer_elems = (movement_pairs.size()+1) * 3; // One extra entry at the beginning for coordinate {0.0f, 0.0f, 0.0f}
 
-	GLfloat* sensor0VertexBufferData = new GLfloat[numVertexBufferElems];
-	GLfloat* sensor0ColorBufferData = new GLfloat[numVertexBufferElems];
-	GLfloat* sensor1VertexBufferData = new GLfloat[numVertexBufferElems];
-	GLfloat* sensor1ColorBufferData = new GLfloat[numVertexBufferElems];
+	GLfloat* sensor_0_vertex_buffer_data = new GLfloat[num_vertex_buffer_elems];
+	GLfloat* sensor_0_color_buffer_data = new GLfloat[num_vertex_buffer_elems];
+	GLfloat* sensor_1_vertex_buffer_data = new GLfloat[num_vertex_buffer_elems];
+	GLfloat* sensor_1_color_buffer_data = new GLfloat[num_vertex_buffer_elems];
 
-	populateSensorVertexBuffers(0, movementPairs, sensor0VertexBufferData);
-	populateSensorVertexBuffers(1, movementPairs, sensor1VertexBufferData);
-	populateSensorColorBuffers(sensor0ColorBufferData, sensor1ColorBufferData, numVertexBufferElems);
+	PopulateSensorVertexBuffers(0, movement_pairs, sensor_0_vertex_buffer_data);
+	PopulateSensorVertexBuffers(1, movement_pairs, sensor_1_vertex_buffer_data);
+	PopulateSensorColorBuffers(sensor_0_color_buffer_data, sensor_1_color_buffer_data, num_vertex_buffer_elems);
 
 	/* Vertex buffers */
 
-	GLuint sensor0VertexBuffer;
-	glGenBuffers(1, &sensor0VertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, sensor0VertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, numVertexBufferElems * sizeof(GLfloat), sensor0VertexBufferData, GL_STATIC_DRAW);
+	GLuint sensor_0_vertex_buffer;
+	glGenBuffers(1, &sensor_0_vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sensor_0_vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, num_vertex_buffer_elems * sizeof(GLfloat), sensor_0_vertex_buffer_data, GL_STATIC_DRAW);
 
-	GLuint sensor1VertexBuffer;
-	glGenBuffers(1, &sensor1VertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, sensor1VertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, numVertexBufferElems * sizeof(GLfloat), sensor1VertexBufferData, GL_STATIC_DRAW);
+	GLuint sensor_1_vertex_buffer;
+	glGenBuffers(1, &sensor_1_vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sensor_1_vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, num_vertex_buffer_elems * sizeof(GLfloat), sensor_1_vertex_buffer_data, GL_STATIC_DRAW);
 
 	/* Color buffers */
 
-	GLuint sensor0ColorBuffer;
-	glGenBuffers(1, &sensor0ColorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, sensor0ColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, numVertexBufferElems * sizeof(GLfloat), sensor0ColorBufferData, GL_STATIC_DRAW);
+	GLuint sensor_0_color_buffer;
+	glGenBuffers(1, &sensor_0_color_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sensor_0_color_buffer);
+	glBufferData(GL_ARRAY_BUFFER, num_vertex_buffer_elems * sizeof(GLfloat), sensor_0_color_buffer_data, GL_STATIC_DRAW);
 
-	GLuint sensor1ColorBuffer;
-	glGenBuffers(1, &sensor1ColorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, sensor1ColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, numVertexBufferElems * sizeof(GLfloat), sensor1ColorBufferData, GL_STATIC_DRAW);
+	GLuint sensor_1_color_buffer;
+	glGenBuffers(1, &sensor_1_color_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sensor_1_color_buffer);
+	glBufferData(GL_ARRAY_BUFFER, num_vertex_buffer_elems * sizeof(GLfloat), sensor_1_color_buffer_data, GL_STATIC_DRAW);
 
 	do{
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Use our shader
-		glUseProgram(programID);
+		glUseProgram(program_id);
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
-		glm::mat4 ProjectionMatrix = getProjectionMatrix();
-		glm::mat4 ViewMatrix = getViewMatrix();
-		glm::mat4 ModelMatrix = glm::mat4(1.0);
-		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		ComputeMatricesFromInputs();
+		glm::mat4 projection_matrix = GetProjectionMatrix();
+		glm::mat4 view_matrix = GetViewMatrix();
+		glm::mat4 model_matrix = glm::mat4(1.0);
+		glm::mat4 mvp = projection_matrix * view_matrix * model_matrix;
 
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
 
 		// Enabled vertex attributes
-		glEnableVertexAttribArray(vertexPosition_modelspaceID);
-		glEnableVertexAttribArray(colorIntensityID);
+		glEnableVertexAttribArray(vertex_position_model_space_id);
+		glEnableVertexAttribArray(color_intensity_id);
 
-		glBindBuffer(GL_ARRAY_BUFFER, sensor0VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, sensor_0_vertex_buffer);
 		glVertexAttribPointer(
-			vertexPosition_modelspaceID, // The attribute we want to configure
+			vertex_position_model_space_id, // The attribute we want to configure
 			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
@@ -304,9 +304,9 @@ int main(int argc, char *argv[])
 			(void*)0            // array buffer offset
 		);
 
-		glBindBuffer(GL_ARRAY_BUFFER, sensor0ColorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, sensor_0_color_buffer);
 		glVertexAttribPointer(
-			colorIntensityID, // The attribute we want to configure
+			color_intensity_id, // The attribute we want to configure
 			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
@@ -315,11 +315,11 @@ int main(int argc, char *argv[])
 		);
 
 		// Draw the gesture for sensor 0
-		glDrawArrays(GL_LINE_STRIP, 0, movementPairs.size()+1); // Initial position + movement pairs read from the file
+		glDrawArrays(GL_LINE_STRIP, 0, movement_pairs.size()+1); // Initial position + movement pairs read from the file
 
-		glBindBuffer(GL_ARRAY_BUFFER, sensor1VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, sensor_1_vertex_buffer);
 		glVertexAttribPointer(
-			vertexPosition_modelspaceID, // The attribute we want to configure
+			vertex_position_model_space_id, // The attribute we want to configure
 			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
@@ -327,9 +327,9 @@ int main(int argc, char *argv[])
 			(void*)0            // array buffer offset
 		);
 
-		glBindBuffer(GL_ARRAY_BUFFER, sensor1ColorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, sensor_1_color_buffer);
 		glVertexAttribPointer(
-			colorIntensityID, // The attribute we want to configure
+			color_intensity_id, // The attribute we want to configure
 			3,                  // size
 			GL_FLOAT,           // type
 			GL_FALSE,           // normalized?
@@ -338,27 +338,27 @@ int main(int argc, char *argv[])
 		);
 
 		// Draw the gesture for sensor 1
-		glDrawArrays(GL_LINE_STRIP, 0, movementPairs.size()+1); // Initial position + movement pairs read from the file
+		glDrawArrays(GL_LINE_STRIP, 0, movement_pairs.size()+1); // Initial position + movement pairs read from the file
 
-		glDisableVertexAttribArray(vertexPosition_modelspaceID);
+		glDisableVertexAttribArray(vertex_position_model_space_id);
 
 		// Swap buffers
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(g_window);
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
-	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+	while( glfwGetKey(g_window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+		   glfwWindowShouldClose(g_window) == 0 );
 
 	// Clean up buffers and shader
-	glDeleteBuffers(1, &sensor0VertexBuffer);
-	glDeleteBuffers(1, &sensor1VertexBuffer);
+	glDeleteBuffers(1, &sensor_0_vertex_buffer);
+	glDeleteBuffers(1, &sensor_1_vertex_buffer);
 
-	glDeleteBuffers(1, &sensor0ColorBuffer);
-	glDeleteBuffers(1, &sensor1ColorBuffer);
+	glDeleteBuffers(1, &sensor_0_color_buffer);
+	glDeleteBuffers(1, &sensor_1_color_buffer);
 
-	glDeleteProgram(programID);
-	glDeleteTextures(1, &TextureID);
+	glDeleteProgram(program_id);
+	glDeleteTextures(1, &texture_id);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
