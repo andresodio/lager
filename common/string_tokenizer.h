@@ -1,22 +1,22 @@
 #include <string>
 
 /* Obtained from http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html */
-void tokenizeString(const std::string& str,
+void TokenizeString(const std::string& str,
 				std::vector<std::string>& tokens,
 				const std::string& delimiters)
 {
 	// Skip delimiters at beginning.
-	std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+	std::string::size_type last_pos = str.find_first_not_of(delimiters, 0);
 	// Find first "non-delimiter".
-	std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+	std::string::size_type pos     = str.find_first_of(delimiters, last_pos);
 
-	while (std::string::npos != pos || std::string::npos != lastPos)
+	while (std::string::npos != pos || std::string::npos != last_pos)
 	{
 		// Found a token, add it to the vector.
-		tokens.push_back(str.substr(lastPos, pos - lastPos));
+		tokens.push_back(str.substr(last_pos, pos - last_pos));
 		// Skip delimiters.  Note the "not_of"
-		lastPos = str.find_first_not_of(delimiters, pos);
+		last_pos = str.find_first_not_of(delimiters, pos);
 		// Find next "non-delimiter"
-		pos = str.find_first_of(delimiters, lastPos);
+		pos = str.find_first_of(delimiters, last_pos);
 	}
 }

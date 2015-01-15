@@ -136,10 +136,10 @@ void PrintSensorCoordinates(const vrpn_TRACKERCB& last_report,
 }
 
 char GetCurrentLetter(int snap_phi, int snap_theta) {
-  struct sphericalCoordinates current_coordinates;
-  current_coordinates.mPhi = snap_phi;
-  current_coordinates.mTheta = snap_theta;
-  return coordinatesLetter[current_coordinates];
+  struct SphericalCoordinates current_coordinates;
+  current_coordinates.phi = snap_phi;
+  current_coordinates.theta = snap_theta;
+  return coordinates_letter[current_coordinates];
 }
 
 int GetMillisecondsSinceNow(const time_point<system_clock> &last_time) {
@@ -337,7 +337,7 @@ string ExpandString(const string& input_string, int new_size) {
   int length_multiplier = new_size / input_string.length();
 
   vector<string> movement_pairs;
-  tokenizeString(input_string, movement_pairs, ".");
+  TokenizeString(input_string, movement_pairs, ".");
 
   for (vector<string>::iterator it = movement_pairs.begin();
       it < movement_pairs.end(); ++it) {
@@ -380,7 +380,7 @@ int ReadAndCompareGesturesFromFile(vector<GestureEntry>& aGestures) {
     GestureEntry new_gesture_entry;
     ss >> new_gesture_entry.name >> new_gesture_entry.movements;
 
-    int gesture_length_least_common_multiple = leastCommonMultiple(
+    int gesture_length_least_common_multiple = LeastCommonMultiple(
         inputGesture.length(), new_gesture_entry.movements.length());
     string expanded_input_string = ExpandString(
         inputGesture, gesture_length_least_common_multiple);
@@ -429,7 +429,7 @@ void DrawMatchingGestures(const GestureEntry& closest_gesture) {
 
 bool IsSingleSensorGesture() {
   vector<string> movement_pairs;
-  tokenizeString(g_gesture_string.str(), movement_pairs, ".");
+  TokenizeString(g_gesture_string.str(), movement_pairs, ".");
   bool sensor_0_moved = false;
   bool sensor_1_moved = false;
 

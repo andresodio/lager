@@ -1,7 +1,7 @@
 #include "spherical_coordinates.h"
 #include <unordered_map>
 
-std::unordered_map<char, struct sphericalCoordinates> letterCoordinates =
+std::unordered_map<char, struct SphericalCoordinates> letter_coordinates =
 	// Format: {'<LETTER>', {<PHI>,<THETA>}}
 	// A is the top face (pole), E is the bottom face (pole)
 	// They repeat on each plane

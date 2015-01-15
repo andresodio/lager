@@ -5,13 +5,13 @@
  * Code based on:
  * http://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
  */
-struct sphericalCoordinates {
-	int mPhi;
-	int mTheta;
+struct SphericalCoordinates {
+	int phi;
+	int theta;
 
-	bool operator==(const sphericalCoordinates &other) const
+	bool operator==(const SphericalCoordinates &other) const
 	{
-		return (mPhi == other.mPhi && mTheta == other.mTheta);
+		return (phi == other.phi && theta == other.theta);
 	}
 };
 
@@ -21,20 +21,20 @@ struct sphericalCoordinates {
  */
 namespace std {
 	template<>
-	struct hash<sphericalCoordinates>
+	struct hash<SphericalCoordinates>
 	{
-		std::size_t operator()(const sphericalCoordinates& k) const
+		std::size_t operator()(const SphericalCoordinates& k) const
 		{
 			// Compute individual hash values for mPhi and mTheta
 			// and combine them using XOR and bit shifting:
-			return ((hash<int>()(k.mPhi) ^ (hash<int>()(k.mTheta) << 1)));
+			return ((hash<int>()(k.phi) ^ (hash<int>()(k.theta) << 1)));
 		}
 	};
 }
 
-double degreesToRadians(double aDegrees)
+double DegreesToRadians(double degrees)
 {
-	return (aDegrees/180 * M_PI);
+	return (degrees/180 * M_PI);
 }
 
 #endif /* SPHERICAL_COORDINATES_HPP */

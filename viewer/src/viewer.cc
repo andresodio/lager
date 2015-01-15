@@ -94,11 +94,11 @@ void populateSensorVertexBuffers(int aSensorIndex, const vector<string>& aMoveme
 			deltaY = 0.0f;
 			deltaZ = 0.0f;
 		} else {
-			struct sphericalCoordinates currentCoordinates =
-					letterCoordinates[currentMovement];
+			struct SphericalCoordinates currentCoordinates =
+					letter_coordinates[currentMovement];
 			getVectors(deltaX, deltaY, deltaZ,
-					degreesToRadians(currentCoordinates.mPhi),
-					degreesToRadians(currentCoordinates.mTheta));
+					DegreesToRadians(currentCoordinates.phi),
+					DegreesToRadians(currentCoordinates.theta));
 		}
 		//cout << "movement " << currentS1Movement << " dx: " << deltaX << " dy: " << deltaY << " dz: " << deltaZ << endl;
 		tempCoordinates[0] += deltaX;
@@ -143,7 +143,7 @@ void populateSensorColorBuffers(GLfloat* aSensor0ColorBufferData, GLfloat* aSens
 void readGestureFromArguments(char* argv[], vector<string>& movementPairs) {
 	string gesture(argv[2]);
 
-	tokenizeString(gesture, movementPairs, ".");
+	TokenizeString(gesture, movementPairs, ".");
 	cout << "Gesture: " << gesture << endl;
 }
 
@@ -158,7 +158,7 @@ int readGestureFromFile(vector<string>& movementPairs) {
 		return EXIT_FAILURE;
 	}
 
-	tokenizeString(line, movementPairs, ".");
+	TokenizeString(line, movementPairs, ".");
 	cout << "Gesture: " << line << endl;
 
 	return EXIT_SUCCESS;
