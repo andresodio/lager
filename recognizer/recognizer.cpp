@@ -51,8 +51,6 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 using std::chrono::time_point;
 
-using namespace boost::interprocess;
-
 /* Forward declarations */
 int snapAngle(double angle);
 
