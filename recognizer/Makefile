@@ -160,16 +160,16 @@ $(OBJ_DIR)/%.o: %.cc
 	@[ -d $(OBJ_DIR) ] || mkdir -p $(OBJ_DIR)
 	$(CC) $(CXXFLAGS) -o $@ -c $<
 
-INSTALL_APPS := recognizer
+INSTALL_APPS := lager_recognizer
 
-all:	recognizer
+all:	lager_recognizer
 
-.PHONY:	recognizer
-recognizer:	$(OBJ_DIR)/recognizer
+.PHONY:	lager_recognizer
+lager_recognizer:	$(OBJ_DIR)/lager_recognizer
 
-$(OBJ_DIR)/recognizer: $(OBJ_DIR)/recognizer.o $(LIB_DIR)/libvrpn.a
-	$(CC) $(LFLAGS) -o $(OBJ_DIR)/recognizer \
-		$(OBJ_DIR)/recognizer.o -lvrpn $(ARCH_LIBS)
+$(OBJ_DIR)/lager_recognizer: $(OBJ_DIR)/lager_recognizer.o $(LIB_DIR)/libvrpn.a
+	$(CC) $(LFLAGS) -o $(OBJ_DIR)/lager_recognizer \
+		$(OBJ_DIR)/lager_recognizer.o -lvrpn $(ARCH_LIBS)
 
 install: all
 	-mkdir -p $(BIN_DIR)
