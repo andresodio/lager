@@ -410,7 +410,7 @@ int ReadAndCompareGesturesFromFile(vector<GestureEntry>& aGestures) {
 void DrawMatchingGestures(const GestureEntry& closest_gesture) {
   stringstream viewer_command;
   string viewer_command_prefix =
-      "cd ~/lager/viewer/src/ && ../build/viewer --gesture ";
+      "cd ~/lager/viewer/src/ && ../build/lager_viewer --gesture ";
   string hide_output_suffix = " > /dev/null";
 
   cout << "Drawing input gesture..." << endl;
