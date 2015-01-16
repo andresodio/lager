@@ -11,6 +11,8 @@
 #include <sstream>
 #include <chrono>
 
+#include <boost/math/common_factor.hpp>
+
 #include <vrpn_Button.h>                // for vrpn_BUTTONCB, etc
 #include <vrpn_Tracker.h>               // for vrpn_TRACKERCB, etc
 
@@ -21,7 +23,6 @@
 
 #include "spherical_coordinates.h"
 #include "coordinates_letter.h"
-#include "math_utilities.h"
 #include "string_tokenizer.h"
 
 #define RECOGNIZER_ERROR -1
@@ -380,7 +381,7 @@ int ReadAndCompareGesturesFromFile(vector<GestureEntry>& aGestures) {
     GestureEntry new_gesture_entry;
     ss >> new_gesture_entry.name >> new_gesture_entry.movements;
 
-    int gesture_length_least_common_multiple = LeastCommonMultiple(
+    int gesture_length_least_common_multiple = boost::math::lcm(
         inputGesture.length(), new_gesture_entry.movements.length());
     string expanded_input_string = ExpandString(
         inputGesture, gesture_length_least_common_multiple);
