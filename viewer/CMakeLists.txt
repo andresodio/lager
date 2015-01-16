@@ -64,9 +64,9 @@ add_definitions(
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
-# Gesture viewer
-add_executable(viewer
-	src/viewer.cc
+# Gesture lager_viewer
+add_executable(lager_viewer
+	src/lager_viewer.cc
 	common/shader.cc
 	common/shader.h
 	common/controls.cc
@@ -77,12 +77,12 @@ add_executable(viewer
 	src/TransformVertexShader.vertexshader
 	src/TextureFragmentShader.fragmentshader
 )
-target_link_libraries(viewer
+target_link_libraries(lager_viewer
 	${ALL_LIBS}
 )
 # Xcode and Visual working directories
-set_target_properties(viewer PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/")
-create_target_launcher(viewer WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+set_target_properties(lager_viewer PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+create_target_launcher(lager_viewer WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
 
 SOURCE_GROUP(common REGULAR_EXPRESSION ".*/common/.*" )
