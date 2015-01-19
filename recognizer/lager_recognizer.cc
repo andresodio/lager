@@ -28,7 +28,8 @@
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0
 
-#define SENSOR_SERVER "Filter0@localhost"
+#define TRACKER_SERVER "Filter0@localhost" // Filtered
+#define BUTTON_SERVER "Tracker0@localhost" // Raw
 
 #define DISTANCE_INTERVAL_SQUARED 0.0004f //0.4 * (1 cm)^2
 
@@ -59,6 +60,8 @@ int SnapAngle(double angle);
 
 static vrpn_TRACKERCB g_last_report_0;  // last report for sensor 0
 static vrpn_TRACKERCB g_last_report_1;  // last report for sensor 1
+
+bool g_draw_gestures = false;
 
 stringstream g_gesture_string;
 
@@ -528,6 +531,10 @@ void VRPN_CALLBACK handle_tracker_change(void *user_data,
   int snap_theta, snap_phi;
   static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
+  if (!g_draw_gestures) {
+    return;
+  }
+
   if (tracker.sensor == 0) {
     last_report = &g_last_report_0;
   } else {
@@ -554,18 +561,11 @@ void VRPN_CALLBACK handle_tracker_change(void *user_data,
 
 void VRPN_CALLBACK handle_button_change(void *user_data,
                                         const vrpn_BUTTONCB button) {
-  static int count = 0;
-  static int button_state = 1;
-  int done = 0;
-
-  if (button.state != button_state) {
-    printf("button #%d is in state %d\n", button.button, button.state);
-    button_state = button.state;
-    count++;
+  if (button.state == 1) {
+    g_draw_gestures = true;
+  } else {
+    g_draw_gestures = false;
   }
-  if (count > 4)
-    done = 1;
-  *(int *) user_data = done;
 }
 
 void VRPN_CALLBACK dummy_handle_tracker_change(void *user_data,
@@ -581,32 +581,63 @@ void VRPN_CALLBACK dummy_handle_tracker_change(void *user_data,
   *num_reports_received = *num_reports_received + 1;
 }
 
-int main(int argc, char *argv[]) {
-  printf("Generates strings for movement of tracker %s\n\n", SENSOR_SERVER);
+bool DetermineButtonUse(const int argc, const char** argv) {
+  bool use_buttons;
 
+  if ((argc > 1)
+      && (std::string(argv[1]).find("--use_buttons") != std::string::npos)) {
+    cout << "Gesture detection will be active while pressing a button." << endl;
+    use_buttons = true;
+
+    // Detection is off by default, unless the button handler enables it
+    g_draw_gestures = false;
+  } else {
+    cout << "Gesture detection will be active at all times." << endl;
+    use_buttons = false;
+
+    // Always draw gestures regardless of buttons
+    g_draw_gestures = true;
+  }
+
+  return use_buttons;
+}
+
+void InitializeTrackers(vrpn_Tracker_Remote*& tracker,
+                        vrpn_Button_Remote*& button,
+                        struct timespec& sleep_interval, bool &use_buttons) {
   int num_reports_received = 0;
-  int done = 0;
-  vrpn_Tracker_Remote *tracker;
-  vrpn_Button_Remote *button;
-  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
 
-  // initialize the tracker
-  tracker = new vrpn_Tracker_Remote(SENSOR_SERVER);
-
-  // initialize the button
-  button = new vrpn_Button_Remote(SENSOR_SERVER);
-
+  // Initialize the tracker handler
+  tracker = new vrpn_Tracker_Remote(TRACKER_SERVER);
   tracker->register_change_handler(&num_reports_received,
                                    dummy_handle_tracker_change);
+
+  // Skip the first reports, which are spurious (sensor initialization)
   while (num_reports_received != 2) {
     nanosleep(&sleep_interval, NULL);
     tracker->mainloop();
   }
-
+  // Finish initializing the tracker
   tracker->unregister_change_handler(&num_reports_received,
                                      dummy_handle_tracker_change);
   tracker->register_change_handler(NULL, handle_tracker_change);
-  button->register_change_handler(&done, handle_button_change);
+
+  if (use_buttons) {
+    // Initialize the button handler
+    button = new vrpn_Button_Remote(BUTTON_SERVER);
+    button->register_change_handler(NULL, handle_button_change);
+  }
+}
+
+int main(int argc, const char *argv[]) {
+  printf("Generates strings for movement of tracker %s\n\n", TRACKER_SERVER);
+
+  vrpn_Tracker_Remote *tracker;
+  vrpn_Button_Remote *button;
+  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
+  bool use_buttons = DetermineButtonUse(argc, argv);
+
+  InitializeTrackers(tracker, button, sleep_interval, use_buttons);
 
   cout << " ________________________________ " << endl;
   cout << "|                                |" << endl;
@@ -615,12 +646,15 @@ int main(int argc, char *argv[]) {
   cout << "                                  " << endl;
 
   // Main loop
-  while (!done) {
+  while (true) {
 
-    // Let tracker receive position information from remote tracker
+    if (use_buttons) {
+      // Let button handler receive button status from the remote button
+      button->mainloop();
+    }
+
+    // Let tracker handler receive position information from the remote tracker
     tracker->mainloop();
-    // Let button receive button status from remote button
-    button->mainloop();
 
     // If gesture buildup pauses, attempt to recognize it
     int gesture_string_length = g_gesture_string.str().length();
