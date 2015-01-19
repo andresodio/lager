@@ -143,7 +143,7 @@ char GetCurrentLetter(int snap_phi, int snap_theta) {
   return coordinates_letter[current_coordinates];
 }
 
-int GetMillisecondsSinceNow(const time_point<system_clock> &last_time) {
+int GetMillisecondsUntilNow(const time_point<system_clock> &last_time) {
   time_point<system_clock> now = system_clock::now();
   return duration<double, std::milli>(now - last_time).count();
 }
@@ -162,7 +162,7 @@ void UpdateTimePoint(time_point<system_clock>& time_to_update,
 }
 
 bool GesturePaused() {
-  return (GetMillisecondsSinceNow(g_global_last_movement_time)
+  return (GetMillisecondsUntilNow(g_global_last_movement_time)
       > GESTURE_PAUSE_TIME_MILLISECONDS);
 }
 
