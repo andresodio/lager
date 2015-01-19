@@ -458,6 +458,9 @@ bool IsSingleSensorGesture() {
 void RecognizeGesture() {
   vector<GestureEntry> gestures;
   int lowestDistance;
+  bool match_found = false;
+  unsigned int num_milliseconds_since_recognition_start = 0;
+  time_point<system_clock> recognition_start_time = system_clock::now();
   int gesture_distance_threshold_pct =
       IsSingleSensorGesture() ?
       SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT :
@@ -476,22 +479,35 @@ void RecognizeGesture() {
 
   GestureEntry closest_gesture = *min_element(gestures.begin(), gestures.end(),
                                               GestureEntryLessThan);
-  cout << endl;
-  cout << "Closest gesture:\t" << closest_gesture.name << endl;
-  cout << "Distance:\t\t" << closest_gesture.dl_distance_pct << "% ("
-       << closest_gesture.dl_distance << " D-L ops)" << endl;
-  cout << "Threshold:\t\t" << gesture_distance_threshold_pct << "%" << endl;
+  match_found = closest_gesture.dl_distance_pct
+      <= gesture_distance_threshold_pct;
+  num_milliseconds_since_recognition_start = GetMillisecondsUntilNow(
+      recognition_start_time);
 
-  if (closest_gesture.dl_distance_pct <= gesture_distance_threshold_pct) {
+  if (match_found) {
     cout << " ________________________________ " << endl;
     cout << "|                                |" << endl;
     cout << "|          MATCH FOUND!          |" << endl;
     cout << "|________________________________|" << endl;
     cout << "                                  " << endl;
-    DrawMatchingGestures(closest_gesture);
   } else {
     cout << endl;
     cout << "NO MATCH." << endl;
+  }
+
+  cout << endl;
+  cout << "Closest gesture:\t" << closest_gesture.name << endl;
+  cout << endl;
+  cout << "Distance:\t\t" << closest_gesture.dl_distance_pct << "% ("
+       << closest_gesture.dl_distance << " D-L ops)" << endl;
+  cout << "Threshold:\t\t" << gesture_distance_threshold_pct << "%" << endl;
+  cout << endl;
+  cout << "Recognition time: \t" << num_milliseconds_since_recognition_start
+       << "ms" << endl;
+  cout << endl;
+
+  if (match_found) {
+    DrawMatchingGestures(closest_gesture);
   }
 
   cout << endl << endl;
