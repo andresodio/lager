@@ -62,7 +62,9 @@ ifdef PBASE_ROOT
 endif
 
 CC := g++
-ARCH_LIBS := -lpthread -lquat -lm
+ARCH_LIBS := -lpthread -lquat -lm -lrt
+BOOST_LIBS := -lboost_system -lboost_thread -lboost_serialization
+LAGER_LIBS := -llager_connect
 
 ifeq ($(HW_OS),pc_linux)
   CC := g++
@@ -169,7 +171,7 @@ lager_recognizer:	$(OBJ_DIR)/lager_recognizer
 
 $(OBJ_DIR)/lager_recognizer: $(OBJ_DIR)/lager_recognizer.o $(LIB_DIR)/libvrpn.a
 	$(CC) $(LFLAGS) -o $(OBJ_DIR)/lager_recognizer \
-		$(OBJ_DIR)/lager_recognizer.o -lvrpn $(ARCH_LIBS)
+		$(OBJ_DIR)/lager_recognizer.o -lvrpn $(LAGER_LIBS) $(ARCH_LIBS) $(BOOST_LIBS)
 
 install: all
 	-mkdir -p $(BIN_DIR)

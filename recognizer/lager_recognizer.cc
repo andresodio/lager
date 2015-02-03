@@ -11,8 +11,6 @@
 #include <sstream>
 #include <chrono>
 
-#include <boost/math/common_factor.hpp>
-
 #include <vrpn_Button.h>                // for vrpn_BUTTONCB, etc
 #include <vrpn_Tracker.h>               // for vrpn_TRACKERCB, etc
 
@@ -20,6 +18,13 @@
 #include "vrpn_Connection.h"            // for vrpn_Connection
 #include "vrpn_ForceDevice.h"           // for vrpn_ForceDevice_Remote, etc
 #include "vrpn_Types.h"                 // for vrpn_float64
+
+#include <boost/math/common_factor.hpp>
+#include <boost/interprocess/ipc/message_queue.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+#include "liblager_connect.h"
 
 #include "spherical_coordinates.h"
 #include "coordinates_letter.h"
@@ -53,10 +58,23 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 using std::chrono::time_point;
 
+using namespace boost::interprocess;
+
 /* Forward declarations */
 int SnapAngle(double angle);
 
 /* Globals */
+
+struct SubscribedGesture {
+  string name;
+  string lager;
+  string expanded_lager;
+  pid_t pid;
+  int dl_distance;
+  float dl_distance_pct;
+};
+
+vector<SubscribedGesture> g_subscribed_gestures;
 
 static vrpn_TRACKERCB g_last_report_0;  // last report for sensor 0
 static vrpn_TRACKERCB g_last_report_1;  // last report for sensor 1
@@ -353,65 +371,45 @@ string ExpandString(const string& input_string, int new_size) {
   return output_string.str();
 }
 
-struct GestureEntry {
-  string name;
-  string movements;
-  int dl_distance;
-  float dl_distance_pct;
-};
-
-bool GestureEntryLessThan(GestureEntry i, GestureEntry j) {
+bool GestureEntryLessThan(SubscribedGesture i, SubscribedGesture j) {
   return (i.dl_distance_pct < j.dl_distance_pct);
 }
 
-int ReadAndCompareGesturesFromFile(vector<GestureEntry>& aGestures) {
-  ifstream gesture_file;
-  string current_line;
+void UpdateSubscribedGestureDistance(
+    struct SubscribedGesture& subscribed_gesture) {
+  const string input_gesture = g_gesture_string.str();
 
-  cout << "Current gesture" << endl << "\t" << g_gesture_string.str() << endl
+  int gesture_length_least_common_multiple = boost::math::lcm(
+      input_gesture.length(), subscribed_gesture.lager.length());
+
+  string expanded_input_string = ExpandString(
+      input_gesture, gesture_length_least_common_multiple);
+  subscribed_gesture.expanded_lager = ExpandString(
+      subscribed_gesture.lager, gesture_length_least_common_multiple);
+
+  subscribed_gesture.dl_distance = DlDist2(
+      expanded_input_string.c_str(), subscribed_gesture.expanded_lager.c_str(),
+      expanded_input_string.length(),
+      subscribed_gesture.expanded_lager.length());
+
+  subscribed_gesture.dl_distance_pct = (subscribed_gesture.dl_distance * 100.0f)
+      / subscribed_gesture.expanded_lager.length();
+
+  cout << subscribed_gesture.name << endl << "\t" << subscribed_gesture.lager
        << endl;
-
-  gesture_file.open("gestures.dat");
-  if (!gesture_file.is_open()) {
-    return RECOGNIZER_ERROR;
-  }
-
-  while (getline(gesture_file, current_line)) {
-    //cout << "Line: " << current_line << endl;
-    stringstream ss(current_line);
-    const string& inputGesture = g_gesture_string.str();
-
-    GestureEntry new_gesture_entry;
-    ss >> new_gesture_entry.name >> new_gesture_entry.movements;
-
-    int gesture_length_least_common_multiple = boost::math::lcm(
-        inputGesture.length(), new_gesture_entry.movements.length());
-    string expanded_input_string = ExpandString(
-        inputGesture, gesture_length_least_common_multiple);
-    string expanded_new_gesture_entry_string = ExpandString(
-        new_gesture_entry.movements, gesture_length_least_common_multiple);
-
-    new_gesture_entry.dl_distance = DlDist2(
-        expanded_input_string.c_str(),
-        expanded_new_gesture_entry_string.c_str(),
-        expanded_input_string.length(),
-        expanded_new_gesture_entry_string.length());
-    new_gesture_entry.dl_distance_pct = (new_gesture_entry.dl_distance * 100.0f)
-        / expanded_new_gesture_entry_string.length();
-
-    cout << new_gesture_entry.name << endl << "\t"
-         << new_gesture_entry.movements << endl;
-    cout << "Distance: " << new_gesture_entry.dl_distance_pct << "% ("
-         << new_gesture_entry.dl_distance << " D-L ops)" << endl;
-    cout << endl;
-
-    aGestures.push_back(new_gesture_entry);
-  }
-
-  return RECOGNIZER_NO_ERROR;
+  cout << "Distance: " << subscribed_gesture.dl_distance_pct << "% ("
+       << subscribed_gesture.dl_distance << " D-L ops)" << endl;
+  cout << endl;
 }
 
-void DrawMatchingGestures(const GestureEntry& closest_gesture) {
+void UpdateSubscribedGestureDistances() {
+  for (vector<SubscribedGesture>::iterator it = g_subscribed_gestures.begin();
+      it < g_subscribed_gestures.end(); ++it) {
+    UpdateSubscribedGestureDistance(*it);
+  }
+}
+
+void DrawMatchingGestures(const SubscribedGesture& closest_gesture) {
   stringstream viewer_command;
   string viewer_command_prefix =
       "cd ~/lager/viewer/src/ && ../build/lager_viewer --gesture ";
@@ -426,7 +424,7 @@ void DrawMatchingGestures(const GestureEntry& closest_gesture) {
   cout << "Drawing gesture match..." << endl;
 
   viewer_command.str("");
-  viewer_command << viewer_command_prefix << closest_gesture.movements
+  viewer_command << viewer_command_prefix << closest_gesture.lager
                  << hide_output_suffix;
   system(viewer_command.str().c_str());
 }
@@ -458,8 +456,12 @@ bool IsSingleSensorGesture() {
   return (!sensor_0_moved || !sensor_1_moved);
 }
 
-void RecognizeGesture() {
-  vector<GestureEntry> gestures;
+void RecognizeGesture(bool use_gestures_file, bool draw_gestures) {
+  if (g_subscribed_gestures.size() == 0) {
+    cout << "No gesture subscriptions." << endl;
+    return;
+  }
+
   int lowestDistance;
   bool match_found = false;
   unsigned int num_milliseconds_since_recognition_start = 0;
@@ -475,13 +477,11 @@ void RecognizeGesture() {
   cout << "|________________________________|" << endl;
   cout << "                                  " << endl;
 
-  if (ReadAndCompareGesturesFromFile(gestures) != RECOGNIZER_NO_ERROR) {
-    cout << "Error reading gestures from file." << endl;
-    return;
-  }
+  UpdateSubscribedGestureDistances();
 
-  GestureEntry closest_gesture = *min_element(gestures.begin(), gestures.end(),
-                                              GestureEntryLessThan);
+  SubscribedGesture closest_gesture = *min_element(
+      g_subscribed_gestures.begin(), g_subscribed_gestures.end(),
+      GestureEntryLessThan);
   match_found = closest_gesture.dl_distance_pct
       <= gesture_distance_threshold_pct;
   num_milliseconds_since_recognition_start = GetMillisecondsUntilNow(
@@ -510,7 +510,12 @@ void RecognizeGesture() {
   cout << endl;
 
   if (match_found) {
-    DrawMatchingGestures(closest_gesture);
+    if (draw_gestures) {
+      DrawMatchingGestures(closest_gesture);
+    }
+    if (!use_gestures_file && closest_gesture.pid != 0) {
+      SendDetectedGestureMessage(closest_gesture.name, closest_gesture.pid);
+    }
   }
 
   cout << endl << endl;
@@ -602,6 +607,36 @@ bool DetermineButtonUse(const int argc, const char** argv) {
   return use_buttons;
 }
 
+bool DetermineGesturesFileUse(const int argc, const char** argv) {
+  bool use_gestures_file;
+
+  if ((argc > 1)
+      && (std::string(argv[1]).find("--use_gestures_files") != std::string::npos)) {
+    cout << "Comparing input to gestures in a file." << endl;
+    use_gestures_file = true;
+  } else {
+    cout << "Comparing input to subscribed gestures." << endl;
+    use_gestures_file = false;
+  }
+
+  return use_gestures_file;
+}
+
+bool DetermineGestureDrawing(const int argc, const char** argv) {
+  bool draw_gestures;
+
+  if ((argc > 1)
+      && (std::string(argv[1]).find("--draw_gestures") != std::string::npos)) {
+    cout << "Using lager_viewer to draw input and subscribed gestures." << endl;
+    draw_gestures = true;
+  } else {
+    cout << "Will not draw gestures." << endl;
+    draw_gestures = false;
+  }
+
+  return draw_gestures;
+}
+
 void InitializeTrackers(vrpn_Tracker_Remote*& tracker,
                         vrpn_Button_Remote*& button,
                         struct timespec& sleep_interval, bool &use_buttons) {
@@ -629,6 +664,50 @@ void InitializeTrackers(vrpn_Tracker_Remote*& tracker,
   }
 }
 
+void AddSubscribedGestures() {
+  while (true) {
+    GestureSubscriptionMessage message = GetGestureSubscriptionMessage();
+
+    cout << "Adding subscription..." << endl;
+    cout << endl;
+    cout << "Name: \"" << message.gesture_name() << "\"" << endl;
+    cout << "Lager: \"" << message.gesture_lager() << endl;
+    cout << endl;
+
+    SubscribedGesture subscription;
+    subscription.name = message.gesture_name();
+    subscription.lager = message.gesture_lager();
+    subscription.pid = message.pid();
+    g_subscribed_gestures.push_back(subscription);
+  }
+}
+
+int GetSubscribedGesturesFromFile() {
+  ifstream gestures_file;
+  string current_line;
+
+  cout << "Current gesture" << endl << "\t" << g_gesture_string.str() << endl
+       << endl;
+
+  gestures_file.open("gestures.dat");
+  if (!gestures_file.is_open()) {
+    return RECOGNIZER_ERROR;
+  }
+
+  while (getline(gestures_file, current_line)) {
+    string name, lager;
+    stringstream ss(current_line);
+    ss >> name >> lager;
+
+    SubscribedGesture new_gesture;
+    ss >> new_gesture.name >> new_gesture.lager;
+    new_gesture.pid = 0;
+    g_subscribed_gestures.push_back(new_gesture);
+  }
+
+  return RECOGNIZER_NO_ERROR;
+}
+
 int main(int argc, const char *argv[]) {
   printf("Generates strings for movement of tracker %s\n\n", TRACKER_SERVER);
 
@@ -636,6 +715,15 @@ int main(int argc, const char *argv[]) {
   vrpn_Button_Remote *button;
   struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
   bool use_buttons = DetermineButtonUse(argc, argv);
+  bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
+  bool draw_gestures = DetermineGestureDrawing(argc, argv);
+
+  if (use_gestures_file) {
+    GetSubscribedGesturesFromFile();
+  } else {
+    CreateGestureSubscriptionQueue();
+    boost::thread subscription_updater(AddSubscribedGestures);
+  }
 
   InitializeTrackers(tracker, button, sleep_interval, use_buttons);
 
@@ -664,7 +752,7 @@ int main(int argc, const char *argv[]) {
        * This reduces spurious recognitions from inadvertent movements.
        */
       if (gesture_string_length > 3) {
-        RecognizeGesture();
+        RecognizeGesture(use_gestures_file, draw_gestures);
       }
 
       cout << " ________________________________ " << endl;
