@@ -1,6 +1,8 @@
 #ifndef LAGER_COMMON_SPHERICAL_COORDINATES_H
 #define LAGER_COMMON_SPHERICAL_COORDINATES_H
 
+#include <math.h>
+
 /*
  * Code based on:
  * http://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
