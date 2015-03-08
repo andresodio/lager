@@ -33,6 +33,13 @@ class LagerConverter {
  public:
   static LagerConverter* Instance();
 
+  void SetUseButtons(bool use_buttons) {
+    use_buttons_ = use_buttons;
+
+    // If using buttons, will only draw when button is pressed
+    draw_gestures_ = !use_buttons;
+  }
+
   ~LagerConverter() {
     tracker_->unregister_change_handler(NULL, HandleTrackerChange);
 
