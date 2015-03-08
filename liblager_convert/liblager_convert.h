@@ -41,16 +41,21 @@ class LagerConverter {
   }
 
   ~LagerConverter() {
-    tracker_->unregister_change_handler(NULL, HandleTrackerChange);
+    processing_thread_.interrupt();
+    processing_thread_.join();
 
-    if (use_buttons_) {
-      button_->unregister_change_handler(NULL, HandleButtonChange);
+    if (tracker_) {
+      delete tracker_;
+    }
+
+    if (button_) {
+      delete button_;
     }
   }
 
   void Start() {
     InitializeTrackers();
-    thread_ = boost::thread(&LagerConverter::ProcessSensorEvents, this);
+    processing_thread_ = boost::thread(&LagerConverter::ProcessSensorEvents, this);
   }
 
   string BlockingGetLagerString();
@@ -75,7 +80,7 @@ class LagerConverter {
   ;
   bool lager_write_complete_ = false;
 
-  boost::thread thread_;
+  boost::thread processing_thread_;
   bool use_buttons_ = false;
 
   vrpn_Tracker_Remote* tracker_;

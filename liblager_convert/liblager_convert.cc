@@ -345,8 +345,6 @@ void LagerConverter::InitializeTrackers() {
 }
 
 void LagerConverter::ProcessSensorEvents() {
-  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
-
   while (true) {
     if (use_buttons_) {
       // Let button handler receive button status from the remote button
@@ -388,7 +386,7 @@ void LagerConverter::ProcessSensorEvents() {
     }
 
     // Sleep so we don't take up 100% of CPU
-    nanosleep(&sleep_interval, NULL);
+    boost::this_thread::sleep_for(boost::chrono::microseconds{MAIN_SLEEP_INTERVAL_MICROSECONDS});
   }
 }
 
