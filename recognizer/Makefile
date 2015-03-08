@@ -64,7 +64,7 @@ endif
 CC := g++
 ARCH_LIBS := -lpthread -lquat -lm -lrt
 BOOST_LIBS := -lboost_system -lboost_thread -lboost_serialization
-LAGER_LIBS := -llager_connect
+LAGER_LIBS := -llager_connect -llager_convert
 
 ifeq ($(HW_OS),pc_linux)
   CC := g++
@@ -169,9 +169,9 @@ all:	lager_recognizer
 .PHONY:	lager_recognizer
 lager_recognizer:	$(OBJ_DIR)/lager_recognizer
 
-$(OBJ_DIR)/lager_recognizer: $(OBJ_DIR)/lager_recognizer.o $(LIB_DIR)/libvrpn.a
+$(OBJ_DIR)/lager_recognizer: $(OBJ_DIR)/lager_recognizer.o
 	$(CC) $(LFLAGS) -o $(OBJ_DIR)/lager_recognizer \
-		$(OBJ_DIR)/lager_recognizer.o -lvrpn $(LAGER_LIBS) $(ARCH_LIBS) $(BOOST_LIBS)
+		$(OBJ_DIR)/lager_recognizer.o $(LAGER_LIBS) $(ARCH_LIBS) $(BOOST_LIBS) -lvrpn
 
 install: all
 	-mkdir -p $(BIN_DIR)
@@ -184,7 +184,3 @@ uninstall:
 
 clean:
 	rm -f $(OBJ_DIR)/*
-
-$(LIB_DIR)/libvrpn.a:
-
-

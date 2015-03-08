@@ -1,7 +1,6 @@
 // phan_client.C - simplest example: generates a flat horizontal plane
 
 #include <stdio.h>    // for printf, NULL
-#include <math.h>     // for atan2
 #include <time.h>     // for nanosleep
 #include <algorithm>  // for std::min_element
 #include <iostream>   // for std::cout
@@ -11,20 +10,13 @@
 #include <sstream>
 #include <chrono>
 
-#include <vrpn_Button.h>                // for vrpn_BUTTONCB, etc
-#include <vrpn_Tracker.h>               // for vrpn_TRACKERCB, etc
-
-#include "vrpn_Configure.h"             // for VRPN_CALLBACK
-#include "vrpn_Connection.h"            // for vrpn_Connection
-#include "vrpn_ForceDevice.h"           // for vrpn_ForceDevice_Remote, etc
-#include "vrpn_Types.h"                 // for vrpn_float64
-
 #include <boost/math/common_factor.hpp>
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 
 #include "liblager_connect.h"
+#include "liblager_convert.h"
 
 #include "spherical_coordinates.h"
 #include "coordinates_letter.h"
@@ -32,11 +24,6 @@
 
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0
-
-#define TRACKER_SERVER "Filter0@localhost" // Filtered
-#define BUTTON_SERVER "Tracker0@localhost" // Raw
-
-#define DISTANCE_INTERVAL_SQUARED 0.0004f //0.4 * (1 cm)^2
 
 #define MAIN_SLEEP_INTERVAL_MICROSECONDS 1000 // 1ms
 #define MAIN_SLEEP_INTERVAL_MILLISECONDS MAIN_SLEEP_INTERVAL_MICROSECONDS/1000
@@ -53,15 +40,10 @@ using std::stringstream;
 using std::vector;
 
 using std::chrono::duration;
-using std::chrono::microseconds;
-using std::chrono::seconds;
 using std::chrono::system_clock;
 using std::chrono::time_point;
 
 using namespace boost::interprocess;
-
-/* Forward declarations */
-int SnapAngle(double angle);
 
 /* Globals */
 
@@ -74,225 +56,9 @@ struct SubscribedGesture {
   float dl_distance_pct;
 };
 
+string g_gesture_string;
+
 vector<SubscribedGesture> g_subscribed_gestures;
-
-static vrpn_TRACKERCB g_last_report_0;  // last report for sensor 0
-static vrpn_TRACKERCB g_last_report_1;  // last report for sensor 1
-
-bool g_draw_gestures = false;
-
-stringstream g_gesture_string;
-
-time_point<system_clock> g_global_last_movement_time = system_clock::now();
-
-time_point<system_clock> g_sensor_0_last_movement_time = system_clock::now();
-time_point<system_clock> g_sensor_0_last_grouped_movement_time =
-    system_clock::now();
-
-time_point<system_clock> g_sensor_1_last_movement_time = system_clock::now();
-time_point<system_clock> g_sensor_1_last_grouped_movement_time =
-    system_clock::now();
-
-char g_last_sensor_0_letter = '_';
-char g_last_sensor_1_letter = '_';
-
-vrpn_float64 GetDeltaX(const vrpn_TRACKERCB& last_report,
-                       const vrpn_TRACKERCB& tracker) {
-  return (last_report.pos[1] - tracker.pos[1]);
-}
-
-vrpn_float64 GetDeltaY(const vrpn_TRACKERCB& last_report,
-                       const vrpn_TRACKERCB& tracker) {
-  return (tracker.pos[0] - last_report.pos[0]);
-}
-
-vrpn_float64 GetDeltaZ(const vrpn_TRACKERCB& last_report,
-                       const vrpn_TRACKERCB& tracker) {
-  return (tracker.pos[2] - last_report.pos[2]);
-}
-
-double GetMovementThetaInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,
-                                 vrpn_float64 delta_z) {
-  double movementTheta = acos(
-      delta_z
-          / (sqrt(pow(delta_x, 2.0) + pow(delta_y, 2.0) + pow(delta_z, 2.0))))
-      * (180.0 / M_PI);
-  return fmod(movementTheta + 360.0, 360.0);  // Always returns a positive angle
-}
-
-double GetMovementPhiInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,
-                               double theta) {
-  int snap_theta = SnapAngle(theta);
-  if (snap_theta == 0 || snap_theta == 180) {
-    return 0;  // Phi becomes meaningless at the north and south poles, so we default it to 0.
-  }
-
-  double movementPhi = atan2(delta_y, delta_x) * (180.0 / M_PI);
-  return fmod(movementPhi + 360.0, 360.0);  // Always returns a positive angle
-}
-
-/* Snaps angle to 45 degree intervals */
-int SnapAngle(double aAngle) {
-  return 45 * (round(aAngle / 45.0));
-}
-
-vrpn_float64 GetDistanceSquared(const vrpn_TRACKERCB& last_report,
-                                const vrpn_TRACKERCB& tracker) {
-  return (last_report.pos[0] - tracker.pos[0])
-      * (last_report.pos[0] - tracker.pos[0])
-      + (last_report.pos[1] - tracker.pos[1])
-          * (last_report.pos[1] - tracker.pos[1])
-      + (last_report.pos[2] - tracker.pos[2])
-          * (last_report.pos[2] - tracker.pos[2]);
-}
-
-#define abs(x) ((x)<0 ? -(x) : (x))
-
-void PrintSensorCoordinates(const vrpn_TRACKERCB& last_report,
-                            const vrpn_TRACKERCB& tracker) {
-  printf("\nSensor %d is now at (%g,%g,%g)\n", tracker.sensor, tracker.pos[0],
-         tracker.pos[1], tracker.pos[2]);
-  printf("old/new X: %g, %g\n", last_report.pos[1], tracker.pos[1]);
-  printf("old/new Y: %g, %g\n", last_report.pos[0], tracker.pos[0]);
-  printf("old/new Z: %g, %g\n", last_report.pos[2], tracker.pos[2]);
-}
-
-char GetCurrentLetter(int snap_phi, int snap_theta) {
-  struct SphericalCoordinates current_coordinates;
-  current_coordinates.phi = snap_phi;
-  current_coordinates.theta = snap_theta;
-  return coordinates_letter[current_coordinates];
-}
-
-int GetMillisecondsUntilNow(const time_point<system_clock> &last_time) {
-  time_point<system_clock> now = system_clock::now();
-  return duration<double, std::milli>(now - last_time).count();
-}
-
-int GetMillisecondsSinceTrackerTime(const vrpn_TRACKERCB& tracker,
-                                    const time_point<system_clock> &last_time) {
-  time_point<system_clock> current_movement_time(
-      seconds(tracker.msg_time.tv_sec)
-          + microseconds(tracker.msg_time.tv_usec));
-  return duration<double, std::milli>(current_movement_time - last_time).count();
-}
-
-void UpdateTimePoint(time_point<system_clock>& time_to_update,
-                     time_point<system_clock> new_time) {
-  time_to_update = new_time;
-}
-
-bool GesturePaused() {
-  return (GetMillisecondsUntilNow(g_global_last_movement_time)
-      > GESTURE_PAUSE_TIME_MILLISECONDS);
-}
-
-void ResetGestureString() {
-  g_gesture_string.str("");
-}
-
-void CalculateMovementDeltas(const vrpn_TRACKERCB& tracker,
-                             const vrpn_TRACKERCB* last_report,
-                             vrpn_float64& delta_x, vrpn_float64& delta_y,
-                             vrpn_float64& delta_z) {
-  delta_x = GetDeltaX(*last_report, tracker);
-  delta_y = GetDeltaY(*last_report, tracker);
-  delta_z = GetDeltaZ(*last_report, tracker);
-  //printf("X delta: %g, Y delta: %g, Z delta: %g\n", deltaX, deltaY, deltaZ);
-}
-
-void CalculateMovementAngles(double& theta, double& phi, int& snap_theta,
-                             int& snap_phi, vrpn_float64 delta_x,
-                             vrpn_float64 delta_y, vrpn_float64 delta_z) {
-  theta = GetMovementThetaInDegrees(delta_x, delta_y, delta_z);
-  snap_theta = SnapAngle(theta);
-  phi = GetMovementPhiInDegrees(delta_x, delta_y, theta);
-  snap_phi = SnapAngle(phi);
-}
-
-void MoveHeadToBeginningOfLetterPair() {
-  if (g_gesture_string.str().size() >= 3) {
-    g_gesture_string.seekp(-3, g_gesture_string.cur);
-  }
-}
-
-time_point<system_clock> GetCurrentMovementTime(const vrpn_TRACKERCB& tracker) {
-  time_point<system_clock> current_movement_time(
-      seconds(tracker.msg_time.tv_sec)
-          + microseconds(tracker.msg_time.tv_usec));
-  return current_movement_time;
-}
-
-void UpdateGestureString(const vrpn_TRACKERCB& tracker, const int snap_theta,
-                         const int snap_phi) {
-  int time_since_sensor_0_last_movement = 0;
-  int time_since_sensor_1_last_movement = 0;
-  char currentLetter = GetCurrentLetter(snap_phi, snap_theta);
-
-  if (tracker.sensor == 0) {
-    g_last_sensor_0_letter = currentLetter;
-    time_since_sensor_1_last_movement = GetMillisecondsSinceTrackerTime(
-        tracker, g_sensor_1_last_movement_time);
-
-    /*
-     * If sensor 1 reported new movements since the last time it was grouped,
-     * and if it moved not too long ago, group its letter with sensor 0's.
-     */
-    if ((g_sensor_1_last_grouped_movement_time != g_sensor_1_last_movement_time)
-        && (time_since_sensor_1_last_movement
-            < GESTURE_GROUPING_TIME_MILLISECONDS)) {
-      //printf("S0: Grouping with previous S1. Current: %c, last: %c\n", currentLetter, last_sensor_1_letter);
-      g_sensor_0_last_grouped_movement_time = GetCurrentMovementTime(tracker);
-      g_sensor_1_last_grouped_movement_time = g_sensor_1_last_movement_time;
-      MoveHeadToBeginningOfLetterPair();
-      g_gesture_string << currentLetter << g_last_sensor_1_letter;
-    } else {
-      //printf("S0 ELSE. GroupingT=MovementT?: %i, tSS1: %i\n", sensor_1_last_grouped_movement_time == sensor_1_last_movement_time, time_since_sensor_1);
-      g_last_sensor_1_letter = '_';
-      g_gesture_string << currentLetter << g_last_sensor_1_letter;
-    }
-  } else {
-    g_last_sensor_1_letter = currentLetter;
-    time_since_sensor_0_last_movement = GetMillisecondsSinceTrackerTime(
-        tracker, g_sensor_0_last_movement_time);
-
-    /*
-     * If sensor 0 reported new movements since the last time it was grouped,
-     * and if it moved not too long ago, group its letter with sensor 1's.
-     */
-    if ((g_sensor_0_last_grouped_movement_time != g_sensor_0_last_movement_time)
-        && (time_since_sensor_0_last_movement
-            < GESTURE_GROUPING_TIME_MILLISECONDS)) {
-      //printf("S1: Grouping with previous S0. Current: %c, last: %c\n", currentLetter, last_sensor_0_letter);
-      g_sensor_0_last_grouped_movement_time = g_sensor_0_last_movement_time;
-      g_sensor_1_last_grouped_movement_time = GetCurrentMovementTime(tracker);
-      MoveHeadToBeginningOfLetterPair();
-      g_gesture_string << g_last_sensor_0_letter << currentLetter;
-    } else {
-      //printf("S1 ELSE. GroupingT=MovementT?: %i, tSS0: %i\n", sensor_0_last_grouped_movement_time == sensor_0_last_movement_time, time_since_sensor_0);
-      g_last_sensor_0_letter = '_';
-      g_gesture_string << g_last_sensor_0_letter << currentLetter;
-    }
-  }
-  g_gesture_string << ".";
-
-  cout << "Gesture: " << g_gesture_string.str() << endl;
-  cout << endl;
-}
-
-void UpdateTimers(const vrpn_TRACKERCB& tracker) {
-  time_point<system_clock> current_movement_time = GetCurrentMovementTime(
-      tracker);
-  UpdateTimePoint(g_global_last_movement_time, current_movement_time);
-
-  if (tracker.sensor == 0) {
-    UpdateTimePoint(g_sensor_0_last_movement_time, current_movement_time);
-  } else {
-    UpdateTimePoint(g_sensor_1_last_movement_time, current_movement_time);
-  }
-
-  //printf("Updated. GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
-}
 
 #define d(i,j) dd[(i) * (m+2) + (j) ]
 #define min(x,y) ((x) < (y) ? (x) : (y))
@@ -377,7 +143,7 @@ bool GestureEntryLessThan(SubscribedGesture i, SubscribedGesture j) {
 
 void UpdateSubscribedGestureDistance(
     struct SubscribedGesture& subscribed_gesture) {
-  const string input_gesture = g_gesture_string.str();
+  const string input_gesture = g_gesture_string;
 
   int gesture_length_least_common_multiple = boost::math::lcm(
       input_gesture.length(), subscribed_gesture.lager.length());
@@ -417,7 +183,7 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture) {
 
   cout << "Drawing input gesture..." << endl;
 
-  viewer_command << viewer_command_prefix << g_gesture_string.str()
+  viewer_command << viewer_command_prefix << g_gesture_string
                  << hide_output_suffix;
   system(viewer_command.str().c_str());
 
@@ -431,7 +197,7 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture) {
 
 bool IsSingleSensorGesture() {
   vector<string> movement_pairs;
-  TokenizeString(g_gesture_string.str(), movement_pairs, ".");
+  TokenizeString(g_gesture_string, movement_pairs, ".");
   bool sensor_0_moved = false;
   bool sensor_1_moved = false;
 
@@ -454,6 +220,11 @@ bool IsSingleSensorGesture() {
   }
 
   return (!sensor_0_moved || !sensor_1_moved);
+}
+
+int GetMillisecondsUntilNow(const time_point<system_clock> &last_time) {
+  time_point<system_clock> now = system_clock::now();
+  return duration<double, std::milli>(now - last_time).count();
 }
 
 void RecognizeGesture(bool use_gestures_file, bool draw_gestures) {
@@ -528,64 +299,6 @@ void RecognizeGesture(bool use_gestures_file, bool draw_gestures) {
  *
  *****************************************************************************/
 
-void VRPN_CALLBACK handle_tracker_change(void *user_data,
-                                         const vrpn_TRACKERCB tracker) {
-  vrpn_TRACKERCB *last_report;  // keep track of the current sensor's last report
-  vrpn_float64 deltaX, deltaY, deltaZ;
-  double theta, phi;
-  int snap_theta, snap_phi;
-  static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
-
-  if (!g_draw_gestures) {
-    return;
-  }
-
-  if (tracker.sensor == 0) {
-    last_report = &g_last_report_0;
-  } else {
-    last_report = &g_last_report_1;
-  }
-
-  if (GetDistanceSquared(*last_report, tracker) > dist_interval_sq) {
-    printf("Update for sensor: %i at time: %ld.%06ld\n", tracker.sensor,
-           tracker.msg_time.tv_sec, tracker.msg_time.tv_usec);
-    //printf("GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
-    //printSensorCoordinates(last_report, tracker);
-
-    UpdateTimers(tracker);
-
-    CalculateMovementDeltas(tracker, last_report, deltaX, deltaY, deltaZ);
-    CalculateMovementAngles(theta, phi, snap_theta, snap_phi, deltaX, deltaY,
-                            deltaZ);
-
-    UpdateGestureString(tracker, snap_theta, snap_phi);
-
-    *last_report = tracker;
-  }
-}
-
-void VRPN_CALLBACK handle_button_change(void *user_data,
-                                        const vrpn_BUTTONCB button) {
-  if (button.state == 1) {
-    g_draw_gestures = true;
-  } else {
-    g_draw_gestures = false;
-  }
-}
-
-void VRPN_CALLBACK dummy_handle_tracker_change(void *user_data,
-                                               const vrpn_TRACKERCB tracker) {
-  //printf("DUMMY CALLED for sensor %i!\n", tracker.sensor);
-  if (tracker.sensor == 0) {
-    g_last_report_0 = tracker;
-  } else {
-    g_last_report_1 = tracker;
-  }
-
-  int *num_reports_received = (int *) user_data;
-  *num_reports_received = *num_reports_received + 1;
-}
-
 bool DetermineButtonUse(const int argc, const char** argv) {
   bool use_buttons;
 
@@ -593,15 +306,9 @@ bool DetermineButtonUse(const int argc, const char** argv) {
       && (std::string(argv[1]).find("--use_buttons") != std::string::npos)) {
     cout << "Gesture detection will be active while pressing a button." << endl;
     use_buttons = true;
-
-    // Detection is off by default, unless the button handler enables it
-    g_draw_gestures = false;
   } else {
     cout << "Gesture detection will be active at all times." << endl;
     use_buttons = false;
-
-    // Always draw gestures regardless of buttons
-    g_draw_gestures = true;
   }
 
   return use_buttons;
@@ -611,7 +318,7 @@ bool DetermineGesturesFileUse(const int argc, const char** argv) {
   bool use_gestures_file;
 
   if ((argc > 1)
-      && (std::string(argv[1]).find("--use_gestures_files") != std::string::npos)) {
+      && (std::string(argv[1]).find("--use_gestures_file") != std::string::npos)) {
     cout << "Comparing input to gestures in a file." << endl;
     use_gestures_file = true;
   } else {
@@ -637,33 +344,6 @@ bool DetermineGestureDrawing(const int argc, const char** argv) {
   return draw_gestures;
 }
 
-void InitializeTrackers(vrpn_Tracker_Remote*& tracker,
-                        vrpn_Button_Remote*& button,
-                        struct timespec& sleep_interval, bool &use_buttons) {
-  int num_reports_received = 0;
-
-  // Initialize the tracker handler
-  tracker = new vrpn_Tracker_Remote(TRACKER_SERVER);
-  tracker->register_change_handler(&num_reports_received,
-                                   dummy_handle_tracker_change);
-
-  // Skip the first reports, which are spurious (sensor initialization)
-  while (num_reports_received != 2) {
-    nanosleep(&sleep_interval, NULL);
-    tracker->mainloop();
-  }
-  // Finish initializing the tracker
-  tracker->unregister_change_handler(&num_reports_received,
-                                     dummy_handle_tracker_change);
-  tracker->register_change_handler(NULL, handle_tracker_change);
-
-  if (use_buttons) {
-    // Initialize the button handler
-    button = new vrpn_Button_Remote(BUTTON_SERVER);
-    button->register_change_handler(NULL, handle_button_change);
-  }
-}
-
 void AddSubscribedGestures() {
   while (true) {
     GestureSubscriptionMessage message = GetGestureSubscriptionMessage();
@@ -686,7 +366,7 @@ int GetSubscribedGesturesFromFile() {
   ifstream gestures_file;
   string current_line;
 
-  cout << "Current gesture" << endl << "\t" << g_gesture_string.str() << endl
+  cout << "Current gesture" << endl << "\t" << g_gesture_string << endl
        << endl;
 
   gestures_file.open("gestures.dat");
@@ -709,14 +389,13 @@ int GetSubscribedGesturesFromFile() {
 }
 
 int main(int argc, const char *argv[]) {
-  printf("Generates strings for movement of tracker %s\n\n", TRACKER_SERVER);
+  //printf("Generates strings for movement of tracker %s\n\n", TRACKER_SERVER);
 
-  vrpn_Tracker_Remote *tracker;
-  vrpn_Button_Remote *button;
   struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
   bool draw_gestures = DetermineGestureDrawing(argc, argv);
+  LagerConverter* lager_converter = LagerConverter::Instance();
 
   if (use_gestures_file) {
     GetSubscribedGesturesFromFile();
@@ -725,47 +404,17 @@ int main(int argc, const char *argv[]) {
     boost::thread subscription_updater(AddSubscribedGestures);
   }
 
-  InitializeTrackers(tracker, button, sleep_interval, use_buttons);
-
   cout << " ________________________________ " << endl;
   cout << "|                                |" << endl;
   cout << "|       COLLECTING DATA...       |" << endl;
   cout << "|________________________________|" << endl;
   cout << "                                  " << endl;
 
-  // Main loop
-  while (true) {
+  lager_converter->SetUseButtons(use_buttons);
+  lager_converter->Start();
 
-    if (use_buttons) {
-      // Let button handler receive button status from the remote button
-      button->mainloop();
-    }
-
-    // Let tracker handler receive position information from the remote tracker
-    tracker->mainloop();
-
-    // If gesture buildup pauses, attempt to recognize it
-    int gesture_string_length = g_gesture_string.str().length();
-    if (GesturePaused() && gesture_string_length > 0) {
-      /*
-       * Only try to recognize gestures with more than one movement pair.
-       * This reduces spurious recognitions from inadvertent movements.
-       */
-      if (gesture_string_length > 3) {
-        RecognizeGesture(use_gestures_file, draw_gestures);
-      }
-
-      cout << " ________________________________ " << endl;
-      cout << "|                                |" << endl;
-      cout << "|       COLLECTING DATA...       |" << endl;
-      cout << "|________________________________|" << endl;
-      cout << "                                  " << endl;
-
-      ResetGestureString();
-    }
-
-    // Sleep so we don't take up 100% of CPU
-    nanosleep(&sleep_interval, NULL);
+  while(true) {
+    g_gesture_string = lager_converter->BlockingGetLagerString();
+    RecognizeGesture(use_gestures_file, draw_gestures);
   }
-
 } /* main */
