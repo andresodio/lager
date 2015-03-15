@@ -1,6 +1,6 @@
 # CMake entry point
 cmake_minimum_required (VERSION 2.6)
-project (Tutorials)
+project (lager_viewer)
 
 find_package(OpenGL REQUIRED)
 
@@ -40,12 +40,9 @@ include(CheckCXXCompilerFlag)
 	endif()
 
 include_directories(
-	#external/AntTweakBar-1.16/include/
 	external/glfw-3.0.3/include/GLFW/
 	external/glm-0.9.4.0/
 	external/glew-1.9.0/include/
-	#external/assimp-3.0.1270/include/
-	#external/bullet-2.81-rev2613/src/
 	../common/
 	.
 )
@@ -98,3 +95,6 @@ elseif (${CMAKE_GENERATOR} MATCHES "Xcode" )
 
 endif (NOT ${CMAKE_GENERATOR} MATCHES "Xcode" )
 
+install (TARGETS lager_viewer DESTINATION bin)
+install (FILES src/TransformVertexShader.vertexshader DESTINATION include)
+install (FILES src/TextureFragmentShader.fragmentshader DESTINATION include)

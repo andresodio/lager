@@ -210,8 +210,8 @@ int main(int argc, char *argv[]) {
   glEnable(GL_CULL_FACE);
 
   // Create and compile our GLSL program from the shaders
-  GLuint program_id = LoadShaders("TransformVertexShader.vertexshader",
-                                  "TextureFragmentShader.fragmentshader");
+  GLuint program_id = LoadShaders("/usr/local/include/TransformVertexShader.vertexshader",
+                                  "/usr/local/include/TextureFragmentShader.fragmentshader");
 
   // Get a handle for our "MVP" uniform
   GLuint matrix_id = glGetUniformLocation(program_id, "MVP");
