@@ -80,7 +80,7 @@ void PrintOptionsMenu() {
   cout << "2. Add gesture with lager string" << endl;
   cout << "3. Add gesture with sensor" << endl;
   cout << "4. Show gesture" << endl;
-  cout << "5. Redefine gesture" << endl;
+  cout << "5. Edit gesture" << endl;
   cout << "6. Delete gesture" << endl;
   cout << endl;
   cout << "7. Quit" << endl;
@@ -101,7 +101,14 @@ void AddGestureWithLager(vector<GestureEntry>& gestures) {
   GestureEntry new_gesture;
 
   cout << "Enter gesture name (no spaces): ";
-  cin >> new_gesture.name;
+  getline(cin, new_gesture.name);
+
+  while (new_gesture.name.find(" ") != std::string::npos) {
+    cout << "Error: Space detected. Please try again." << endl;
+    cout << "Enter gesture name (no spaces): ";
+    getline(cin, new_gesture.name);
+  }
+
   cout << "Enter gesture lager: ";
   std::getline(cin, new_gesture.lager);
 
@@ -131,6 +138,44 @@ void AddGestureWithSensor(vector<GestureEntry>& gestures) {
   cout << "Gesture lager: " << new_gesture.lager << endl << endl;
 
   gestures.push_back(new_gesture);
+}
+
+void ShowGesture(vector<GestureEntry>& gestures, int gesture_number) {
+  GestureEntry& gesture = gestures[gesture_number - 1];
+
+  cout << "Gesture name: " << gesture.name << endl;
+  cout << "Gesture lager: " << gesture.lager << endl;
+
+  stringstream viewer_command;
+  string viewer_command_prefix =
+      "lager_viewer --gesture ";
+  string hide_output_suffix = " > /dev/null";
+
+  cout << "Drawing gesture..." << endl;
+
+  viewer_command << viewer_command_prefix << gesture.lager
+                 << hide_output_suffix;
+
+  system(viewer_command.str().c_str());
+}
+
+void EditGesture(vector<GestureEntry>& gestures, int gesture_number) {
+  GestureEntry& gesture = gestures[gesture_number - 1];
+  string input;
+
+  cout << "Old gesture name: " << gesture.name << endl;
+  cout << "New gesture name (blank to leave unchanged): ";
+  getline(cin, input);
+  if (input.compare(string("")) != 0) {
+    gesture.name = input;
+  }
+
+  cout << "Old gesture lager: " << gesture.lager << endl;
+  cout << "New gesture lager (blank to leave unchanged): ";
+  getline(cin, input);
+  if (input.compare(string("")) != 0) {
+    gesture.lager = input;
+  }
 }
 
 void DeleteGesture(vector<GestureEntry>& gestures, int gesture_number) {
@@ -174,9 +219,19 @@ int main(int argc, const char *argv[]) {
           AddGestureWithSensor(gestures);
           cout << endl;
           break;
+        case 4:
+          cout << "Enter number of gesture to show: ";
+          getline(cin, input);
+          ShowGesture(gestures, atoi(input.c_str()));
+          break;
+        case 5:
+          cout << "Enter number of gesture to edit: ";
+          getline(cin, input);
+          EditGesture(gestures, atoi(input.c_str()));
+          break;
         case 6:
           cout << "Enter number of gesture to delete: ";
-          cin >> input;
+          getline(cin, input);
           DeleteGesture(gestures, atoi(input.c_str()));
           break;
         case 7:
