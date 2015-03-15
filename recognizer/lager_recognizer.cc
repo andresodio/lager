@@ -178,7 +178,7 @@ void UpdateSubscribedGestureDistances() {
 void DrawMatchingGestures(const SubscribedGesture& closest_gesture) {
   stringstream viewer_command;
   string viewer_command_prefix =
-      "cd ~/lager/viewer/src/ && ../build/lager_viewer --gesture ";
+      "lager_viewer --gesture ";
   string hide_output_suffix = " > /dev/null";
 
   cout << "Drawing input gesture..." << endl;
