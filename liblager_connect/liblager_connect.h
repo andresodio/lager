@@ -75,6 +75,7 @@ class GestureSubscriptionMessage {
 void CreateGestureSubscriptionQueue();
 GestureSubscriptionMessage GetGestureSubscriptionMessage();
 void SendGestureSubscriptionMessage(string gesture_name, string gesture_lager);
+void SubscribeToGesturesInFile(string file_name);
 
 DetectedGestureMessage GetDetectedGestureMessage();
 void SendDetectedGestureMessage(string gesture_name, pid_t destination_pid);

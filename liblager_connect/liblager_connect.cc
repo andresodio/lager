@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -13,6 +14,8 @@
 using namespace boost::interprocess;
 using std::cout;
 using std::endl;
+using std::getline;
+using std::ifstream;
 using std::ostringstream;
 using std::string;
 using std::stringstream;
@@ -75,6 +78,30 @@ void SendGestureSubscriptionMessage(string gesture_name, string gesture_lager) {
 
     std::string serialized_string(output_stringstream.str());
     mq.send(serialized_string.data(), serialized_string.size(), 0);
+  } catch (interprocess_exception &ex) {
+    std::cerr << ex.what() << endl;
+  }
+}
+
+void SubscribeToGesturesInFile(string file_name) {
+  try {
+    ifstream gestures_file;
+    string current_line;
+
+    gestures_file.open(file_name.c_str());
+    if (!gestures_file.is_open()) {
+      cout << "ERROR: Unable to open file: " << file_name << endl;
+      return;
+    }
+
+    while (getline(gestures_file, current_line)) {
+      string name, lager;
+      stringstream ss(current_line);
+      ss >> name >> lager;
+
+      SendGestureSubscriptionMessage(name, lager);
+    }
+
   } catch (interprocess_exception &ex) {
     std::cerr << ex.what() << endl;
   }
