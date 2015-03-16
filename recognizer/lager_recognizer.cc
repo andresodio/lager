@@ -303,12 +303,12 @@ bool DetermineButtonUse(const int argc, const char** argv) {
   bool use_buttons;
 
   if ((argc > 1)
-      && (std::string(argv[1]).find("--use_buttons") != std::string::npos)) {
-    cout << "Gesture detection will be active while pressing a button." << endl;
-    use_buttons = true;
-  } else {
+      && (std::string(argv[1]).find("--no_buttons") != std::string::npos)) {
     cout << "Gesture detection will be active at all times." << endl;
     use_buttons = false;
+  } else {
+    cout << "Gesture detection will be active while pressing a button." << endl;
+    use_buttons = true;
   }
 
   return use_buttons;
