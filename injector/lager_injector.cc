@@ -143,59 +143,33 @@ void RefreshTab(Display* display) {
   SendKey(display, XK_F5, 0);
 }
 
-void RegisterGestures() {
-  SendGestureSubscriptionMessage(
-      "Open Chrome",
-      "_n._s._s._s._s._x._r._l._d._x._e._k._q._q._p._p._p._p._p._p.");
-  SendGestureSubscriptionMessage(
-      "New tab",
-      "_p._p._p._p._p._p._p._p._p._p._p._p._s._s._s._s._s._s._e._e._e._e._e._e._e._e._e.");
-  SendGestureSubscriptionMessage(
-      "Open CNN",
-      "_s._s._x._x._x._e._k._k._q._q._p._p._p._p._a._a._a._a._a._a._o._q._q._k._e._k._k._e._e._k._a._a._a._a._a._a._a._p._q._q._q._e._q._e._e._e._u._a._a._a._a._a.");
-  SendGestureSubscriptionMessage(
-      "Open Google",
-      "_z._s._s._x._r._x._x._e._q._q._q._p._p._p._o._a._t._s._s._s.");
-  SendGestureSubscriptionMessage(
-      "Close tab",
-      "_r._r._r._r._r._r._r._r._r._r._r._r._r._r._a._a._a._a._a._a._a._a._a._a._q._q._q._q._q._q._q._q._q._q._q._q._q.");
-  SendGestureSubscriptionMessage(
-      "Zoom in",
-      "sp.sp.sp.sp.sp.sp.sp.sp.");
-  SendGestureSubscriptionMessage(
-      "Zoom out",
-      "ps.ps.ps.ps.ps.ps.ps.ps.");
-  SendGestureSubscriptionMessage(
-      "Refresh tab",
-      "_t._a._u._o._o._o._p._p._q._k._k._e._x._x._x._s._s._t._t._n._a.");
-}
-
 int main() {
   Display* display = XOpenDisplay(NULL);
   string gesture_name;
 
-  RegisterGestures();
+  string gestures_file_name;
+  SubscribeToGesturesInFile(string(getenv("HOME")) + "/.lager/injector/gestures.dat");
 
   while (true) {
     gesture_name = GetDetectedGestureMessage().get_gesture_name();
     cout << "Injector: Received message for gesture \"" << gesture_name << "\""
         << endl;
 
-    if (gesture_name.compare("Open Chrome") == 0) {
+    if (gesture_name.compare("OpenChrome") == 0) {
       OpenChrome(display);
-    } else if (gesture_name.compare("New tab") == 0) {
+    } else if (gesture_name.compare("NewTab") == 0) {
       OpenNewTab(display);
-    } else if (gesture_name.compare("Open CNN") == 0) {
+    } else if (gesture_name.compare("OpenCNN") == 0) {
       OpenCnn(display);
-    } else if (gesture_name.compare("Open Google") == 0) {
+    } else if (gesture_name.compare("OpenGoogle") == 0) {
       OpenGoogle(display);
-    } else if (gesture_name.compare("Close tab") == 0) {
+    } else if (gesture_name.compare("CloseTab") == 0) {
       CloseTab(display);
-    } else if (gesture_name.compare("Zoom in") == 0) {
+    } else if (gesture_name.compare("ZoomIn") == 0) {
       ZoomIn(display);
-    } else if (gesture_name.compare("Zoom out") == 0) {
+    } else if (gesture_name.compare("ZoomOut") == 0) {
       ZoomOut(display);
-    } else if (gesture_name.compare("Refresh tab") == 0) {
+    } else if (gesture_name.compare("RefreshTab") == 0) {
       RefreshTab(display);
     } else {
       cout << "Error: Received unexpected gesture: \"" << gesture_name << "\""
