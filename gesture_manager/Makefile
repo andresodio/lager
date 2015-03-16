@@ -10,3 +10,9 @@ lager_gesture_manager: lager_gesture_manager.cc
 
 clean:
 	rm -f build/*
+
+install:
+	cp ${BUILD_DIR}/lager_gesture_manager /usr/local/bin/
+
+remove:
+	rm /usr/local/bin/lager_gesture_manager
