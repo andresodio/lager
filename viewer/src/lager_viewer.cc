@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <time.h> // for nanosleep
 #include <cstring>
 
 #include "letter_coordinates.h"
@@ -171,6 +172,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  struct timespec sleep_interval = { 0, 10000000 }; // 10 ms
+
   glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -278,6 +281,9 @@ int main(int argc, char *argv[]) {
                sensor_1_color_buffer_data, GL_STATIC_DRAW);
 
   do {
+	// Don't hog the CPU
+    nanosleep(&sleep_interval, NULL);
+
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -346,7 +352,6 @@ int main(int argc, char *argv[]) {
     // Swap buffers
     glfwSwapBuffers(g_window);
     glfwPollEvents();
-
   }  // Check if the ESC key was pressed or the window was closed
   while (glfwGetKey(g_window, GLFW_KEY_ESCAPE) != GLFW_PRESS
       && glfwWindowShouldClose(g_window) == 0);
