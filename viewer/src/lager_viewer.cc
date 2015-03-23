@@ -107,7 +107,7 @@ void PopulateSensorVertexBuffers(int sensor_index,
     sensor_vertex_buffer_data[j + 3] = temp_coordinates[0];
     sensor_vertex_buffer_data[j + 4] = temp_coordinates[1];
     sensor_vertex_buffer_data[j + 5] = temp_coordinates[2];
-    //printf("vertex[%i, %i, %i] = {%f, %f, %f}\n", j+3, j+4, j+5, tempCoordinates[0], tempCoordinates[1], temp_coordinates[2]);
+    //printf("vertex[%i, %i, %i] = {%f, %f, %f}\n", j+3, j+4, j+5, temp_coordinates[0], temp_coordinates[1], temp_coordinates[2]);
   }
 }
 
