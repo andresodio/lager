@@ -1,7 +1,6 @@
 // phan_client.C - simplest example: generates a flat horizontal plane
 
 #include <stdio.h>    // for printf, NULL
-#include <time.h>     // for nanosleep
 #include <algorithm>  // for std::min_element
 #include <iostream>   // for std::cout
 #include <string>
@@ -25,8 +24,6 @@
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0
 
-#define MAIN_SLEEP_INTERVAL_MICROSECONDS 1000 // 1ms
-#define MAIN_SLEEP_INTERVAL_MILLISECONDS MAIN_SLEEP_INTERVAL_MICROSECONDS/1000
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define GESTURE_GROUPING_TIME_MILLISECONDS 200
 #define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 20
@@ -391,7 +388,6 @@ int GetSubscribedGesturesFromFile() {
 int main(int argc, const char *argv[]) {
   //printf("Generates strings for movement of tracker %s\n\n", TRACKER_SERVER);
 
-  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
   bool draw_gestures = DetermineGestureDrawing(argc, argv);
