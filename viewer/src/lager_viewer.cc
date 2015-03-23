@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 
   // Ensure we can capture the escape key being pressed below
   glfwSetInputMode(g_window, GLFW_STICKY_KEYS, GL_TRUE);
-  glfwSetCursorPos(g_window, 1280 / 2, 1024 / 2);
+  glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // White background
   glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
