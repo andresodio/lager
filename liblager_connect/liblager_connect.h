@@ -4,13 +4,24 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string>
-
 using std::string;
+#include <vector>
+using std::vector;
 
-#include <boost/thread/thread.hpp>
+#include <boost/serialization/access.hpp>
 #include <boost/serialization/string.hpp>
+#include <boost/thread/thread.hpp>
 
 #define MAX_DETECTED_GESTURE_MSG_SIZE 1000
+
+struct SubscribedGesture {
+  string name;
+  string lager;
+  string expanded_lager;
+  pid_t pid;
+  int distance;
+  float distance_pct;
+};
 
 /* Code structure based on http://stackoverflow.com/a/12349823 */
 class DetectedGestureMessage {
@@ -26,10 +37,9 @@ class DetectedGestureMessage {
   ;
 
  private:
-  string gesture_name_;
-
   friend class boost::serialization::access;
 
+  string gesture_name_;
   template<class Archive>
   void serialize(Archive & ar, const unsigned int version) {
     ar & gesture_name_;
@@ -73,6 +83,7 @@ class GestureSubscriptionMessage {
 };
 
 void CreateGestureSubscriptionQueue();
+void AddSubscribedGestures(vector<SubscribedGesture>* subscribed_gestures);
 GestureSubscriptionMessage GetGestureSubscriptionMessage();
 void SendGestureSubscriptionMessage(string gesture_name, string gesture_lager);
 void SubscribeToGesturesInFile(string file_name);

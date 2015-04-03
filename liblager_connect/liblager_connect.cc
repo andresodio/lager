@@ -34,6 +34,24 @@ void CreateGestureSubscriptionQueue() {
   }
 }
 
+void AddSubscribedGestures(vector<SubscribedGesture>* subscribed_gestures) {
+  while (true) {
+    GestureSubscriptionMessage message = GetGestureSubscriptionMessage();
+
+    cout << "Adding subscription..." << endl;
+    cout << endl;
+    cout << "Name: \"" << message.gesture_name() << "\"" << endl;
+    cout << "Lager: \"" << message.gesture_lager() << endl;
+    cout << endl;
+
+    SubscribedGesture subscription;
+    subscription.name = message.gesture_name();
+    subscription.lager = message.gesture_lager();
+    subscription.pid = message.pid();
+    subscribed_gestures->push_back(subscription);
+  }
+}
+
 /* Code structure taken from http://stackoverflow.com/a/12349823 */
 GestureSubscriptionMessage GetGestureSubscriptionMessage() {
   GestureSubscriptionMessage message;

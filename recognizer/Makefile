@@ -62,9 +62,9 @@ ifdef PBASE_ROOT
 endif
 
 CC := g++
-ARCH_LIBS := -lpthread -lquat -lm -lrt
+ARCH_LIBS := -lpthread
 BOOST_LIBS := -lboost_system -lboost_thread -lboost_serialization
-LAGER_LIBS := -llager_connect -llager_convert
+LAGER_LIBS := -llager_connect -llager_convert -llager_recognize
 
 ifeq ($(HW_OS),pc_linux)
   CC := g++
