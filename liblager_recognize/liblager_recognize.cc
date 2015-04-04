@@ -7,28 +7,22 @@
 
 #include <algorithm>  // for std::min_element
 using std::min_element;
-#include <string>
-using std::stringstream;
-#include <time.h>     // for nanosleep
-
-//#include "spherical_coordinates.h"
-//#include "coordinates_letter.h"
-#include "string_tokenizer.h"
-
-#include "liblager_recognize.h"
-#include "liblager_connect.h"
-
 #include <boost/math/common_factor.hpp>
-
-using std::cout;
-using std::endl;
-using std::string;
 #include <chrono>
 using std::chrono::duration;
 using std::chrono::microseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
 using std::chrono::time_point;
+#include <iostream>
+using std::cout;
+using std::endl;
+using std::string;
+using std::stringstream;
+
+#include "liblager_connect.h"
+#include "liblager_recognize.h"
+#include "string_tokenizer.h"
 
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define GESTURE_GROUPING_TIME_MILLISECONDS 200
