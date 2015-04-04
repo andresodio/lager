@@ -44,19 +44,10 @@ LagerRecognizer* LagerRecognizer::Instance(vector<struct SubscribedGesture>* sub
 #define min3(a,b,c) ((a)< (b) ? min((a),(c)) : min((b),(c)))
 #define min4(a,b,c,d) ((a)< (b) ? min3((a),(c),(d)) : min3((b),(c),(d)))
 
-int DPrint(int* dd, int n, int m) {
-  int i, j;
-  for (i = 0; i < n + 2; i++) {
-    for (j = 0; j < m + 2; j++) {
-      printf("%02d ", d(i, j));
-    }
-    printf("\n");
-  }
-  printf("\n");
-  return 0;
-}
-
-int DlDist2(const char *s, const char* t, int n, int m) {
+/* Calculates the Damerau-Levenshtein distance between two strings.
+ * Based on implementation at: http://stackoverflow.com/a/10741694
+ */
+int DLDistance(const char *s, const char* t, int n, int m) {
   int *dd, *DA;
   int i, j, cost, k, i1, j1, DB;
   int infinity = n + m;
@@ -73,7 +64,6 @@ int DlDist2(const char *s, const char* t, int n, int m) {
     d(1,j+1)= j;
     d(0,j+1) = infinity;
   }
-  //DPrint(dd,n,m);
   for (k = 0; k < 256; k++)
     DA[k] = 0;
   for (i = 1; i < n + 1; i++) {
@@ -91,7 +81,6 @@ int DlDist2(const char *s, const char* t, int n, int m) {
           d(i1,j1) + (i-i1-1) + 1 + (j-j1-1));
     }
     DA[s[i - 1]] = i;
-    //dprint(dd,n,m);
   }
   cost = d(n + 1, m + 1);
   free(dd);
@@ -132,7 +121,7 @@ void LagerRecognizer::UpdateSubscribedGestureDistance(
   subscribed_gesture.expanded_lager = ExpandString(
       subscribed_gesture.lager, gesture_length_least_common_multiple);
 
-  subscribed_gesture.distance = DlDist2(
+  subscribed_gesture.distance = DLDistance(
       expanded_input_string.c_str(), subscribed_gesture.expanded_lager.c_str(),
       expanded_input_string.length(),
       subscribed_gesture.expanded_lager.length());
