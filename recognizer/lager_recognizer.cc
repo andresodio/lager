@@ -1,24 +1,19 @@
-// phan_client.C - simplest example: generates a flat horizontal plane
-
-#include <stdio.h>    // for printf, NULL
-#include <iostream>   // for std::cout
-#include <string>
-#include <vector>
-#include <fstream>
-#include <sstream>
-
 #include <boost/thread/thread.hpp>
+#include <iostream>
+using std::cout;
+using std::endl;
+#include <string>
+using std::string;
+#include <fstream>
+using std::ifstream;
+#include <sstream>
+using std::stringstream;
+#include <vector>
+using std::vector;
 
 #include "liblager_connect.h"
 #include "liblager_convert.h"
 #include "liblager_recognize.h"
-
-using std::cout;
-using std::endl;
-using std::ifstream;
-using std::string;
-using std::stringstream;
-using std::vector;
 
 /* Globals */
 vector<SubscribedGesture> g_subscribed_gestures;
@@ -118,8 +113,6 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gestu
 }
 
 int main(int argc, const char *argv[]) {
-  //printf("Generates strings for movement of tracker %s\n\n", TRACKER_SERVER);
-
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
   bool draw_gestures = DetermineGestureDrawing(argc, argv);
