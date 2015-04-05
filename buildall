@@ -16,7 +16,9 @@ function build_module {
         then
             cd $1
         else
+            mkdir -p $2
             cd $2
+            cmake ..
     fi
 
     make clean && make
