@@ -52,7 +52,6 @@ void AddSubscribedGestures(vector<SubscribedGesture>* subscribed_gestures) {
   }
 }
 
-/* Code structure taken from http://stackoverflow.com/a/12349823 */
 GestureSubscriptionMessage GetGestureSubscriptionMessage() {
   GestureSubscriptionMessage message;
 
