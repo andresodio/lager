@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# This script compiles and installs all LaGeR modules.
+# It then generates HTML documentation.
+
+function build_module {
+    echo " ----------------------"
+    printf "%*s\n" $(( (${#1} + 24) / 2)) "$1"
+    echo " ----------------------"
+    echo ""
+
+    echo "Compiling..."
+    echo ""
+
+    if [ -z "$2" ]
+        then
+            cd $1
+        else
+            cd $2
+    fi
+
+    make clean && make
+
+    echo ""
+
+    echo "Installing..."
+    echo ""
+
+    sudo make install
+
+    cd -
+    echo ""
+}
+
+function build_docs {
+    doxygen Doxyfile
+}
+
+build_module liblager_connect
+build_module liblager_convert
+build_module liblager_recognize
+
+build_module gesture_manager
+build_module injector
+build_module recognizer
+build_module viewer viewer/build
+
+build_docs
