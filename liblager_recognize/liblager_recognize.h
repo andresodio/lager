@@ -8,13 +8,13 @@
 #ifndef LIBLAGER_RECOGNIZE_H_
 #define LIBLAGER_RECOGNIZE_H_
 
+#include <chrono>
+using std::chrono::system_clock;
+using std::chrono::time_point;
 #include <string>
 using std::string;
 #include <vector>
 using std::vector;
-#include <chrono>
-using std::chrono::system_clock;
-using std::chrono::time_point;
 
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0
@@ -26,9 +26,6 @@ class LagerRecognizer {
 
   ~LagerRecognizer() {
   }
-
-  //void Start() {
-  //}
 
   struct SubscribedGesture RecognizeGesture(bool draw_gestures,
                                             string current_gesture,
