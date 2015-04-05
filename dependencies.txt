@@ -1,0 +1,47 @@
+/**
+ * Dependencies that need to be installed for lager to compile and run on
+ * an Ubuntu 14.04 or 14.10 machine.
+ */
+
+-----------------
+ Ubuntu Packages
+-----------------
+
+Install the missing packages:
+~$ sudo apt-get install cmake-curses-gui doxygen git libboost-all-dev libglew-dev libusb-1.0-0-dev libxrandr-dev libxt-dev libxtst-dev
+
+Make sure to accept all extra packages suggested by apt-get.
+
+-----------------
+      VRPN
+-----------------
+
+Clone the VRPN repository:
+~$ git clone https://github.com/vrpn/vrpn.git
+
+Go to the vrpn directory and download its submodules to allow compiling VRPN's local HIDAPI
+implementation:
+~$ cd vrpn
+~/vrpn$ git submodule init; git submodule update
+
+Then create a build directory within vrpn:
+~/vrpn$ mkdir build
+
+And configure its build via CMake:
+~/vrpn$ cd build
+~/vrpn/build$ ccmake ..
+
+While configuring CMake, enable the following:
+VRPN_USE_HID
+VRPN_USE_LOCAL_HIDAPI
+
+Next, compile and install VRPN:
+~/vrpn/build$ make && sudo make install
+
+Finally, edit the VRPN configuration file to enable support for your chosen sensor:
+~/vrpn/build$ sudo vi /usr/local/etc/vrpn.cfg
+
+For example, in order to enable the Razer Hydra (which is used by liblager_convert),
+uncomment these lines:
+#vrpn_Tracker_RazerHydra Tracker0
+#vrpn_Tracker_FilterOneEuro Filter0 *Tracker0  2  1.15 1.0 1.2  1.5 5.0 1.2
