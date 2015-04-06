@@ -8,7 +8,7 @@
 -----------------
 
 Install the missing packages:
-~$ sudo apt-get install cmake-curses-gui doxygen git libboost-all-dev libglew-dev libusb-1.0-0-dev libxrandr-dev libxt-dev libxtst-dev
+~$ sudo apt-get install cmake doxygen git libboost-all-dev libglew-dev libusb-1.0-0-dev libxrandr-dev libxt-dev libxtst-dev
 
 Make sure to accept all extra packages suggested by apt-get.
 
@@ -22,18 +22,14 @@ Clone the VRPN repository:
 Go to the vrpn directory and download its submodules to allow compiling VRPN's local HIDAPI
 implementation:
 ~$ cd vrpn
-~/vrpn$ git submodule init; git submodule update
+~/vrpn$ git submodule update --init
 
 Then create a build directory within vrpn:
 ~/vrpn$ mkdir build
 
 And configure its build via CMake:
 ~/vrpn$ cd build
-~/vrpn/build$ ccmake ..
-
-While configuring CMake, enable the following:
-VRPN_USE_HID
-VRPN_USE_LOCAL_HIDAPI
+~/vrpn/build$ cmake ..
 
 Next, compile and install VRPN:
 ~/vrpn/build$ make && sudo make install
