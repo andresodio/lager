@@ -38,6 +38,8 @@ function build_docs {
     doxygen Doxyfile
 }
 
+# Build the modules
+
 build_module liblager_connect
 build_module liblager_convert
 build_module liblager_recognize
@@ -47,4 +49,8 @@ build_module injector
 build_module recognizer
 build_module viewer viewer/build
 
+# Update the dynamic linker cache
+sudo ldconfig
+
+# Build the documentation
 build_docs
