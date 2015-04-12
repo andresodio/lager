@@ -354,12 +354,12 @@ void LagerConverter::ProcessSensorEvents() {
     // Let tracker handler receive position information from the remote tracker
     tracker_->mainloop();
 
-    // If gesture buildup pauses, attempt to recognize it
+    // If gesture buildup pauses, finish converting it
     int lager_string_length = lager_string_.str().length();
     if (GesturePaused() && lager_string_length > 0) {
       /*
-       * Only try to recognize gestures with more than one movement pair.
-       * This reduces spurious recognitions from inadvertent movements.
+       * Only try to convert gestures with more than one movement pair.
+       * This reduces spurious conversions from inadvertent movements.
        */
       if (lager_string_length > 3) {
         {
