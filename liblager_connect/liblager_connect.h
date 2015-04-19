@@ -66,7 +66,7 @@ class DetectedGestureMessage {
   }
 };
 
-/*
+/**
  * Encodes and serializes gesture subscription messages going from the
  * subscribers to the recognizer.
  *
