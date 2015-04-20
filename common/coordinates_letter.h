@@ -4,6 +4,11 @@
 #include "spherical_coordinates.h"
 #include <unordered_map>
 
+/**
+ * Unordered map from spherical coordinates to LaGeR literals.
+ * Coordinates are specified in terms of a theta (polar) angle and a phi
+ * (azimuthal) angle.
+ */
 std::unordered_map<struct SphericalCoordinates, char> coordinates_letter =
 	// Format: {{<THETA>, <PHI>}, '<LETTER>'}
 	// A is the top face (pole), Z is the bottom face (pole)
