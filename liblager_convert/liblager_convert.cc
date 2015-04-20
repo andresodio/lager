@@ -106,10 +106,10 @@ void LagerConverter::PrintSensorCoordinates(const vrpn_TRACKERCB& last_report,
   printf("old/new Z: %g, %g\n", last_report.pos[2], tracker.pos[2]);
 }
 
-char LagerConverter::GetCurrentLetter(int snap_phi, int snap_theta) {
+char LagerConverter::GetCurrentLetter(int snap_theta, int snap_phi) {
   struct SphericalCoordinates current_coordinates;
-  current_coordinates.phi = snap_phi;
   current_coordinates.theta = snap_theta;
+  current_coordinates.phi = snap_phi;
   return coordinates_letter[current_coordinates];
 }
 
@@ -184,7 +184,7 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
                                        const int snap_phi) {
   int time_since_sensor_0_last_movement = 0;
   int time_since_sensor_1_last_movement = 0;
-  char currentLetter = GetCurrentLetter(snap_phi, snap_theta);
+  char currentLetter = GetCurrentLetter(snap_theta, snap_phi);
 
   if (tracker.sensor == 0) {
     last_sensor_0_letter_ = currentLetter;

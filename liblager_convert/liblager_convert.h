@@ -294,10 +294,10 @@ class LagerConverter {
   void MoveHeadToBeginningOfLetterPair();
 
   /**
-   * Takes phi and theta spherical coordinates and returns the corresponding
+   * Takes theta and phi spherical coordinates and returns the corresponding
    * LaGeR symbol.
    */
-  char GetCurrentLetter(int snap_phi, int snap_theta);
+  char GetCurrentLetter(int snap_theta, int snap_phi);
 
   /**
    * Takes the current sensor data and the theta and phi spherical coordinates

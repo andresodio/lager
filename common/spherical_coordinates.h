@@ -11,12 +11,12 @@
  * http://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
  */
 struct SphericalCoordinates {
-	int phi;
 	int theta;
+  int phi;
 
 	bool operator==(const SphericalCoordinates &other) const
 	{
-		return (phi == other.phi && theta == other.theta);
+		return (theta == other.theta && phi == other.phi);
 	}
 };
 
@@ -38,9 +38,9 @@ namespace std {
 	   */
 		std::size_t operator()(const SphericalCoordinates& k) const
 		{
-			// Compute individual hash values for mPhi and mTheta
+			// Compute individual hash values for mTheta and mPhi
 			// and combine them using XOR and bit shifting:
-			return ((hash<int>()(k.phi) ^ (hash<int>()(k.theta) << 1)));
+			return ((hash<int>()(k.theta) ^ (hash<int>()(k.phi) << 1)));
 		}
 	};
 }
