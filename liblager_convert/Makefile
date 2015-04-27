@@ -2,7 +2,7 @@ INCLUDE_DIR=../common
 LIBDIR=/usr/local/lib/
 LDFLAGS=-L$(LIBDIR)
 ARCH_LIBS := -lpthread -lquat -lm -lrt
-LIBS=-lboost_thread-mt -lvrpn
+LIBS=-lboost_thread -lvrpn
 
 all: liblager_convert
 
