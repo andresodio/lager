@@ -16,6 +16,8 @@ using std::vector;
 #include "liblager_recognize.h"
 
 /* Globals */
+
+/// Global vector of SubscribedGestures
 vector<SubscribedGesture> g_subscribed_gestures;
 
 /*****************************************************************************
@@ -24,6 +26,11 @@ vector<SubscribedGesture> g_subscribed_gestures;
  *
  *****************************************************************************/
 
+/**
+ * Reads the program arguments and returns whether sensor buttons are going to
+ * be used to start/stop gesture detection, or whether buttons will be ignored
+ * and detection will be active at all times.
+ */
 bool DetermineButtonUse(const int argc, const char** argv) {
   bool use_buttons;
 
@@ -39,6 +46,11 @@ bool DetermineButtonUse(const int argc, const char** argv) {
   return use_buttons;
 }
 
+/**
+ * Reads the program arguments and returns whether the gesture input is going
+ * to be compared to subscribed gestures or to a fixed list of gestures in a
+ * file.
+ */
 bool DetermineGesturesFileUse(const int argc, const char** argv) {
   bool use_gestures_file;
 
@@ -54,6 +66,10 @@ bool DetermineGesturesFileUse(const int argc, const char** argv) {
   return use_gestures_file;
 }
 
+/**
+ * Reads the program arguments and returns whether or not the input and
+ * subscribed gestures will be drawn on screen via lager_viewer.
+ */
 bool DetermineGestureDrawing(const int argc, const char** argv) {
   bool draw_gestures;
 
@@ -69,6 +85,10 @@ bool DetermineGestureDrawing(const int argc, const char** argv) {
   return draw_gestures;
 }
 
+/**
+ * Reads a file named gestures.dat and parses it to save its gestures into the
+ * global vector of SubscribedGestures.
+ */
 int GetSubscribedGesturesFromFile() {
   ifstream gestures_file;
   string current_line;
@@ -92,6 +112,10 @@ int GetSubscribedGesturesFromFile() {
   return RECOGNIZER_NO_ERROR;
 }
 
+/**
+ * Takes a reference to a SubscribedGesture and an input gesture LaGeR string,
+ * and draws them on screen via lager_viewer.
+ */
 void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gesture_string) {
   stringstream viewer_command;
   string viewer_command_prefix =
@@ -112,6 +136,9 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gestu
   system(viewer_command.str().c_str());
 }
 
+/**
+ * The main loop of the LaGeR Recognizer.
+ */
 int main(int argc, const char *argv[]) {
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
