@@ -3,7 +3,13 @@
 
 #include <string>
 
-/* Obtained from http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html */
+/**
+ * Parses a string and breaks it down into tokens separated by delimiters. The
+ * tokens are added to a vector of strings.
+ *
+ * Based on code from
+ * http://oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html
+ */
 void TokenizeString(const std::string& str,
 				std::vector<std::string>& tokens,
 				const std::string& delimiters)
