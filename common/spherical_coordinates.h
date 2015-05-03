@@ -11,9 +11,15 @@
  * http://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key
  */
 struct SphericalCoordinates {
+  /// Polar angle component of the coordinates
   int theta;
+  /// Azimuthal angle component of the coordinates
   int phi;
 
+  /**
+   * Determines equality between two SphericalCoordinates structures by
+   * comparing whether both theta and phi angles are the same.
+   */
   bool operator==(const SphericalCoordinates &other) const
   {
     return (theta == other.theta && phi == other.phi);
