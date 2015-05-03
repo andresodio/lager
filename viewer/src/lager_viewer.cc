@@ -34,8 +34,8 @@ using namespace glm;
 #define NO_ERROR 0
 
 /* Forward declarations */
-GLfloat GetXVector(const double phi, const double theta);
-GLfloat GetYVector(const double phi, const double theta);
+GLfloat GetXVector(const double theta, const double phi);
+GLfloat GetYVector(const double theta, const double phi);
 GLfloat GetZVector(const double theta);
 
 /*
@@ -55,18 +55,18 @@ GLfloat GetZVector(const double theta);
  * Converts theta (polar) and phi (azimuthal) angles into normalized X, Y, and
  * Z vector components.
  */
-void getVectors(GLfloat &delta_x, GLfloat &delta_y, GLfloat &delta_z,
-                const double phi, const double theta) {
-  delta_x = GetYVector(phi, theta);
+void GetVectors(GLfloat &delta_x, GLfloat &delta_y, GLfloat &delta_z,
+                const double theta, const double phi) {
+  delta_x = GetYVector(theta, phi);
   delta_y = GetZVector(theta);
-  delta_z = GetXVector(phi, theta);
+  delta_z = GetXVector(theta, phi);
 }
 
 /**
  * Converts theta (polar) and phi (azimuthal) angles into a normalized X vector
  * component.
  */
-GLfloat GetXVector(const double phi, const double theta) {
+GLfloat GetXVector(const double theta, const double phi) {
   return STD_RADIUS * sin(theta) * cos(phi);
 }
 
@@ -74,7 +74,7 @@ GLfloat GetXVector(const double phi, const double theta) {
  * Converts theta (polar) and phi (azimuthal) angles into a normalized Y vector
  * component.
  */
-GLfloat GetYVector(const double phi, const double theta) {
+GLfloat GetYVector(const double theta, const double phi) {
   return STD_RADIUS * sin(theta) * sin(phi);
 }
 
@@ -116,9 +116,9 @@ void PopulateSensorVertexBuffers(int sensor_index,
     } else {
       struct SphericalCoordinates current_coordinates =
           letter_coordinates[current_movement];
-      getVectors(delta_x, delta_y, delta_z,
-                 DegreesToRadians(current_coordinates.phi),
-                 DegreesToRadians(current_coordinates.theta));
+      GetVectors(delta_x, delta_y, delta_z,
+                 DegreesToRadians(current_coordinates.theta),
+                 DegreesToRadians(current_coordinates.phi));
     }
     //cout << "movement " << currentS1Movement << " dx: " << deltaX << " dy: " << deltaY << " dz: " << deltaZ << endl;
     temp_coordinates[0] += delta_x;
@@ -135,8 +135,8 @@ void PopulateSensorVertexBuffers(int sensor_index,
  * Populates a pair of sensor color buffer data arrays such that sensor 0
  * becomes progressively redder and sensor 1 progressively bluer.
  */
-void PopulateSensorColorBuffers(GLfloat* asensor_0_color_buffer_data,
-                                GLfloat* asensor_1_color_buffer_data,
+void PopulateSensorColorBuffers(GLfloat* sensor_0_color_buffer_data,
+                                GLfloat* sensor_1_color_buffer_data,
                                 int anum_vertex_buffer_elems) {
   int num_movements = anum_vertex_buffer_elems / 3;
   int num_color_intensity_jumps = num_movements - 1;
@@ -147,21 +147,21 @@ void PopulateSensorColorBuffers(GLfloat* asensor_0_color_buffer_data,
 
   /* Origin is colored with intensity 0.0f */
   for (int i = 0; i < 3; i++) {
-    asensor_0_color_buffer_data[i] = 0.0f;
-    asensor_1_color_buffer_data[i] = 0.0f;
+    sensor_0_color_buffer_data[i] = 0.0f;
+    sensor_1_color_buffer_data[i] = 0.0f;
   }
 
   for (int i = 3; i < (anum_vertex_buffer_elems - 2); i += 3) {
     sensor_0_temp_intensities[0] += color_intensity_interval;  // Intensify red for sensor 0
     sensor_1_temp_intensities[2] += color_intensity_interval;  // Intensify blue for sensor 1
 
-    asensor_0_color_buffer_data[i] = sensor_0_temp_intensities[0];
-    asensor_0_color_buffer_data[i + 1] = sensor_0_temp_intensities[1];
-    asensor_0_color_buffer_data[i + 2] = sensor_0_temp_intensities[2];
+    sensor_0_color_buffer_data[i] = sensor_0_temp_intensities[0];
+    sensor_0_color_buffer_data[i + 1] = sensor_0_temp_intensities[1];
+    sensor_0_color_buffer_data[i + 2] = sensor_0_temp_intensities[2];
 
-    asensor_1_color_buffer_data[i] = sensor_1_temp_intensities[0];
-    asensor_1_color_buffer_data[i + 1] = sensor_1_temp_intensities[1];
-    asensor_1_color_buffer_data[i + 2] = sensor_1_temp_intensities[2];
+    sensor_1_color_buffer_data[i] = sensor_1_temp_intensities[0];
+    sensor_1_color_buffer_data[i + 1] = sensor_1_temp_intensities[1];
+    sensor_1_color_buffer_data[i + 2] = sensor_1_temp_intensities[2];
   }
 }
 
@@ -248,8 +248,9 @@ int main(int argc, char *argv[]) {
   glEnable(GL_CULL_FACE);
 
   // Create and compile our GLSL program from the shaders
-  GLuint program_id = LoadShaders("/usr/local/include/TransformVertexShader.vertexshader",
-                                  "/usr/local/include/TextureFragmentShader.fragmentshader");
+  GLuint program_id = LoadShaders(
+      "/usr/local/include/TransformVertexShader.vertexshader",
+      "/usr/local/include/TextureFragmentShader.fragmentshader");
 
   // Get a handle for our "MVP" uniform
   GLuint matrix_id = glGetUniformLocation(program_id, "MVP");
@@ -316,7 +317,7 @@ int main(int argc, char *argv[]) {
                sensor_1_color_buffer_data, GL_STATIC_DRAW);
 
   do {
-	// Don't hog the CPU
+    // Don't hog the CPU
     nanosleep(&sleep_interval, NULL);
 
     // Clear the screen
@@ -406,4 +407,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-
