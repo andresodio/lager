@@ -21,11 +21,21 @@ using std::vector;
 
 /* Globals */
 
+/**
+ * Structure that contains the basic components of a LaGeR gesture:
+ * the gesture name and the gesture LaGeR representation.
+ */
 struct GestureEntry {
+  /// Name of the gesture
   string name;
+  /// LaGeR string representing the gesture
   string lager;
 };
 
+/**
+ * Takes a GestureEntry vector reference and a file name, then takes all the
+ * gestures within the file and inserts them into the vector.
+ */
 int ReadGesturesFromFile(vector<GestureEntry>& gestures, const string& gestures_file_name) {
   ifstream gestures_file;
   string current_line;
@@ -50,6 +60,11 @@ int ReadGesturesFromFile(vector<GestureEntry>& gestures, const string& gestures_
   return GESTURE_MANAGER_NO_ERROR;
 }
 
+/**
+ * Takes a GestureEntry vector reference and a file name, then takes all the
+ * gestures within the vector and inserts them into the file, overwriting any
+ * previous contents.
+ */
 int WriteGesturesToFile(vector<GestureEntry>& gestures, string& gestures_file_name) {
   ofstream gestures_file;
   string current_line;
@@ -65,6 +80,9 @@ int WriteGesturesToFile(vector<GestureEntry>& gestures, string& gestures_file_na
   }
 }
 
+/**
+ * Prints a welcome banner for the LaGeR Gesture Manager.
+ */
 void PrintWelcomeBanner() {
   cout << " ________________________________ " << endl;
   cout << "|                                |" << endl;
@@ -73,6 +91,9 @@ void PrintWelcomeBanner() {
   cout << "                                  " << endl;
 }
 
+/**
+ * Prints the options menu for the LaGeR Gesture Manager.
+ */
 void PrintOptionsMenu() {
   cout << "Please choose an option:" << endl;
   cout << endl;
@@ -88,6 +109,10 @@ void PrintOptionsMenu() {
   cout << "Choice: ";
 }
 
+/**
+ * Takes a GestureEntry vector reference and prints the sequential number and
+ * name of all the gestures within it.
+ */
 void ListGestures(vector<GestureEntry>& gestures) {
   int gestureNumber = 1;
   for (vector<GestureEntry>::iterator it = gestures.begin();
@@ -97,6 +122,10 @@ void ListGestures(vector<GestureEntry>& gestures) {
   }
 }
 
+/**
+ * Takes a GestureEntry vector reference and prompts the user for a new
+ * gesture in written form, then adds it to the vector.
+ */
 void AddGestureWithLager(vector<GestureEntry>& gestures) {
   GestureEntry new_gesture;
 
@@ -115,6 +144,10 @@ void AddGestureWithLager(vector<GestureEntry>& gestures) {
   gestures.push_back(new_gesture);
 }
 
+/**
+ * Takes a GestureEntry vector reference and instantiates a LagerConverter,
+ * then uses the sensor-based user input to add a new gesture to the vector.
+ */
 void AddGestureWithSensor(vector<GestureEntry>& gestures) {
   GestureEntry new_gesture;
   LagerConverter* lager_converter = LagerConverter::Instance();
@@ -140,6 +173,10 @@ void AddGestureWithSensor(vector<GestureEntry>& gestures) {
   gestures.push_back(new_gesture);
 }
 
+/**
+ * Takes a GestureEntry vector reference and a gesture number, then prints the
+ * corresponding gesture from the vector.
+ */
 void ShowGesture(vector<GestureEntry>& gestures, int gesture_number) {
   GestureEntry& gesture = gestures[gesture_number - 1];
 
@@ -159,6 +196,10 @@ void ShowGesture(vector<GestureEntry>& gestures, int gesture_number) {
   system(viewer_command.str().c_str());
 }
 
+/**
+ * Takes a GestureEntry vector reference and a gesture number, then prompts the
+ * user for changes and writes the edited gesture back into the vector.
+ */
 void EditGesture(vector<GestureEntry>& gestures, int gesture_number) {
   GestureEntry& gesture = gestures[gesture_number - 1];
   string input;
@@ -178,10 +219,17 @@ void EditGesture(vector<GestureEntry>& gestures, int gesture_number) {
   }
 }
 
+/**
+ * Takes a GestureEntry vector reference and a gesture number, then deletes the
+ * corresponding gesture from the vector.
+ */
 void DeleteGesture(vector<GestureEntry>& gestures, int gesture_number) {
   gestures.erase(gestures.begin() + (gesture_number - 1));
 }
 
+/**
+ * The main loop of the LaGeR Gesture Manager.
+ */
 int main(int argc, const char *argv[]) {
   vector<GestureEntry> gestures;
   string gestures_file_name;
