@@ -51,6 +51,10 @@ GLfloat GetZVector(const double theta);
  *  z  --->   y
  */
 
+/**
+ * Converts theta (polar) and phi (azimuthal) angles into normalized X, Y, and
+ * Z vector components.
+ */
 void getVectors(GLfloat &delta_x, GLfloat &delta_y, GLfloat &delta_z,
                 const double phi, const double theta) {
   delta_x = GetYVector(phi, theta);
@@ -58,18 +62,34 @@ void getVectors(GLfloat &delta_x, GLfloat &delta_y, GLfloat &delta_z,
   delta_z = GetXVector(phi, theta);
 }
 
+/**
+ * Converts theta (polar) and phi (azimuthal) angles into a normalized X vector
+ * component.
+ */
 GLfloat GetXVector(const double phi, const double theta) {
   return STD_RADIUS * sin(theta) * cos(phi);
 }
 
+/**
+ * Converts theta (polar) and phi (azimuthal) angles into a normalized Y vector
+ * component.
+ */
 GLfloat GetYVector(const double phi, const double theta) {
   return STD_RADIUS * sin(theta) * sin(phi);
 }
 
+/**
+ * Converts theta (polar) and phi (azimuthal) angles into a normalized Z vector
+ * component.
+ */
 GLfloat GetZVector(const double theta) {
   return STD_RADIUS * cos(theta);
 }
 
+/**
+ * Takes a sensor index and a reference to a vector of movement pair strings,
+ * and uses them to populate an array of sensor vertex buffer data.
+ */
 void PopulateSensorVertexBuffers(int sensor_index,
                                  const vector<string>& movement_pairs,
                                  GLfloat* sensor_vertex_buffer_data) {
@@ -111,6 +131,10 @@ void PopulateSensorVertexBuffers(int sensor_index,
   }
 }
 
+/**
+ * Populates a pair of sensor color buffer data arrays such that sensor 0
+ * becomes progressively redder and sensor 1 progressively bluer.
+ */
 void PopulateSensorColorBuffers(GLfloat* asensor_0_color_buffer_data,
                                 GLfloat* asensor_1_color_buffer_data,
                                 int anum_vertex_buffer_elems) {
@@ -141,6 +165,10 @@ void PopulateSensorColorBuffers(GLfloat* asensor_0_color_buffer_data,
   }
 }
 
+/**
+ * Takes a gesture from the program arguments, tokenizes it, and writes the
+ * tokens to a referenced vector of movement pair strings.
+ */
 void ReadGestureFromArguments(char* argv[], vector<string>& movement_pairs) {
   string gesture(argv[2]);
 
@@ -148,6 +176,10 @@ void ReadGestureFromArguments(char* argv[], vector<string>& movement_pairs) {
   cout << "Gesture: " << gesture << endl;
 }
 
+/**
+ * Parses the gestures.dat file and writes its first gesture into a referenced
+ * vector of movement pair strings.
+ */
 int ReadGestureFromFile(vector<string>& movement_pairs) {
   ifstream gesture_file;
   gesture_file.open("gesture.dat");
@@ -165,6 +197,9 @@ int ReadGestureFromFile(vector<string>& movement_pairs) {
   return EXIT_SUCCESS;
 }
 
+/**
+ * The main loop of the LaGeR Viewer.
+ */
 int main(int argc, char *argv[]) {
   // Initialise GLFW
   if (!glfwInit()) {
