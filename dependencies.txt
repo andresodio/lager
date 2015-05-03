@@ -8,7 +8,7 @@
 -----------------
 
 Install the missing packages:
-~$ sudo apt-get install cmake doxygen git libboost-serialization-dev libboost-system-dev libboost-thread-dev libglew-dev libusb-1.0-0-dev libxrandr-dev libxt-dev libxtst-dev
+~$ sudo apt-get install cmake doxygen git graphviz libboost-serialization-dev libboost-system-dev libboost-thread-dev libglew-dev libusb-1.0-0-dev libxrandr-dev libxt-dev libxtst-dev
 
 Make sure to accept all extra packages suggested by apt-get.
 
