@@ -15,7 +15,14 @@ using std::endl;
 using std::string;
 using std::stringstream;
 
-/* Based on https://bharathisubramanian.wordpress.com/2010/03/14/x11-fake-key-event-generation-using-xtest-ext/ab */
+/**
+ * Takes a key symbol and a modifier key. Sends X Server a press and release
+ * for the main key. If a modifier is specified, it first sends a press for the
+ * modifier and sends a release for it at the very end.
+ *
+ * Based on code from
+ * https://bharathisubramanian.wordpress.com/2010/03/14/x11-fake-key-event-generation-using-xtest-ext/ab
+ */
 static void SendKey(Display * display, KeySym key_symbol, KeySym mod_symbol) {
   KeyCode key_code = 0, mod_code = 0;
 
@@ -42,6 +49,10 @@ static void SendKey(Display * display, KeySym key_symbol, KeySym mod_symbol) {
   XTestGrabControl(display, False);
 }
 
+/**
+ * Sends X Server a series of key presses to bring up the open application
+ * dialog in Unity and start Google Chrome.
+ */
 void OpenChrome(Display* display) {
   struct timespec sleep_interval = { 0, 750000 };  // microseconds
 
@@ -79,11 +90,17 @@ void OpenChrome(Display* display) {
   SendKey(display, XK_Tab, XK_Alt_L);
 }
 
+/**
+ * Sends X Server the key presses to open a new tab in Google Chrome.
+ */
 void OpenNewTab(Display* display) {
   // Ctrl + T
   SendKey(display, XK_T, XK_Control_L);
 }
 
+/**
+ * Sends X Server the key presses to type the CNN URL and press Enter.
+ */
 void OpenCnn(Display* display) {
   // Type www.cnn.com
   SendKey(display, XK_W, 0);
@@ -102,6 +119,9 @@ void OpenCnn(Display* display) {
   SendKey(display, XK_Return, 0);
 }
 
+/**
+ * Sends X Server the key presses to type the Google URL and press Enter.
+ */
 void OpenGoogle(Display* display) {
   // Type www.google.com
   SendKey(display, XK_W, 0);
@@ -123,26 +143,41 @@ void OpenGoogle(Display* display) {
   SendKey(display, XK_Return, 0);
 }
 
+/**
+ * Sends X Server the key presses to close a tab in Google Chrome.
+ */
 void CloseTab(Display* display) {
   // Ctrl + W
   SendKey(display, XK_W, XK_Control_L);
 }
 
+/**
+ * Sends X Server the key presses to zoom in in Google Chrome.
+ */
 void ZoomIn(Display* display) {
   // Ctrl + Plus
   SendKey(display, XK_plus, XK_Control_L);
 }
 
+/**
+ * Sends X Server the key presses to zoom out in Google Chrome.
+ */
 void ZoomOut(Display* display) {
   // Ctrl + Minus
   SendKey(display, XK_minus, XK_Control_L);
 }
 
+/**
+ * Sends X Server the key press to refresh a page in Google Chrome.
+ */
 void RefreshTab(Display* display) {
   // F5
   SendKey(display, XK_F5, 0);
 }
 
+/**
+ * The main loop of the LaGeR Injector.
+ */
 int main() {
   Display* display = XOpenDisplay(NULL);
   string gesture_name;
