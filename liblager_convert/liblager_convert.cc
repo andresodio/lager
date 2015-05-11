@@ -361,7 +361,7 @@ void LagerConverter::ProcessSensorEvents() {
        * Only try to convert gestures with more than one movement pair.
        * This reduces spurious conversions from inadvertent movements.
        */
-      if (lager_string_length > 3) {
+      if (lager_string_length > 4) {
         {
           std::lock_guard < std::mutex > lock(mutex_);
           lager_read_complete_ = false;
