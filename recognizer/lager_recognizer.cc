@@ -166,20 +166,16 @@ int main(int argc, const char *argv[]) {
   while(true) {
     string gesture_string = lager_converter->BlockingGetLagerString();
     if (g_subscribed_gestures.size() > 0) {
-        SubscribedGesture recognized_gesture =
-            lager_recognizer->RecognizeGesture(draw_gestures, gesture_string, match_found);
+      SubscribedGesture recognized_gesture = lager_recognizer->RecognizeGesture(
+          draw_gestures, gesture_string, match_found);
 
-        if (draw_gestures) {
-                    DrawMatchingGestures(recognized_gesture, gesture_string);
-                  }
-        if (match_found) {
-          if (draw_gestures) {
-           // DrawMatchingGestures(recognized_gesture, gesture_string);
-          }
-          if (!use_gestures_file && recognized_gesture.pid != 0) {
-            SendDetectedGestureMessage(recognized_gesture.name, recognized_gesture.pid);
-          }
-        }
+      if (draw_gestures) {
+        DrawMatchingGestures(recognized_gesture, gesture_string);
+      }
+      if (match_found && (!use_gestures_file && recognized_gesture.pid != 0)) {
+        SendDetectedGestureMessage(recognized_gesture.name,
+                                   recognized_gesture.pid);
+      }
     }
   }
 } /* main */
