@@ -101,12 +101,12 @@ int GetSubscribedGesturesFromFile() {
   while (getline(gestures_file, current_line)) {
     string name, lager;
     stringstream ss(current_line);
-    ss >> name >> lager;
 
     SubscribedGesture new_gesture;
     ss >> new_gesture.name >> new_gesture.lager;
     new_gesture.pid = 0;
     g_subscribed_gestures.push_back(new_gesture);
+    cout << "Added Name: " << new_gesture.name << " Lager: " << new_gesture.lager << endl;
   }
 
   return RECOGNIZER_NO_ERROR;
