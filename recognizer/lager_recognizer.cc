@@ -27,6 +27,27 @@ vector<SubscribedGesture> g_subscribed_gestures;
  *****************************************************************************/
 
 /**
+ * Reads the program arguments and returns whether a given string is present
+ */
+bool DetermineArgumentPresent(const int argc, const char** argv,
+                              const char* string_to_find) {
+  bool string_found = false;
+
+  if (argc > 1) {
+    int i = 1;
+    for (; i < argc; i++) {
+      string_found = std::string(argv[i]).find(string_to_find)
+          != std::string::npos;
+      if (string_found) {
+        break;
+      }
+    }
+  }
+
+  return string_found;
+}
+
+/**
  * Reads the program arguments and returns whether sensor buttons are going to
  * be used to start/stop gesture detection, or whether buttons will be ignored
  * and detection will be active at all times.
@@ -34,8 +55,7 @@ vector<SubscribedGesture> g_subscribed_gestures;
 bool DetermineButtonUse(const int argc, const char** argv) {
   bool use_buttons;
 
-  if ((argc > 1)
-      && (std::string(argv[1]).find("--no_buttons") != std::string::npos)) {
+  if (DetermineArgumentPresent(argc, argv, "--no_buttons")) {
     cout << "Gesture detection will be active at all times." << endl;
     use_buttons = false;
   } else {
@@ -54,8 +74,7 @@ bool DetermineButtonUse(const int argc, const char** argv) {
 bool DetermineGesturesFileUse(const int argc, const char** argv) {
   bool use_gestures_file;
 
-  if ((argc > 1)
-      && (std::string(argv[1]).find("--use_gestures_file") != std::string::npos)) {
+  if (DetermineArgumentPresent(argc, argv, "--use_gestures_file")) {
     cout << "Comparing input to gestures in a file." << endl;
     use_gestures_file = true;
   } else {
@@ -73,8 +92,7 @@ bool DetermineGesturesFileUse(const int argc, const char** argv) {
 bool DetermineGestureDrawing(const int argc, const char** argv) {
   bool draw_gestures;
 
-  if ((argc > 1)
-      && (std::string(argv[1]).find("--draw_gestures") != std::string::npos)) {
+  if (DetermineArgumentPresent(argc, argv, "--draw_gestures")) {
     cout << "Using lager_viewer to draw input and subscribed gestures." << endl;
     draw_gestures = true;
   } else {
