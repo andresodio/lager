@@ -219,7 +219,16 @@ struct SubscribedGesture LagerRecognizer::RecognizeGesture(
 
   cout << " ________________________________ " << endl;
   cout << "|                                |" << endl;
-  cout << "|         RECOGNIZING...         |" << endl;
+  cout << "|          INPUT LAGER           |" << endl;
+  cout << "|________________________________|" << endl;
+  cout << "                                  " << endl;
+
+  cout << current_gesture << endl << endl;
+
+  cout << " ________________________________ " << endl;
+  cout << "|                                |" << endl;
+  cout << "|           EVALUATING           |" << endl;
+  cout << "|           CANDIDATES...        |" << endl;
   cout << "|________________________________|" << endl;
   cout << "                                  " << endl;
 
