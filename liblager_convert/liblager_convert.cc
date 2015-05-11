@@ -233,8 +233,10 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
   }
   lager_string_ << ".";
 
-  cout << "Gesture: " << lager_string_.str() << endl;
-  cout << endl;
+  if (print_updates_) {
+    cout << "Gesture: " << lager_string_.str() << endl;
+    cout << endl;
+  }
 }
 
 void LagerConverter::UpdateTimers(const vrpn_TRACKERCB& tracker) {
@@ -254,7 +256,6 @@ void LagerConverter::UpdateTimers(const vrpn_TRACKERCB& tracker) {
 void VRPN_CALLBACK LagerConverter::HandleTrackerChange(
     void *user_data, const vrpn_TRACKERCB tracker) {
 
-  //printf("%s:%i\n", __FUNCTION__, __LINE__);
   LagerConverter* lager_converter = LagerConverter::Instance();
   vrpn_TRACKERCB *last_report;  // keep track of the current sensor's last report
   vrpn_float64 deltaX, deltaY, deltaZ;
@@ -274,10 +275,12 @@ void VRPN_CALLBACK LagerConverter::HandleTrackerChange(
 
   if (lager_converter->GetDistanceSquared(*last_report, tracker)
       > dist_interval_sq) {
-    printf("Update for sensor: %i at time: %ld.%06ld\n", tracker.sensor,
-           tracker.msg_time.tv_sec, tracker.msg_time.tv_usec);
-    //printf("GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
-    //printSensorCoordinates(last_report, tracker);
+    if (lager_converter->print_updates_) {
+      printf("Update for sensor: %i at time: %ld.%06ld\n", tracker.sensor,
+             tracker.msg_time.tv_sec, tracker.msg_time.tv_usec);
+      //printf("GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
+      //printSensorCoordinates(last_report, tracker);
+    }
 
     lager_converter->UpdateTimers(tracker);
 

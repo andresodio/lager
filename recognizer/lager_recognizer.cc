@@ -86,6 +86,24 @@ bool DetermineGesturesFileUse(const int argc, const char** argv) {
 }
 
 /**
+ * Reads the program arguments and returns whether LaGeR string updates are
+ * going to be printed out as they occur.
+ */
+bool DetermineUpdatePrinting(const int argc, const char** argv) {
+  bool print_updates;
+
+  if (DetermineArgumentPresent(argc, argv, "--print_updates")) {
+    cout << "LaGeR string updates will be printed out as they occur." << endl;
+    print_updates = true;
+  } else {
+    cout << "LaGeR string updates will not be printed out." << endl;
+    print_updates = false;
+  }
+
+  return print_updates;
+}
+
+/**
  * Reads the program arguments and returns whether or not the input and
  * subscribed gestures will be drawn on screen via lager_viewer.
  */
@@ -160,6 +178,7 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gestu
 int main(int argc, const char *argv[]) {
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
+  bool print_updates = DetermineUpdatePrinting(argc, argv);
   bool draw_gestures = DetermineGestureDrawing(argc, argv);
   bool match_found = false;
   LagerConverter* lager_converter = LagerConverter::Instance();
@@ -178,6 +197,7 @@ int main(int argc, const char *argv[]) {
   cout << "|________________________________|" << endl;
   cout << "                                  " << endl;
 
+  lager_converter->SetPrintUpdates(print_updates);
   lager_converter->SetUseButtons(use_buttons);
   lager_converter->Start();
 

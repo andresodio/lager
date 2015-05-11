@@ -41,6 +41,15 @@ class LagerConverter {
   static LagerConverter* Instance();
 
   /**
+   * Sets the print_updates_ member variable.
+   *
+   * If true, LaGeR string updates are printed out as they occur.
+   */
+  void SetPrintUpdates(bool print_updates) {
+    print_updates_ = print_updates;
+  }
+
+  /**
    * Sets the use_buttons_ member variable.
    *
    * If true, sensor movements are only converted to LaGeR while a button is
@@ -125,6 +134,8 @@ class LagerConverter {
 
   /// The thread that is used for processing sensor events
   boost::thread processing_thread_;
+  /// Indicates whether LaGeR string updates are printed out as they occur.
+  bool print_updates_ = false;
   /// Indicates whether sensor buttons are used to determine when to convert
   /// movements to LaGeR.
   bool use_buttons_ = false;
