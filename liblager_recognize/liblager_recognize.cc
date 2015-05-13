@@ -24,8 +24,6 @@ using std::stringstream;
 #include "liblager_recognize.h"
 #include "string_tokenizer.h"
 
-#define GESTURE_PAUSE_TIME_MILLISECONDS 500
-#define GESTURE_GROUPING_TIME_MILLISECONDS 200
 #define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 20
 #define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 30
 
