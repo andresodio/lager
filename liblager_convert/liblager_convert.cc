@@ -26,7 +26,7 @@ using std::chrono::time_point;
 #define MAIN_SLEEP_INTERVAL_MICROSECONDS 10000 // 10ms
 #define MAIN_SLEEP_INTERVAL_MILLISECONDS MAIN_SLEEP_INTERVAL_MICROSECONDS/1000
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
-#define GESTURE_GROUPING_TIME_MILLISECONDS 200
+#define MOVEMENT_GROUPING_TIME_MILLISECONDS 200
 #define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 20
 #define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 30
 
@@ -197,7 +197,7 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
      */
     if ((sensor_1_last_grouped_movement_time_ != sensor_1_last_movement_time_)
         && (time_since_sensor_1_last_movement
-            < GESTURE_GROUPING_TIME_MILLISECONDS)) {
+            < MOVEMENT_GROUPING_TIME_MILLISECONDS)) {
       //printf("S0: Grouping with previous S1. Current: %c, last: %c\n", currentLetter, last_sensor_1_letter);
       sensor_0_last_grouped_movement_time_ = GetCurrentMovementTime(tracker);
       sensor_1_last_grouped_movement_time_ = sensor_1_last_movement_time_;
@@ -219,7 +219,7 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
      */
     if ((sensor_0_last_grouped_movement_time_ != sensor_0_last_movement_time_)
         && (time_since_sensor_0_last_movement
-            < GESTURE_GROUPING_TIME_MILLISECONDS)) {
+            < MOVEMENT_GROUPING_TIME_MILLISECONDS)) {
       //printf("S1: Grouping with previous S0. Current: %c, last: %c\n", currentLetter, last_sensor_0_letter);
       sensor_0_last_grouped_movement_time_ = sensor_0_last_movement_time_;
       sensor_1_last_grouped_movement_time_ = GetCurrentMovementTime(tracker);
