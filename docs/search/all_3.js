@@ -14,5 +14,5 @@ var searchData=
   ['distance_5fpct',['distance_pct',['../structSubscribedGesture.html#a7d5e5a8f7e4a6a3f8debae1823b22f64',1,'SubscribedGesture']]],
   ['dldistance',['DLDistance',['../liblager__recognize_8cc.html#aabf317bbd20f8a36daf37ec4ec5beb75',1,'liblager_recognize.cc']]],
   ['drawmatchinggestures',['DrawMatchingGestures',['../lager__recognizer_8cc.html#aa4bbeba1ba9a828aff88276656945522',1,'lager_recognizer.cc']]],
-  ['dual_5fsensor_5fgesture_5fdistance_5fthreshold_5fpct',['DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT',['../liblager__convert_8cc.html#abe00c26036faa943a9d700b8719fe591',1,'DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT():&#160;liblager_convert.cc'],['../liblager__recognize_8cc.html#abe00c26036faa943a9d700b8719fe591',1,'DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT():&#160;liblager_recognize.cc']]]
+  ['dual_5fsensor_5fgesture_5fdistance_5fthreshold_5fpct',['DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT',['../liblager__recognize_8cc.html#abe00c26036faa943a9d700b8719fe591',1,'liblager_recognize.cc']]]
 ];

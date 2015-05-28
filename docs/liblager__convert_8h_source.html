@@ -154,127 +154,141 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    processing_thread_ = boost::thread(&amp;LagerConverter::ProcessSensorEvents, <span class="keyword">this</span>);</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  }</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;  <span class="keywordtype">string</span> <a class="code" href="classLagerConverter.html#a138d9773e084a95246b6fa7b3094088e">BlockingGetLagerString</a>();</div>
+<div class="line"><a name="l00094"></a><span class="lineno"><a class="line" href="classLagerConverter.html#a9102ac3d12e80675a886c2e2925cbcd7">   94</a></span>&#160;  <span class="keywordtype">void</span> <a class="code" href="classLagerConverter.html#a9102ac3d12e80675a886c2e2925cbcd7">Stop</a>() {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    processing_thread_.interrupt();</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    processing_thread_.join();</div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;  <a class="code" href="classLagerConverter.html">LagerConverter</a>() {</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  }</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  ;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;  <a class="code" href="classLagerConverter.html">LagerConverter</a>(<a class="code" href="classLagerConverter.html">LagerConverter</a> <span class="keyword">const</span>&amp;) {</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;  }</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  ;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="keywordflow">if</span> (tracker_) {</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;      <span class="keyword">delete</span> tracker_;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    }</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordflow">if</span> (button_) {</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;      <span class="keyword">delete</span> button_;</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    }</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  }</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  <span class="keywordtype">string</span> <a class="code" href="classLagerConverter.html#a138d9773e084a95246b6fa7b3094088e">BlockingGetLagerString</a>();</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;  <a class="code" href="classLagerConverter.html">LagerConverter</a>&amp; operator=(<a class="code" href="classLagerConverter.html">LagerConverter</a> <span class="keyword">const</span>&amp;) {</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  }</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  ;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;  <span class="keyword">static</span> <a class="code" href="classLagerConverter.html">LagerConverter</a>* instance_;</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  std::mutex mutex_;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  std::condition_variable lager_rw_condition_;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <a class="code" href="classLagerConverter.html">LagerConverter</a>() {</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;  }</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;  ;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <a class="code" href="classLagerConverter.html">LagerConverter</a>(<a class="code" href="classLagerConverter.html">LagerConverter</a> <span class="keyword">const</span>&amp;) {</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  }</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  ;</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  <span class="keywordtype">bool</span> lager_read_complete_ = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <span class="keywordtype">bool</span> lager_write_complete_ = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;  boost::thread processing_thread_;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="keywordtype">bool</span> print_updates_ = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  <span class="keywordtype">bool</span> use_buttons_ = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  vrpn_Tracker_Remote* tracker_;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;  vrpn_Button_Remote* button_;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  vrpn_TRACKERCB last_report_0_;</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;  vrpn_TRACKERCB last_report_1_;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <span class="keywordtype">bool</span> draw_gestures_ = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  std::stringstream lager_string_;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;  <a class="code" href="classLagerConverter.html">LagerConverter</a>&amp; operator=(<a class="code" href="classLagerConverter.html">LagerConverter</a> <span class="keyword">const</span>&amp;) {</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  }</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;  ;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;  <span class="keyword">static</span> <a class="code" href="classLagerConverter.html">LagerConverter</a>* instance_;</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;  std::mutex mutex_;</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;  std::condition_variable lager_rw_condition_;</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;  <span class="keywordtype">bool</span> lager_read_complete_ = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  <span class="keywordtype">bool</span> lager_write_complete_ = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;  boost::thread processing_thread_;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;  <span class="keywordtype">bool</span> print_updates_ = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <span class="keywordtype">bool</span> use_buttons_ = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  time_point&lt;system_clock&gt; global_last_movement_time_ = system_clock::now();</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;  time_point&lt;system_clock&gt; sensor_0_last_movement_time_ = system_clock::now();</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  time_point&lt;system_clock&gt; sensor_0_last_grouped_movement_time_ =</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;      system_clock::now();</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  time_point&lt;system_clock&gt; sensor_1_last_movement_time_ = system_clock::now();</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;  time_point&lt;system_clock&gt; sensor_1_last_grouped_movement_time_ =</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;      system_clock::now();</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;  <span class="keywordtype">char</span> last_sensor_0_letter_ = <span class="charliteral">&#39;_&#39;</span>;</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;  <span class="keywordtype">char</span> last_sensor_1_letter_ = <span class="charliteral">&#39;_&#39;</span>;</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;  <span class="keywordtype">void</span> InitializeTrackers();</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="keywordtype">void</span> ProcessSensorEvents();</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">void</span> VRPN_CALLBACK HandleTrackerChange(<span class="keywordtype">void</span> *user_data,</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;                                                <span class="keyword">const</span> vrpn_TRACKERCB tracker);</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">void</span> VRPN_CALLBACK HandleButtonChange(<span class="keywordtype">void</span> *user_data,</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;                                               <span class="keyword">const</span> vrpn_BUTTONCB button);</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">void</span> VRPN_CALLBACK DummyHandleTrackerChange(</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;      <span class="keywordtype">void</span> *user_data, <span class="keyword">const</span> vrpn_TRACKERCB tracker);</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;  vrpn_float64 GetDeltaX(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;                         <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;  vrpn_float64 GetDeltaY(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;                         <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;  vrpn_float64 GetDeltaZ(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;                         <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;  <span class="keywordtype">double</span> GetMovementThetaInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                                   vrpn_float64 delta_z);</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;  <span class="keywordtype">double</span> GetMovementPhiInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                                 <span class="keywordtype">double</span> theta);</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;  <span class="keywordtype">int</span> SnapAngle(<span class="keywordtype">double</span> aAngle);</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;  vrpn_float64 GetDistanceSquared(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;                                  <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;  <span class="keywordtype">void</span> PrintSensorCoordinates(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                              <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;  <span class="keywordtype">int</span> GetMillisecondsUntilNow(<span class="keyword">const</span> time_point&lt;system_clock&gt; &amp;last_time);</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  <span class="keywordtype">int</span> GetMillisecondsSinceTrackerTime(</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;      <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker, <span class="keyword">const</span> time_point&lt;system_clock&gt; &amp;last_time);</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordtype">void</span> UpdateTimePoint(time_point&lt;system_clock&gt;&amp; time_to_update,</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;                       time_point&lt;system_clock&gt; new_time);</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;  time_point&lt;system_clock&gt; GetCurrentMovementTime(</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;        <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  <span class="keywordtype">bool</span> GesturePaused();</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  <span class="keywordtype">void</span> ResetLagerString();</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;  <span class="keywordtype">void</span> CalculateMovementDeltas(<span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker,</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;                               <span class="keyword">const</span> vrpn_TRACKERCB* last_report,</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;                               vrpn_float64&amp; delta_x, vrpn_float64&amp; delta_y,</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;                               vrpn_float64&amp; delta_z);</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;  <span class="keywordtype">void</span> CalculateMovementAngles(<span class="keywordtype">double</span>&amp; theta, <span class="keywordtype">double</span>&amp; phi, <span class="keywordtype">int</span>&amp; snap_theta,</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;                               <span class="keywordtype">int</span>&amp; snap_phi, vrpn_float64 delta_x,</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;                               vrpn_float64 delta_y, vrpn_float64 delta_z);</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;  vrpn_Tracker_Remote* tracker_;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;  vrpn_Button_Remote* button_;</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;  vrpn_TRACKERCB last_report_0_;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;  vrpn_TRACKERCB last_report_1_;</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;  <span class="keywordtype">bool</span> draw_gestures_ = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;  std::stringstream lager_string_;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  time_point&lt;system_clock&gt; global_last_movement_time_ = system_clock::now();</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;  time_point&lt;system_clock&gt; sensor_0_last_movement_time_ = system_clock::now();</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;  time_point&lt;system_clock&gt; sensor_0_last_grouped_movement_time_ =</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;      system_clock::now();</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;  time_point&lt;system_clock&gt; sensor_1_last_movement_time_ = system_clock::now();</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;  time_point&lt;system_clock&gt; sensor_1_last_grouped_movement_time_ =</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;      system_clock::now();</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;  <span class="keywordtype">char</span> last_sensor_0_letter_ = <span class="charliteral">&#39;_&#39;</span>;</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;  <span class="keywordtype">char</span> last_sensor_1_letter_ = <span class="charliteral">&#39;_&#39;</span>;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;  <span class="keywordtype">void</span> InitializeTrackers();</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;  <span class="keywordtype">void</span> ProcessSensorEvents();</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">void</span> VRPN_CALLBACK HandleTrackerChange(<span class="keywordtype">void</span> *user_data,</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                                                <span class="keyword">const</span> vrpn_TRACKERCB tracker);</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">void</span> VRPN_CALLBACK HandleButtonChange(<span class="keywordtype">void</span> *user_data,</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;                                               <span class="keyword">const</span> vrpn_BUTTONCB button);</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;  <span class="keyword">static</span> <span class="keywordtype">void</span> VRPN_CALLBACK DummyHandleTrackerChange(</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;      <span class="keywordtype">void</span> *user_data, <span class="keyword">const</span> vrpn_TRACKERCB tracker);</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;  vrpn_float64 GetDeltaX(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                         <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;  vrpn_float64 GetDeltaY(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;                         <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;  vrpn_float64 GetDeltaZ(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                         <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;  <span class="keywordtype">double</span> GetMovementThetaInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;                                   vrpn_float64 delta_z);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;  <span class="keywordtype">double</span> GetMovementPhiInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                                 <span class="keywordtype">double</span> theta);</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;  <span class="keywordtype">int</span> SnapAngle(<span class="keywordtype">double</span> aAngle);</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;  vrpn_float64 GetDistanceSquared(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;                                  <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;  <span class="keywordtype">void</span> PrintSensorCoordinates(<span class="keyword">const</span> vrpn_TRACKERCB&amp; last_report,</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;                              <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;  <span class="keywordtype">int</span> GetMillisecondsUntilNow(<span class="keyword">const</span> time_point&lt;system_clock&gt; &amp;last_time);</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;  <span class="keywordtype">int</span> GetMillisecondsSinceTrackerTime(</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;      <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker, <span class="keyword">const</span> time_point&lt;system_clock&gt; &amp;last_time);</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;  <span class="keywordtype">void</span> UpdateTimePoint(time_point&lt;system_clock&gt;&amp; time_to_update,</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                       time_point&lt;system_clock&gt; new_time);</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;  time_point&lt;system_clock&gt; GetCurrentMovementTime(</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;        <span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;  <span class="keywordtype">bool</span> GesturePaused();</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;  <span class="keywordtype">void</span> ResetLagerString();</div>
 <div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  <span class="keywordtype">void</span> MoveHeadToBeginningOfLetterPair();</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;  <span class="keywordtype">char</span> GetCurrentLetter(<span class="keywordtype">int</span> snap_theta, <span class="keywordtype">int</span> snap_phi);</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;  <span class="keywordtype">void</span> UpdateLagerString(<span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker, <span class="keyword">const</span> <span class="keywordtype">int</span> snap_theta,</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span> snap_phi);</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;  <span class="keywordtype">void</span> UpdateTimers(<span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;};</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* LIBLAGER_CONVERT_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;  <span class="keywordtype">void</span> CalculateMovementDeltas(<span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker,</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;                               <span class="keyword">const</span> vrpn_TRACKERCB* last_report,</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;                               vrpn_float64&amp; delta_x, vrpn_float64&amp; delta_y,</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;                               vrpn_float64&amp; delta_z);</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;  <span class="keywordtype">void</span> CalculateMovementAngles(<span class="keywordtype">double</span>&amp; theta, <span class="keywordtype">double</span>&amp; phi, <span class="keywordtype">int</span>&amp; snap_theta,</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;                               <span class="keywordtype">int</span>&amp; snap_phi, vrpn_float64 delta_x,</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;                               vrpn_float64 delta_y, vrpn_float64 delta_z);</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;  <span class="keywordtype">void</span> MoveHeadToBeginningOfLetterPair();</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;  <span class="keywordtype">char</span> GetCurrentLetter(<span class="keywordtype">int</span> snap_theta, <span class="keywordtype">int</span> snap_phi);</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;  <span class="keywordtype">void</span> UpdateLagerString(<span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker, <span class="keyword">const</span> <span class="keywordtype">int</span> snap_theta,</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                         <span class="keyword">const</span> <span class="keywordtype">int</span> snap_phi);</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;  <span class="keywordtype">void</span> UpdateTimers(<span class="keyword">const</span> vrpn_TRACKERCB&amp; tracker);</div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;};</div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* LIBLAGER_CONVERT_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="classLagerConverter_html_aac57cd3b50d9e1b89512065e8b31bc63"><div class="ttname"><a href="classLagerConverter.html#aac57cd3b50d9e1b89512065e8b31bc63">LagerConverter::~LagerConverter</a></div><div class="ttdeci">~LagerConverter()</div><div class="ttdef"><b>Definition:</b> liblager_convert.h:69</div></div>
-<div class="ttc" id="classLagerConverter_html_a66a0110e3fcaad186f1053a5494700d3"><div class="ttname"><a href="classLagerConverter.html#a66a0110e3fcaad186f1053a5494700d3">LagerConverter::Instance</a></div><div class="ttdeci">static LagerConverter * Instance()</div><div class="ttdef"><b>Definition:</b> liblager_convert.cc:38</div></div>
+<div class="ttc" id="classLagerConverter_html_a66a0110e3fcaad186f1053a5494700d3"><div class="ttname"><a href="classLagerConverter.html#a66a0110e3fcaad186f1053a5494700d3">LagerConverter::Instance</a></div><div class="ttdeci">static LagerConverter * Instance()</div><div class="ttdef"><b>Definition:</b> liblager_convert.cc:36</div></div>
 <div class="ttc" id="classLagerConverter_html_aa7bdf5a88cadc4cdc49ce112c04c85bc"><div class="ttname"><a href="classLagerConverter.html#aa7bdf5a88cadc4cdc49ce112c04c85bc">LagerConverter::SetPrintUpdates</a></div><div class="ttdeci">void SetPrintUpdates(bool print_updates)</div><div class="ttdef"><b>Definition:</b> liblager_convert.h:48</div></div>
 <div class="ttc" id="classLagerConverter_html_a5555e81aa849526a08e849eb4e1dbc57"><div class="ttname"><a href="classLagerConverter.html#a5555e81aa849526a08e849eb4e1dbc57">LagerConverter::SetUseButtons</a></div><div class="ttdeci">void SetUseButtons(bool use_buttons)</div><div class="ttdef"><b>Definition:</b> liblager_convert.h:58</div></div>
 <div class="ttc" id="classLagerConverter_html_a3ae91e8a25c1a05e953b66df0766a789"><div class="ttname"><a href="classLagerConverter.html#a3ae91e8a25c1a05e953b66df0766a789">LagerConverter::Start</a></div><div class="ttdeci">void Start()</div><div class="ttdef"><b>Definition:</b> liblager_convert.h:86</div></div>
+<div class="ttc" id="classLagerConverter_html_a9102ac3d12e80675a886c2e2925cbcd7"><div class="ttname"><a href="classLagerConverter.html#a9102ac3d12e80675a886c2e2925cbcd7">LagerConverter::Stop</a></div><div class="ttdeci">void Stop()</div><div class="ttdef"><b>Definition:</b> liblager_convert.h:94</div></div>
 <div class="ttc" id="classLagerConverter_html"><div class="ttname"><a href="classLagerConverter.html">LagerConverter</a></div><div class="ttdef"><b>Definition:</b> liblager_convert.h:35</div></div>
-<div class="ttc" id="classLagerConverter_html_a138d9773e084a95246b6fa7b3094088e"><div class="ttname"><a href="classLagerConverter.html#a138d9773e084a95246b6fa7b3094088e">LagerConverter::BlockingGetLagerString</a></div><div class="ttdeci">string BlockingGetLagerString()</div><div class="ttdef"><b>Definition:</b> liblager_convert.cc:396</div></div>
+<div class="ttc" id="classLagerConverter_html_a138d9773e084a95246b6fa7b3094088e"><div class="ttname"><a href="classLagerConverter.html#a138d9773e084a95246b6fa7b3094088e">LagerConverter::BlockingGetLagerString</a></div><div class="ttdeci">string BlockingGetLagerString()</div><div class="ttdef"><b>Definition:</b> liblager_convert.cc:395</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon May 25 2015 00:10:01 for LaGeR: Language for Gesture Representation by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed May 27 2015 22:06:57 for LaGeR: Language for Gesture Representation by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>
