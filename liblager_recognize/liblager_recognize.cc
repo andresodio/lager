@@ -24,8 +24,8 @@ using std::stringstream;
 #include "liblager_recognize.h"
 #include "string_tokenizer.h"
 
-#define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 20
-#define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 30
+#define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 25
+#define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 35
 
 LagerRecognizer* LagerRecognizer::instance_ = NULL;
 
