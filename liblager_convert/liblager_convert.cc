@@ -263,14 +263,15 @@ void VRPN_CALLBACK LagerConverter::HandleTrackerChange(
   int snap_theta, snap_phi;
   static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
-  if (!lager_converter->draw_gestures_) {
-    return;
-  }
-
   if (tracker.sensor == 0) {
     last_report = &lager_converter->last_report_0_;
   } else {
     last_report = &lager_converter->last_report_1_;
+  }
+
+  if (!lager_converter->draw_gestures_) {
+    *last_report = tracker;
+    return;
   }
 
   if (lager_converter->GetDistanceSquared(*last_report, tracker)
