@@ -89,6 +89,22 @@ class LagerConverter {
   }
 
   /**
+   * Stops processing sensor events and deletes the movement tracking objects.
+   */
+  void Stop() {
+    processing_thread_.interrupt();
+    processing_thread_.join();
+
+    if (tracker_) {
+      delete tracker_;
+    }
+
+    if (button_) {
+      delete button_;
+    }
+  }
+
+  /**
    * Returns the LaGeR string that corresponds to the latest sensor gesture.
    * If a gesture is underway, this function blocks until the gesture has
    * finished.
