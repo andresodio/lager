@@ -167,7 +167,7 @@ void AddGestureWithSensor(vector<GestureEntry>& gestures) {
   lager_converter->Start();
 
   new_gesture.lager = lager_converter->BlockingGetLagerString();
-  delete(lager_converter);
+  lager_converter->Stop();
   cout << "Gesture lager: " << new_gesture.lager << endl << endl;
 
   gestures.push_back(new_gesture);
