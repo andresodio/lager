@@ -1,6 +1,6 @@
 INCLUDE_DIR := ../common
 LDFLAGS=-L/usr/local/lib/
-LIBS=-llager_convert -lboost_system -lboost_thread -lvrpn -lpthread
+LIBS=-llager_convert -lboost_system -lboost_thread -lvrpn -lpthread -lquat
 BUILD_DIR=./build
 
 all: lager_gesture_manager
