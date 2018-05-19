@@ -1,6 +1,6 @@
 /**
  * Dependencies that need to be installed for lager to compile and run on
- * an Ubuntu 14.04 or 14.10 machine.
+ * an Ubuntu 18.04 machine.
  */
 
 -----------------
