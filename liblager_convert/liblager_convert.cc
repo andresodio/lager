@@ -5,6 +5,7 @@
  *      Author: Andrés Odio
  */
 
+#include <iostream>
 #include <string>
 #include <time.h>     // for nanosleep
 
