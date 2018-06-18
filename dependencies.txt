@@ -13,31 +13,18 @@ Install the missing packages:
 Make sure to accept all extra packages suggested by apt-get.
 
 -----------------
-      VRPN
+      OSVR
 -----------------
 
-Clone the VRPN repository:
-~$ git clone https://github.com/vrpn/vrpn.git
+Clone the OSVR-Core repository:
+~$ git clone https://github.com/OSVR/OSVR-Core.git
 
-Go to the vrpn directory and download its submodules to allow compiling VRPN's local HIDAPI
-implementation:
-~$ cd vrpn
-~/vrpn$ git submodule update --init
+Install OSVR-Core by following the instructions at:
+https://github.com/OSVR/OSVR-Docs/blob/master/Getting-Started/Installing/Linux-Build-Instructions.md
 
-Then create a build directory within vrpn:
-~/vrpn$ mkdir build
+If the compilation segfaults with GCC, try it with clang:
+~/OSVR-Core/build$ CXX=/usr/bin/clang++ CC=/usr/bin/clang cmake ..
+~/OSVR-Core/build$ CXX=/usr/bin/clang++ CC=/usr/bin/clang make
 
-And configure its build via CMake:
-~/vrpn$ cd build
-~/vrpn/build$ cmake ..
-
-Next, compile and install VRPN:
-~/vrpn/build$ make && sudo make install
-
-Finally, edit the VRPN configuration file to enable support for your chosen sensor:
-~/vrpn/build$ sudo vi /usr/local/etc/vrpn.cfg
-
-For example, in order to enable the Razer Hydra (which is used by liblager_convert),
-uncomment these lines:
-#vrpn_Tracker_RazerHydra Tracker0
-#vrpn_Tracker_FilterOneEuro Filter0 *Tracker0  2  1.15 1.0 1.2  1.5 5.0 1.2
+Finally, install OSVR:
+~/OSVR-Core/build$ sudo make install

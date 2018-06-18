@@ -14,13 +14,9 @@
 #include <chrono>
 #include <boost/thread.hpp>
 
-#include <vrpn_Button.h>                // for vrpn_BUTTONCB, etc
-#include <vrpn_Tracker.h>               // for vrpn_TRACKERCB, etc
-
-#include "vrpn_Configure.h"             // for VRPN_CALLBACK
-#include "vrpn_Connection.h"            // for vrpn_Connection
-#include "vrpn_ForceDevice.h"           // for vrpn_ForceDevice_Remote, etc
-#include "vrpn_Types.h"                 // for vrpn_float64
+#include <osvr/ClientKit/Context.h>
+#include <osvr/ClientKit/Interface.h>
+#include <osvr/ClientKit/Context_decl.h>
 
 using std::string;
 using std::stringstream;
@@ -69,14 +65,6 @@ class LagerConverter {
   ~LagerConverter() {
     processing_thread_.interrupt();
     processing_thread_.join();
-
-    if (tracker_) {
-      delete tracker_;
-    }
-
-    if (button_) {
-      delete button_;
-    }
   }
 
   /**
@@ -94,14 +82,6 @@ class LagerConverter {
   void Stop() {
     processing_thread_.interrupt();
     processing_thread_.join();
-
-    if (tracker_) {
-      delete tracker_;
-    }
-
-    if (button_) {
-      delete button_;
-    }
   }
 
   /**
@@ -113,17 +93,19 @@ class LagerConverter {
 
  private:
   /**
-   * Empty constructor for this class.
+   * Constructor for this class.
+   * Initializes the OSVR context.
    */
-  LagerConverter() {
+  LagerConverter() : context_("LagerConverter") {
   }
   ;
 
   /**
-   * Empty constructor for this class, with a parameter taking a reference to
+   * Constructor for this class, with a parameter taking a reference to
    * a class instance.
+   * Initializes the OSVR context.
    */
-  LagerConverter(LagerConverter const&) {
+  LagerConverter(LagerConverter const&) : context_("LagerConverter") {
   }
   ;
 
@@ -133,6 +115,9 @@ class LagerConverter {
   LagerConverter& operator=(LagerConverter const&) {
   }
   ;
+
+  /// OSVR context
+  osvr::clientkit::ClientContext context_;
 
   /// Pointer to an instance of this class
   static LagerConverter* instance_;
@@ -156,15 +141,18 @@ class LagerConverter {
   /// movements to LaGeR.
   bool use_buttons_ = false;
 
-  /// Pointer to the current tracker structure
-  vrpn_Tracker_Remote* tracker_;
-  /// Pointer to the current button structure
-  vrpn_Button_Remote* button_;
+  /// Pointer to the current tracker structures
+  osvr::clientkit::Interface left_tracker_;
+  osvr::clientkit::Interface right_tracker_;
+
+  /// Pointer to the current button structures
+  osvr::clientkit::Interface left_button_;
+  osvr::clientkit::Interface right_button_;
 
   /// Last report for sensor 0
-  vrpn_TRACKERCB last_report_0_;
+  OSVR_PositionReport last_report_0_;
   /// Last report for sensor 1
-  vrpn_TRACKERCB last_report_1_;
+  OSVR_PositionReport last_report_1_;
 
   /// Whether to convert sensor movements to LaGeR or not
   bool draw_gestures_ = true;
@@ -193,7 +181,7 @@ class LagerConverter {
   char last_sensor_1_letter_ = '_';
 
   /**
-   * Registers and initializes the VRPN sensor handlers.
+   * Registers and initializes the OSVR sensor handlers.
    */
   void InitializeTrackers();
   /**
@@ -204,50 +192,55 @@ class LagerConverter {
   /**
    * Callback that handles changes to the sensor positions.
    */
-  static void VRPN_CALLBACK HandleTrackerChange(void *user_data,
-                                                const vrpn_TRACKERCB tracker);
+  static void HandleTrackerChange(void * /*userdata*/,
+                          const OSVR_TimeValue * time_value,
+                          const OSVR_PositionReport *cur_report);
+
   /**
    * Callback that handles changes to the sensor button states.
    */
-  static void VRPN_CALLBACK HandleButtonChange(void *user_data,
-                                               const vrpn_BUTTONCB button);
+  static void HandleButtonChange(void *user_data, const OSVR_TimeValue *time_value,
+                        const OSVR_ButtonReport *cur_report);
+
+
   /**
    * Dummy callback that handles the first few sensor position changes during
    * initialization.
    */
-  static void VRPN_CALLBACK DummyHandleTrackerChange(
-      void *user_data, const vrpn_TRACKERCB tracker);
+  static void DummyHandleTrackerChange(void * user_data,
+                          const OSVR_TimeValue * time_value,
+                          const OSVR_PositionReport *cur_report);
 
   /**
    * Takes the previous and current sensor data and returns the change in X
    * axis position.
    */
-  vrpn_float64 GetDeltaX(const vrpn_TRACKERCB& last_report,
-                         const vrpn_TRACKERCB& tracker);
+  double GetDeltaX(const OSVR_PositionReport* last_report,
+                         const OSVR_PositionReport* cur_report);
   /**
    * Takes the previous and current sensor data and returns the change in Y
    * axis position.
    */
-  vrpn_float64 GetDeltaY(const vrpn_TRACKERCB& last_report,
-                         const vrpn_TRACKERCB& tracker);
+  double GetDeltaY(const OSVR_PositionReport* last_report,
+                         const OSVR_PositionReport* cur_report);
   /**
    * Takes the previous and current sensor data and returns the change in Z
    * axis position.
    */
-  vrpn_float64 GetDeltaZ(const vrpn_TRACKERCB& last_report,
-                         const vrpn_TRACKERCB& tracker);
+  double GetDeltaZ(const OSVR_PositionReport* last_report,
+                         const OSVR_PositionReport* cur_report);
 
   /**
    * Takes the change in X, Y, and Z Cartesian coordinates and returns the
    * equivalent theta change in spherical coordinates.
    */
-  double GetMovementThetaInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,
-                                   vrpn_float64 delta_z);
+  double GetMovementThetaInDegrees(double delta_x, double delta_y,
+                                   double delta_z);
   /**
    * Takes the change in X, Y, and Z Cartesian coordinates and returns the
    * equivalent phi change in spherical coordinates.
    */
-  double GetMovementPhiInDegrees(vrpn_float64 delta_x, vrpn_float64 delta_y,
+  double GetMovementPhiInDegrees(double delta_x, double delta_y,
                                  double theta);
 
   /**
@@ -259,13 +252,14 @@ class LagerConverter {
    * Takes the previous and current sensor data and returns the sum of the
    * square of each X, Y, and Z distance component in Cartesian coordinates.
    */
-  vrpn_float64 GetDistanceSquared(const vrpn_TRACKERCB& last_report,
-                                  const vrpn_TRACKERCB& tracker);
+  double GetDistanceSquared(const OSVR_PositionReport* last_report,
+                                  const OSVR_PositionReport* cur_report);
+
   /**
    * Takes the previous and current sensor data and prints it.
    */
-  void PrintSensorCoordinates(const vrpn_TRACKERCB& last_report,
-                              const vrpn_TRACKERCB& tracker);
+  void PrintSensorCoordinates(const OSVR_PositionReport* last_report,
+                              const OSVR_PositionReport* cur_report);
 
   /**
    * Takes a time and returns the numberof milliseconds elapsed until now.
@@ -276,7 +270,7 @@ class LagerConverter {
    * elapsed between the sensor's last movement and that time.
    */
   int GetMillisecondsSinceTrackerTime(
-      const vrpn_TRACKERCB& tracker, const time_point<system_clock> &last_time);
+      const OSVR_TimeValue* time_value, const time_point<system_clock> &last_time);
   /**
    * Takes two time variables and assigns one to the other.
    */
@@ -286,7 +280,7 @@ class LagerConverter {
    * Takes sensor data and returns its movement time.
    */
   time_point<system_clock> GetCurrentMovementTime(
-        const vrpn_TRACKERCB& tracker);
+        const OSVR_TimeValue* time_value);
 
   /**
    * Returns whether the current gesture has paused or not.
@@ -302,17 +296,17 @@ class LagerConverter {
    * Takes the current and previous sensor data and calculates the position
    * change in X, Y, and Z Cartesian coordinates.
    */
-  void CalculateMovementDeltas(const vrpn_TRACKERCB& tracker,
-                               const vrpn_TRACKERCB* last_report,
-                               vrpn_float64& delta_x, vrpn_float64& delta_y,
-                               vrpn_float64& delta_z);
+  void CalculateMovementDeltas(const OSVR_PositionReport* cur_report,
+                               const OSVR_PositionReport* last_report,
+                               double& delta_x, double& delta_y,
+                               double& delta_z);
   /**
    * Takes the current and previous sensor data and calculates the movement
    * angles in theta and phi spherical coordinates.
    */
   void CalculateMovementAngles(double& theta, double& phi, int& snap_theta,
-                               int& snap_phi, vrpn_float64 delta_x,
-                               vrpn_float64 delta_y, vrpn_float64 delta_z);
+                               int& snap_phi, double delta_x,
+                               double delta_y, double delta_z);
 
   /**
    * Moves the global LaGeR stringstream head back to the beginning of a
@@ -331,14 +325,16 @@ class LagerConverter {
    * corresponding to its movement, and update the global LaGeR string with
    * the corresponding symbol.
    */
-  void UpdateLagerString(const vrpn_TRACKERCB& tracker, const int snap_theta,
+  void UpdateLagerString(const OSVR_PositionReport* cur_report,
+                         const OSVR_TimeValue* time_value, const int snap_theta,
                          const int snap_phi);
 
   /**
    * Takes the current sensor data structure and updates the global movement
    * timers.
    */
-  void UpdateTimers(const vrpn_TRACKERCB& tracker);
+  void UpdateTimers(const OSVR_PositionReport* cur_report, const OSVR_TimeValue* time_value);
+
 };
 
 #endif /* LIBLAGER_CONVERT_H_ */

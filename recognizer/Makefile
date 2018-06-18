@@ -3,13 +3,13 @@ LDFLAGS=-L/usr/local/lib/
 ARCH_LIBS := -lpthread -lquat
 BOOST_LIBS := -lboost_system -lboost_thread -lboost_serialization
 LAGER_LIBS := -llager_connect -llager_convert -llager_recognize
-VRPN_LIBS := -lvrpn
+OSVR_LIBS := -losvrClientKit
 BUILD_DIR := ./build
 
 all: lager_recognizer
 
 lager_recognizer: lager_recognizer.cc
-	g++ -std=c++11 -I$(INCLUDE_DIR) $(LDFLAGS) lager_recognizer.cc -o $(BUILD_DIR)/lager_recognizer $(LAGER_LIBS) $(BOOST_LIBS) $(VRPN_LIBS) $(ARCH_LIBS)
+	g++ -std=c++11 -I$(INCLUDE_DIR) $(LDFLAGS) lager_recognizer.cc -o $(BUILD_DIR)/lager_recognizer $(LAGER_LIBS) $(BOOST_LIBS) $(OSVR_LIBS) $(ARCH_LIBS)
 
 clean:
 	rm -f $(BUILD_DIR)/*

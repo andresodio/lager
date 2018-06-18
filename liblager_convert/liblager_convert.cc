@@ -29,9 +29,6 @@ using std::chrono::time_point;
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define MOVEMENT_GROUPING_TIME_MILLISECONDS 200
 
-#define TRACKER_SERVER "Filter0@localhost" // Filtered
-#define BUTTON_SERVER "Tracker0@localhost" // Raw
-
 LagerConverter* LagerConverter::instance_ = NULL;
 
 LagerConverter* LagerConverter::Instance() {
@@ -42,24 +39,24 @@ LagerConverter* LagerConverter::Instance() {
   return instance_;
 }
 
-vrpn_float64 LagerConverter::GetDeltaX(const vrpn_TRACKERCB& last_report,
-                                       const vrpn_TRACKERCB& tracker) {
-  return (last_report.pos[1] - tracker.pos[1]);
+double LagerConverter::GetDeltaX(const OSVR_PositionReport* last_report,
+                                       const OSVR_PositionReport* cur_report) {
+  return (last_report->xyz.data[1] - cur_report->xyz.data[1]);
 }
 
-vrpn_float64 LagerConverter::GetDeltaY(const vrpn_TRACKERCB& last_report,
-                                       const vrpn_TRACKERCB& tracker) {
-  return (tracker.pos[0] - last_report.pos[0]);
+double LagerConverter::GetDeltaY(const OSVR_PositionReport* last_report,
+                                       const OSVR_PositionReport* cur_report) {
+  return (cur_report->xyz.data[0] - last_report->xyz.data[0]);
 }
 
-vrpn_float64 LagerConverter::GetDeltaZ(const vrpn_TRACKERCB& last_report,
-                                       const vrpn_TRACKERCB& tracker) {
-  return (tracker.pos[2] - last_report.pos[2]);
+double LagerConverter::GetDeltaZ(const OSVR_PositionReport* last_report,
+                                       const OSVR_PositionReport* cur_report) {
+  return (cur_report->xyz.data[2] - last_report->xyz.data[2]);
 }
 
-double LagerConverter::GetMovementThetaInDegrees(vrpn_float64 delta_x,
-                                                 vrpn_float64 delta_y,
-                                                 vrpn_float64 delta_z) {
+double LagerConverter::GetMovementThetaInDegrees(double delta_x,
+                                                 double delta_y,
+                                                 double delta_z) {
   double movementTheta = acos(
       delta_z
           / (sqrt(pow(delta_x, 2.0) + pow(delta_y, 2.0) + pow(delta_z, 2.0))))
@@ -67,8 +64,8 @@ double LagerConverter::GetMovementThetaInDegrees(vrpn_float64 delta_x,
   return fmod(movementTheta + 360.0, 360.0);  // Always returns a positive angle
 }
 
-double LagerConverter::GetMovementPhiInDegrees(vrpn_float64 delta_x,
-                                               vrpn_float64 delta_y,
+double LagerConverter::GetMovementPhiInDegrees(double delta_x,
+                                               double delta_y,
                                                double theta) {
   int snap_theta = SnapAngle(theta);
   if (snap_theta == 0 || snap_theta == 180) {
@@ -84,25 +81,25 @@ int LagerConverter::SnapAngle(double aAngle) {
   return 45 * (round(aAngle / 45.0));
 }
 
-vrpn_float64 LagerConverter::GetDistanceSquared(
-    const vrpn_TRACKERCB& last_report, const vrpn_TRACKERCB& tracker) {
-  return (last_report.pos[0] - tracker.pos[0])
-      * (last_report.pos[0] - tracker.pos[0])
-      + (last_report.pos[1] - tracker.pos[1])
-          * (last_report.pos[1] - tracker.pos[1])
-      + (last_report.pos[2] - tracker.pos[2])
-          * (last_report.pos[2] - tracker.pos[2]);
+double LagerConverter::GetDistanceSquared(
+    const OSVR_PositionReport* last_report, const OSVR_PositionReport* cur_report) {
+  return (last_report->xyz.data[0] - cur_report->xyz.data[0])
+      * (last_report->xyz.data[0] - cur_report->xyz.data[0])
+      + (last_report->xyz.data[1] - cur_report->xyz.data[1])
+          * (last_report->xyz.data[1] - cur_report->xyz.data[1])
+      + (last_report->xyz.data[2] - cur_report->xyz.data[2])
+          * (last_report->xyz.data[2] - cur_report->xyz.data[2]);
 }
 
 #define abs(x) ((x)<0 ? -(x) : (x))
 
-void LagerConverter::PrintSensorCoordinates(const vrpn_TRACKERCB& last_report,
-                                            const vrpn_TRACKERCB& tracker) {
-  printf("\nSensor %d is now at (%g,%g,%g)\n", tracker.sensor, tracker.pos[0],
-         tracker.pos[1], tracker.pos[2]);
-  printf("old/new X: %g, %g\n", last_report.pos[1], tracker.pos[1]);
-  printf("old/new Y: %g, %g\n", last_report.pos[0], tracker.pos[0]);
-  printf("old/new Z: %g, %g\n", last_report.pos[2], tracker.pos[2]);
+void LagerConverter::PrintSensorCoordinates(const OSVR_PositionReport* last_report,
+                                            const OSVR_PositionReport* cur_report) {
+  printf("\nSensor %d is now at (%g,%g,%g)\n", cur_report->sensor, cur_report->xyz.data[0],
+         cur_report->xyz.data[1], cur_report->xyz.data[2]);
+  printf("old/new X: %g, %g\n", last_report->xyz.data[1], cur_report->xyz.data[1]);
+  printf("old/new Y: %g, %g\n", last_report->xyz.data[0], cur_report->xyz.data[0]);
+  printf("old/new Z: %g, %g\n", last_report->xyz.data[2], cur_report->xyz.data[2]);
 }
 
 char LagerConverter::GetCurrentLetter(int snap_theta, int snap_phi) {
@@ -119,11 +116,11 @@ int LagerConverter::GetMillisecondsUntilNow(
 }
 
 int LagerConverter::GetMillisecondsSinceTrackerTime(
-    const vrpn_TRACKERCB& tracker, const time_point<system_clock> &last_time) {
+    const OSVR_TimeValue* time_value, const time_point<system_clock> &last_time) {
   time_point < system_clock
       > current_movement_time(
-          seconds(tracker.msg_time.tv_sec)
-              + microseconds(tracker.msg_time.tv_usec));
+          seconds(time_value->seconds)
+              + microseconds(time_value->microseconds));
   return duration<double, std::milli>(current_movement_time - last_time).count();
 }
 
@@ -141,22 +138,22 @@ void LagerConverter::ResetLagerString() {
   lager_string_.str("");
 }
 
-void LagerConverter::CalculateMovementDeltas(const vrpn_TRACKERCB& tracker,
-                                             const vrpn_TRACKERCB* last_report,
-                                             vrpn_float64& delta_x,
-                                             vrpn_float64& delta_y,
-                                             vrpn_float64& delta_z) {
-  delta_x = GetDeltaX(*last_report, tracker);
-  delta_y = GetDeltaY(*last_report, tracker);
-  delta_z = GetDeltaZ(*last_report, tracker);
+void LagerConverter::CalculateMovementDeltas(const OSVR_PositionReport* cur_report,
+                                             const OSVR_PositionReport* last_report,
+                                             double& delta_x,
+                                             double& delta_y,
+                                             double& delta_z) {
+  delta_x = GetDeltaX(last_report, cur_report);
+  delta_y = GetDeltaY(last_report, cur_report);
+  delta_z = GetDeltaZ(last_report, cur_report);
   //printf("X delta: %g, Y delta: %g, Z delta: %g\n", deltaX, deltaY, deltaZ);
 }
 
 void LagerConverter::CalculateMovementAngles(double& theta, double& phi,
                                              int& snap_theta, int& snap_phi,
-                                             vrpn_float64 delta_x,
-                                             vrpn_float64 delta_y,
-                                             vrpn_float64 delta_z) {
+                                             double delta_x,
+                                             double delta_y,
+                                             double delta_z) {
   theta = GetMovementThetaInDegrees(delta_x, delta_y, delta_z);
   snap_theta = SnapAngle(theta);
   phi = GetMovementPhiInDegrees(delta_x, delta_y, theta);
@@ -170,25 +167,26 @@ void LagerConverter::MoveHeadToBeginningOfLetterPair() {
 }
 
 time_point<system_clock> LagerConverter::GetCurrentMovementTime(
-    const vrpn_TRACKERCB& tracker) {
+    const OSVR_TimeValue* time_value) {
   time_point < system_clock
       > current_movement_time(
-          seconds(tracker.msg_time.tv_sec)
-              + microseconds(tracker.msg_time.tv_usec));
+          seconds(time_value->seconds)
+              + microseconds(time_value->microseconds));
   return current_movement_time;
 }
 
-void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
+void LagerConverter::UpdateLagerString(const OSVR_PositionReport* cur_report,
+                                       const OSVR_TimeValue* time_value,
                                        const int snap_theta,
                                        const int snap_phi) {
   int time_since_sensor_0_last_movement = 0;
   int time_since_sensor_1_last_movement = 0;
   char currentLetter = GetCurrentLetter(snap_theta, snap_phi);
 
-  if (tracker.sensor == 0) {
+  if (cur_report->sensor == 0) {
     last_sensor_0_letter_ = currentLetter;
     time_since_sensor_1_last_movement = GetMillisecondsSinceTrackerTime(
-        tracker, sensor_1_last_movement_time_);
+        time_value, sensor_1_last_movement_time_);
 
     /*
      * If sensor 1 reported new movements since the last time it was grouped,
@@ -198,7 +196,7 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
         && (time_since_sensor_1_last_movement
             < MOVEMENT_GROUPING_TIME_MILLISECONDS)) {
       //printf("S0: Grouping with previous S1. Current: %c, last: %c\n", currentLetter, last_sensor_1_letter);
-      sensor_0_last_grouped_movement_time_ = GetCurrentMovementTime(tracker);
+      sensor_0_last_grouped_movement_time_ = GetCurrentMovementTime(time_value);
       sensor_1_last_grouped_movement_time_ = sensor_1_last_movement_time_;
       MoveHeadToBeginningOfLetterPair();
       lager_string_ << currentLetter << last_sensor_1_letter_;
@@ -210,7 +208,7 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
   } else {
     last_sensor_1_letter_ = currentLetter;
     time_since_sensor_0_last_movement = GetMillisecondsSinceTrackerTime(
-        tracker, sensor_0_last_movement_time_);
+        time_value, sensor_0_last_movement_time_);
 
     /*
      * If sensor 0 reported new movements since the last time it was grouped,
@@ -221,7 +219,7 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
             < MOVEMENT_GROUPING_TIME_MILLISECONDS)) {
       //printf("S1: Grouping with previous S0. Current: %c, last: %c\n", currentLetter, last_sensor_0_letter);
       sensor_0_last_grouped_movement_time_ = sensor_0_last_movement_time_;
-      sensor_1_last_grouped_movement_time_ = GetCurrentMovementTime(tracker);
+      sensor_1_last_grouped_movement_time_ = GetCurrentMovementTime(time_value);
       MoveHeadToBeginningOfLetterPair();
       lager_string_ << last_sensor_0_letter_ << currentLetter;
     } else {
@@ -238,12 +236,12 @@ void LagerConverter::UpdateLagerString(const vrpn_TRACKERCB& tracker,
   }
 }
 
-void LagerConverter::UpdateTimers(const vrpn_TRACKERCB& tracker) {
+void LagerConverter::UpdateTimers(const OSVR_PositionReport* cur_report, const OSVR_TimeValue* time_value) {
   time_point < system_clock > current_movement_time = GetCurrentMovementTime(
-      tracker);
+      time_value);
   UpdateTimePoint(global_last_movement_time_, current_movement_time);
 
-  if (tracker.sensor == 0) {
+  if (cur_report->sensor == 0) {
     UpdateTimePoint(sensor_0_last_movement_time_, current_movement_time);
   } else {
     UpdateTimePoint(sensor_1_last_movement_time_, current_movement_time);
@@ -252,68 +250,70 @@ void LagerConverter::UpdateTimers(const vrpn_TRACKERCB& tracker) {
   //printf("Updated. GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
 }
 
-void VRPN_CALLBACK LagerConverter::HandleTrackerChange(
-    void *user_data, const vrpn_TRACKERCB tracker) {
+void LagerConverter::HandleTrackerChange(void *user_data,
+                        const OSVR_TimeValue *time_value,
+                        const OSVR_PositionReport *cur_report) {
 
   LagerConverter* lager_converter = LagerConverter::Instance();
-  vrpn_TRACKERCB *last_report;  // keep track of the current sensor's last report
-  vrpn_float64 deltaX, deltaY, deltaZ;
+  OSVR_PositionReport *last_report;
+  double deltaX, deltaY, deltaZ;
   double theta, phi;
   int snap_theta, snap_phi;
   static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
-  if (tracker.sensor == 0) {
+  if (cur_report->sensor == 0) {
     last_report = &lager_converter->last_report_0_;
   } else {
     last_report = &lager_converter->last_report_1_;
   }
 
   if (!lager_converter->draw_gestures_) {
-    *last_report = tracker;
+    *last_report = *cur_report;
     return;
   }
 
-  if (lager_converter->GetDistanceSquared(*last_report, tracker)
+  if (lager_converter->GetDistanceSquared(last_report, cur_report)
       > dist_interval_sq) {
     if (lager_converter->print_updates_) {
-      printf("Update for sensor: %i at time: %ld.%06ld\n", tracker.sensor,
-             tracker.msg_time.tv_sec, tracker.msg_time.tv_usec);
+      printf("Update for sensor: %i at time: %ld.%06d\n", cur_report->sensor,
+               time_value->seconds, time_value->microseconds);
       //printf("GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
       //printSensorCoordinates(last_report, tracker);
     }
 
-    lager_converter->UpdateTimers(tracker);
+    lager_converter->UpdateTimers(cur_report, time_value);
 
-    lager_converter->CalculateMovementDeltas(tracker, last_report, deltaX,
+    lager_converter->CalculateMovementDeltas(cur_report, last_report, deltaX,
                                              deltaY, deltaZ);
     lager_converter->CalculateMovementAngles(theta, phi, snap_theta, snap_phi,
                                              deltaX, deltaY, deltaZ);
 
-    lager_converter->UpdateLagerString(tracker, snap_theta, snap_phi);
+    lager_converter->UpdateLagerString(cur_report, time_value, snap_theta, snap_phi);
 
-    *last_report = tracker;
+    *last_report = *cur_report;
   }
 }
 
-void VRPN_CALLBACK LagerConverter::HandleButtonChange(
-    void *user_data, const vrpn_BUTTONCB button) {
+void LagerConverter::HandleButtonChange(void *user_data, const OSVR_TimeValue *time_value,
+                      const OSVR_ButtonReport *cur_report) {
   LagerConverter* lager_converter = LagerConverter::Instance();
 
-  if (button.state == 1) {
+  if (cur_report->state == 1) {
     lager_converter->draw_gestures_ = true;
   } else {
     lager_converter->draw_gestures_ = false;
   }
 }
 
-void VRPN_CALLBACK LagerConverter::DummyHandleTrackerChange(
-    void *user_data, const vrpn_TRACKERCB tracker) {
+void LagerConverter::DummyHandleTrackerChange(void * user_data,
+                        const OSVR_TimeValue * time_value,
+                        const OSVR_PositionReport *cur_report) {
   LagerConverter* lager_converter = LagerConverter::Instance();
 
-  if (tracker.sensor == 0) {
-    lager_converter->last_report_0_ = tracker;
+  if (cur_report->sensor == 0) {
+    lager_converter->last_report_0_ = *cur_report;
   } else {
-    lager_converter->last_report_1_ = tracker;
+    lager_converter->last_report_1_ = *cur_report;
   }
 
   int *num_reports_received = (int *) user_data;
@@ -324,38 +324,29 @@ void LagerConverter::InitializeTrackers() {
   struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
   int num_reports_received = 0;
 
-  // Initialize the tracker_ handler
-  tracker_ = new vrpn_Tracker_Remote(TRACKER_SERVER);
-  tracker_->register_change_handler(&num_reports_received,
-                                    DummyHandleTrackerChange);
+  osvr::clientkit::ClientContext context("lager.liblager_convert");
 
-  // Skip the first reports, which are spurious (sensor initialization)
-  while (num_reports_received != 2) {
-    nanosleep(&sleep_interval, NULL);
-    tracker_->mainloop();
-  }
+  // Initialize the tracker handlers
+  left_tracker_ = context_.getInterface("/me/hands/left");
+  right_tracker_ = context_.getInterface("/me/hands/right");
 
-  // Finish initializing the tracker_
-  tracker_->unregister_change_handler(&num_reports_received,
-                                      DummyHandleTrackerChange);
-  tracker_->register_change_handler(NULL, HandleTrackerChange);
+  left_tracker_.registerCallback(&HandleTrackerChange, NULL);
+  right_tracker_.registerCallback(&HandleTrackerChange, NULL);
 
   if (use_buttons_) {
-    // Initialize the button_ handler
-    button_ = new vrpn_Button_Remote(BUTTON_SERVER);
-    button_->register_change_handler(NULL, HandleButtonChange);
+    // Initialize the button handlers
+    left_button_ = context_.getInterface("/controller/left/1");
+    right_button_ = context_.getInterface("/controller/right/1");
+
+    left_button_.registerCallback(&HandleButtonChange, NULL);
+    right_button_.registerCallback(&HandleButtonChange, NULL);
   }
 }
 
 void LagerConverter::ProcessSensorEvents() {
   while (true) {
-    if (use_buttons_) {
-      // Let button handler receive button status from the remote button
-      button_->mainloop();
-    }
-
-    // Let tracker handler receive position information from the remote tracker
-    tracker_->mainloop();
+    // Request an update from the sensor context
+    context_.update();
 
     // If gesture buildup pauses, finish converting it
     int lager_string_length = lager_string_.str().length();
