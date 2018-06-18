@@ -41,7 +41,7 @@ LagerConverter* LagerConverter::Instance() {
 
 double LagerConverter::GetDeltaX(const OSVR_PositionReport* last_report,
                                        const OSVR_PositionReport* cur_report) {
-  return (last_report->xyz.data[1] - cur_report->xyz.data[1]);
+  return (cur_report->xyz.data[2] - last_report->xyz.data[2]);
 }
 
 double LagerConverter::GetDeltaY(const OSVR_PositionReport* last_report,
@@ -51,7 +51,7 @@ double LagerConverter::GetDeltaY(const OSVR_PositionReport* last_report,
 
 double LagerConverter::GetDeltaZ(const OSVR_PositionReport* last_report,
                                        const OSVR_PositionReport* cur_report) {
-  return (cur_report->xyz.data[2] - last_report->xyz.data[2]);
+  return (cur_report->xyz.data[1] - last_report->xyz.data[1]);
 }
 
 double LagerConverter::GetMovementThetaInDegrees(double delta_x,
