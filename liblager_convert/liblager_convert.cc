@@ -253,7 +253,6 @@ void LagerConverter::UpdateTimers(const OSVR_PositionReport* cur_report, const O
 void LagerConverter::HandleTrackerChange(void *user_data,
                         const OSVR_TimeValue *time_value,
                         const OSVR_PositionReport *cur_report) {
-
   LagerConverter* lager_converter = LagerConverter::Instance();
   OSVR_PositionReport *last_report;
   double deltaX, deltaY, deltaZ;
@@ -305,6 +304,17 @@ void LagerConverter::HandleButtonChange(void *user_data, const OSVR_TimeValue *t
   }
 }
 
+void LagerConverter::HandlePinchChange(void * user_data, const OSVR_TimeValue * time_value,
+                      const OSVR_AnalogReport *cur_report) {
+    LagerConverter* lager_converter = LagerConverter::Instance();
+    lager_converter->draw_gestures_ = true; return;
+    if (cur_report->state == 1) {
+      lager_converter->draw_gestures_ = true;
+    } else {
+      lager_converter->draw_gestures_ = false;
+    }
+}
+
 void LagerConverter::DummyHandleTrackerChange(void * user_data,
                         const OSVR_TimeValue * time_value,
                         const OSVR_PositionReport *cur_report) {
@@ -334,12 +344,18 @@ void LagerConverter::InitializeTrackers() {
   right_tracker_.registerCallback(&HandleTrackerChange, NULL);
 
   if (use_buttons_) {
-    // Initialize the button handlers
+    // Initialize the button and pinch handlers
     left_button_ = context_.getInterface("/controller/left/1");
     right_button_ = context_.getInterface("/controller/right/1");
 
     left_button_.registerCallback(&HandleButtonChange, NULL);
     right_button_.registerCallback(&HandleButtonChange, NULL);
+
+    left_pinch_ = context_.getInterface("/controller/left/trigger");
+    //right_pinch_ = context_.getInterface("/controller/right/trigger");
+
+    left_pinch_.registerCallback(&HandlePinchChange, NULL);
+    //right_pinch_.registerCallback(&HandlePinchChange, NULL);
   }
 }
 

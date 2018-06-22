@@ -28,3 +28,40 @@ If the compilation segfaults with GCC, try it with clang:
 
 Finally, install OSVR:
 ~/OSVR-Core/build$ sudo make install
+
+-----------------
+   Razer Hydra
+-----------------
+
+The Razer Hydra is supported out of the box by OSVR.
+
+-----------------
+   Leap Motion
+-----------------
+
+Download the Leap Motion v2 SDK:
+https://leapmotion.app.box.com/s/rlwzvt680i5r6zes75ge36ub2yt7ksx3
+
+Extract it:
+~$ tar xvzf LeapDeveloperKit_linux-hotfix_2.3.1+33747_linux.tgz
+
+Move the LeapSDK to your home directory:
+~$ mv LeapDeveloperKit_2.3.1+33747_linux/LeapSDK/ .
+
+Copy the Leap library to your system:
+~$ sudo cp LeapSDK/lib/x64/libLeap.so /usr/local/lib/
+
+Clone the OSVR-Leap-Motion repository:
+~$ git clone https://github.com/OSVR/OSVR-Leap-Motion.git
+
+Checkout the waitForController branch, which supports the Leap Motion v2 SDK
+and has a fix for controller detection:
+~$ cd OSVR-Leap-Motion
+~/OSVR-Leap-Motion$ git checkout waitForController
+
+Compile and Install OSVR-Leap-Motion:
+~/OSVR-Leap-Motion$ mkdir build
+~/OSVR-Leap-Motion$ cd build
+~/OSVR-Leap-Motion/build$ cmake -DLEAPMOTION_LEAP_LIBRARY_RELEASE=~/LeapSDK/lib/x64/libLeap.so -DLEAPMOTION_ROOT_DIR=~/ ..
+~/OSVR-Leap-Motion/build$ make
+~/OSVR-Leap-Motion/build$ sudo make install

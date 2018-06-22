@@ -149,6 +149,10 @@ class LagerConverter {
   osvr::clientkit::Interface left_button_;
   osvr::clientkit::Interface right_button_;
 
+  /// Pointer to the current pinch structures
+  osvr::clientkit::Interface left_pinch_;
+  osvr::clientkit::Interface right_pinch_;
+
   /// Last report for sensor 0
   OSVR_PositionReport last_report_0_;
   /// Last report for sensor 1
@@ -201,6 +205,12 @@ class LagerConverter {
    */
   static void HandleButtonChange(void *user_data, const OSVR_TimeValue *time_value,
                         const OSVR_ButtonReport *cur_report);
+
+  /**
+   * Callback that handles changes to the sensor pinch states.
+   */
+  static void HandlePinchChange(void *user_data, const OSVR_TimeValue *time_value,
+                        const OSVR_AnalogReport *cur_report);
 
 
   /**
