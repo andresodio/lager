@@ -183,7 +183,7 @@ void LagerConverter::UpdateLagerString(const OSVR_PositionReport* cur_report,
   int time_since_sensor_1_last_movement = 0;
   char currentLetter = GetCurrentLetter(snap_theta, snap_phi);
 
-  if (cur_report->sensor == 0) {
+  if (cur_report->sensor <= 10) { // Usually the first sensor has a value <= 10
     last_sensor_0_letter_ = currentLetter;
     time_since_sensor_1_last_movement = GetMillisecondsSinceTrackerTime(
         time_value, sensor_1_last_movement_time_);
@@ -260,7 +260,7 @@ void LagerConverter::HandleTrackerChange(void *user_data,
   int snap_theta, snap_phi;
   static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
-  if (cur_report->sensor == 0) {
+  if (cur_report->sensor <= 10) { // Usually the first sensor has a value <= 10
     last_report = &lager_converter->last_report_0_;
   } else {
     last_report = &lager_converter->last_report_1_;
@@ -307,8 +307,8 @@ void LagerConverter::HandleButtonChange(void *user_data, const OSVR_TimeValue *t
 void LagerConverter::HandlePinchChange(void * user_data, const OSVR_TimeValue * time_value,
                       const OSVR_AnalogReport *cur_report) {
     LagerConverter* lager_converter = LagerConverter::Instance();
-    lager_converter->draw_gestures_ = true; return;
-    if (cur_report->state == 1) {
+
+    if (cur_report->state > 0.8) { // Approximate value where a pinch most likely occurred
       lager_converter->draw_gestures_ = true;
     } else {
       lager_converter->draw_gestures_ = false;
@@ -352,10 +352,10 @@ void LagerConverter::InitializeTrackers() {
     right_button_.registerCallback(&HandleButtonChange, NULL);
 
     left_pinch_ = context_.getInterface("/controller/left/trigger");
-    //right_pinch_ = context_.getInterface("/controller/right/trigger");
+    right_pinch_ = context_.getInterface("/controller/right/trigger");
 
     left_pinch_.registerCallback(&HandlePinchChange, NULL);
-    //right_pinch_.registerCallback(&HandlePinchChange, NULL);
+    right_pinch_.registerCallback(&HandlePinchChange, NULL);
   }
 }
 
