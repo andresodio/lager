@@ -54,10 +54,27 @@ Copy the Leap library to your system:
 Clone the OSVR-Leap-Motion repository:
 ~$ git clone https://github.com/OSVR/OSVR-Leap-Motion.git
 
-Checkout the waitForController branch, which supports the Leap Motion v2 SDK
-and has a fix for controller detection:
+Checkout the following commit, which is the latest one that supports the Leap
+Motion v2 SDK:
 ~$ cd OSVR-Leap-Motion
-~/OSVR-Leap-Motion$ git checkout waitForController
+~/OSVR-Leap-Motion$ git checkout aa89b29454a6e717ff9860a29b7791518a690d3d
+
+Cherry-pick the following commit, which adds retries to make sure the Leap
+Motion controller is connected:
+~$ cd OSVR-Leap-Motion
+~/OSVR-Leap-Motion$ git cherry-pick 3810b93d908a943bb934fe739171f9f4e21e575c
+
+Apply the following patch to fix a compilation error:
+--- a/Tracker.cpp
++++ b/Tracker.cpp
+@@ -15,7 +15,7 @@ Tracker::Tracker(const osvr::pluginkit::DeviceToken& pDeviceToken,
+                                                                                                mTrackerInterface(NULL) {
+     // note we have two skeleton sensors, one for each hand, each with their own spec
+     // this is because the articulation specs for each hand are not connected by a parent joint
+-    osvrDeviceSkeletonConfigure(pOptions, &mSkeletonInterface, com_osvr_LeapMotion_json, 2);
++    osvrDeviceSkeletonConfigure(pOptions, &mSkeletonInterface, com_osvr_LeapMotion_json);
+ 
+        osvrDeviceTrackerConfigure(pOptions, &mTrackerInterface);
 
 Compile and Install OSVR-Leap-Motion:
 ~/OSVR-Leap-Motion$ mkdir build
