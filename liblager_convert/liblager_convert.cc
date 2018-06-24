@@ -29,6 +29,9 @@ using std::chrono::time_point;
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define MOVEMENT_GROUPING_TIME_MILLISECONDS 200
 
+int first_sensor_index = -1;
+int second_sensor_index = -1;
+
 LagerConverter* LagerConverter::instance_ = NULL;
 
 LagerConverter* LagerConverter::Instance() {
@@ -183,7 +186,7 @@ void LagerConverter::UpdateLagerString(const OSVR_PositionReport* cur_report,
   int time_since_sensor_1_last_movement = 0;
   char currentLetter = GetCurrentLetter(snap_theta, snap_phi);
 
-  if (cur_report->sensor <= 10) { // Usually the first sensor has a value <= 10
+  if (cur_report->sensor == first_sensor_index) {
     last_sensor_0_letter_ = currentLetter;
     time_since_sensor_1_last_movement = GetMillisecondsSinceTrackerTime(
         time_value, sensor_1_last_movement_time_);
@@ -241,7 +244,7 @@ void LagerConverter::UpdateTimers(const OSVR_PositionReport* cur_report, const O
       time_value);
   UpdateTimePoint(global_last_movement_time_, current_movement_time);
 
-  if (cur_report->sensor == 0) {
+  if (cur_report->sensor == first_sensor_index) {
     UpdateTimePoint(sensor_0_last_movement_time_, current_movement_time);
   } else {
     UpdateTimePoint(sensor_1_last_movement_time_, current_movement_time);
@@ -260,7 +263,7 @@ void LagerConverter::HandleTrackerChange(void *user_data,
   int snap_theta, snap_phi;
   static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
-  if (cur_report->sensor <= 10) { // Usually the first sensor has a value <= 10
+  if (cur_report->sensor == first_sensor_index) {
     last_report = &lager_converter->last_report_0_;
   } else {
     last_report = &lager_converter->last_report_1_;
@@ -318,24 +321,55 @@ void LagerConverter::HandlePinchChange(void * user_data, const OSVR_TimeValue * 
 void LagerConverter::DummyHandleTrackerChange(void * user_data,
                         const OSVR_TimeValue * time_value,
                         const OSVR_PositionReport *cur_report) {
+  int *num_sensors_detected = (int *) user_data;
   LagerConverter* lager_converter = LagerConverter::Instance();
+  OSVR_PositionReport *last_report;
 
-  if (cur_report->sensor == 0) {
-    lager_converter->last_report_0_ = *cur_report;
-  } else {
-    lager_converter->last_report_1_ = *cur_report;
+  if (cur_report->sensor > second_sensor_index) {
+    if (second_sensor_index > first_sensor_index) {
+      first_sensor_index = second_sensor_index;
+      *num_sensors_detected = *num_sensors_detected + 1;
+    }
+    second_sensor_index = cur_report->sensor;
+    *num_sensors_detected = *num_sensors_detected + 1;
+  } else if (cur_report-> sensor != second_sensor_index) {
+    first_sensor_index = cur_report->sensor;
+    *num_sensors_detected = *num_sensors_detected + 1;
   }
 
-  int *num_reports_received = (int *) user_data;
-  *num_reports_received = *num_reports_received + 1;
+  if (cur_report->sensor == first_sensor_index) {
+    last_report = &lager_converter->last_report_0_;
+  } else {
+    last_report = &lager_converter->last_report_1_;
+  }
+
+  *last_report = *cur_report;
+}
+
+void LagerConverter::DetectTrackerIndexes() {
+  int num_sensors_detected = 0;
+
+  left_tracker_ = context_.getInterface("/me/hands/left");
+  right_tracker_ = context_.getInterface("/me/hands/right");
+
+  left_tracker_.registerCallback(&DummyHandleTrackerChange, &num_sensors_detected);
+  right_tracker_.registerCallback(&DummyHandleTrackerChange, &num_sensors_detected);
+
+  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
+  // Iterate until we detect both sensors
+  while (num_sensors_detected < 2) {
+      nanosleep(&sleep_interval, NULL);
+      context_.update();
+  }
+
+  left_tracker_.free();
+  right_tracker_.free();
+
+  //cout << "First sensor index: " << first_sensor_index << endl;
+  //cout << "Second sensor index: " << second_sensor_index << endl;
 }
 
 void LagerConverter::InitializeTrackers() {
-  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
-  int num_reports_received = 0;
-
-  osvr::clientkit::ClientContext context("lager.liblager_convert");
-
   // Initialize the tracker handlers
   left_tracker_ = context_.getInterface("/me/hands/left");
   right_tracker_ = context_.getInterface("/me/hands/right");

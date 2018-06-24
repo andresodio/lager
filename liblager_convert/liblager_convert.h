@@ -72,6 +72,7 @@ class LagerConverter {
    * events.
    */
   void Start() {
+    DetectTrackerIndexes();
     InitializeTrackers();
     processing_thread_ = boost::thread(&LagerConverter::ProcessSensorEvents, this);
   }
@@ -185,9 +186,15 @@ class LagerConverter {
   char last_sensor_1_letter_ = '_';
 
   /**
+   * Detects the OSVR sensor indexes for each tracker.
+   */
+  void DetectTrackerIndexes();
+
+  /**
    * Registers and initializes the OSVR sensor handlers.
    */
   void InitializeTrackers();
+
   /**
    * Main loop for processing sensor movement and button events.
    */
