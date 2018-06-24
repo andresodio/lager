@@ -29,6 +29,14 @@ using std::chrono::time_point;
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define MOVEMENT_GROUPING_TIME_MILLISECONDS 200
 
+#define MIN_PINCH_VALUE 0.8
+
+#define FIRST_PINCH_INDEX 8
+#define SECOND_PINCH_INDEX 9
+
+#define FIRST_BUTTON_INDEX 1
+#define SECOND_BUTTON_INDEX 9
+
 int first_sensor_index = -1;
 int second_sensor_index = -1;
 
@@ -269,7 +277,7 @@ void LagerConverter::HandleTrackerChange(void *user_data,
     last_report = &lager_converter->last_report_1_;
   }
 
-  if (!lager_converter->draw_gestures_) {
+  if (!lager_converter->draw_gestures_1_ && !lager_converter->draw_gestures_2_) {
     *last_report = *cur_report;
     return;
   }
@@ -300,10 +308,10 @@ void LagerConverter::HandleButtonChange(void *user_data, const OSVR_TimeValue *t
                       const OSVR_ButtonReport *cur_report) {
   LagerConverter* lager_converter = LagerConverter::Instance();
 
-  if (cur_report->state == 1) {
-    lager_converter->draw_gestures_ = true;
+  if (cur_report->sensor == FIRST_BUTTON_INDEX) {
+    lager_converter->draw_gestures_1_ = (cur_report->state == 1) ? true : false;
   } else {
-    lager_converter->draw_gestures_ = false;
+    lager_converter->draw_gestures_2_ = (cur_report->state == 1) ? true : false;
   }
 }
 
@@ -311,10 +319,10 @@ void LagerConverter::HandlePinchChange(void * user_data, const OSVR_TimeValue * 
                       const OSVR_AnalogReport *cur_report) {
     LagerConverter* lager_converter = LagerConverter::Instance();
 
-    if (cur_report->state > 0.8) { // Approximate value where a pinch most likely occurred
-      lager_converter->draw_gestures_ = true;
+    if (cur_report->sensor == FIRST_PINCH_INDEX) {
+      lager_converter->draw_gestures_1_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
     } else {
-      lager_converter->draw_gestures_ = false;
+      lager_converter->draw_gestures_2_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
     }
 }
 

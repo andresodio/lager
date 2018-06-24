@@ -55,7 +55,8 @@ class LagerConverter {
     use_buttons_ = use_buttons;
 
     // If using buttons, will only draw when button is pressed
-    draw_gestures_ = !use_buttons;
+    draw_gestures_1_ = !use_buttons;
+    draw_gestures_2_ = !use_buttons;
   }
 
   /**
@@ -159,8 +160,11 @@ class LagerConverter {
   /// Last report for sensor 1
   OSVR_PositionReport last_report_1_;
 
-  /// Whether to convert sensor movements to LaGeR or not
-  bool draw_gestures_ = true;
+  /// Whether to convert sensor movements to LaGeR or not.
+  /// Each variable corresponds to one of the sensors.
+  /// We draw whenever at least one of them is activated.
+  bool draw_gestures_1_ = false;
+  bool draw_gestures_2_ = false;
 
   /// The LaGeR string for the current sensor movements
   std::stringstream lager_string_;
