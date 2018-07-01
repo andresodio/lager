@@ -73,7 +73,6 @@ class LagerConverter {
    * events.
    */
   void Start() {
-    DetectTrackerIndexes();
     InitializeTrackers();
     processing_thread_ = boost::thread(&LagerConverter::ProcessSensorEvents, this);
   }
@@ -190,11 +189,6 @@ class LagerConverter {
   char last_sensor_1_letter_ = '_';
 
   /**
-   * Detects the OSVR sensor indexes for each tracker.
-   */
-  void DetectTrackerIndexes();
-
-  /**
    * Registers and initializes the OSVR sensor handlers.
    */
   void InitializeTrackers();
@@ -205,32 +199,49 @@ class LagerConverter {
   void ProcessSensorEvents();
 
   /**
-   * Callback that handles changes to the sensor positions.
+   * Left side wrapper for callback that handles changes to the sensor positions.
    */
-  static void HandleTrackerChange(void * /*userdata*/,
+  static void HandleTrackerChangeLeft(void * /*userdata*/,
                           const OSVR_TimeValue * time_value,
                           const OSVR_PositionReport *cur_report);
 
   /**
-   * Callback that handles changes to the sensor button states.
+   * Right side wrapper for callback that handles changes to the sensor positions.
    */
-  static void HandleButtonChange(void *user_data, const OSVR_TimeValue *time_value,
+  static void HandleTrackerChangeRight(void * /*userdata*/,
+                          const OSVR_TimeValue * time_value,
+                          const OSVR_PositionReport *cur_report);
+
+  /**
+   * Callback that handles changes to the sensor positions.
+   */
+  static void HandleTrackerChange(const unsigned int sensor_index,
+                          const OSVR_TimeValue * time_value,
+                          const OSVR_PositionReport *cur_report);
+
+  /**
+   * Callback that handles changes to the left sensor button states.
+   */
+  static void HandleButtonChangeLeft(void *user_data, const OSVR_TimeValue *time_value,
                         const OSVR_ButtonReport *cur_report);
 
   /**
-   * Callback that handles changes to the sensor pinch states.
+   * Callback that handles changes to the right sensor button states.
    */
-  static void HandlePinchChange(void *user_data, const OSVR_TimeValue *time_value,
-                        const OSVR_AnalogReport *cur_report);
-
+  static void HandleButtonChangeRight(void *user_data, const OSVR_TimeValue *time_value,
+                        const OSVR_ButtonReport *cur_report);
 
   /**
-   * Dummy callback that handles the first few sensor position changes during
-   * initialization.
+   * Callback that handles changes to the left sensor pinch states.
    */
-  static void DummyHandleTrackerChange(void * user_data,
-                          const OSVR_TimeValue * time_value,
-                          const OSVR_PositionReport *cur_report);
+  static void HandlePinchChangeLeft(void *user_data, const OSVR_TimeValue *time_value,
+                        const OSVR_AnalogReport *cur_report);
+
+  /**
+   * Callback that handles changes to the right sensor pinch states.
+   */
+  static void HandlePinchChangeRight(void *user_data, const OSVR_TimeValue *time_value,
+                        const OSVR_AnalogReport *cur_report);
 
   /**
    * Takes the previous and current sensor data and returns the change in X
@@ -346,7 +357,8 @@ class LagerConverter {
    * corresponding to its movement, and update the global LaGeR string with
    * the corresponding symbol.
    */
-  void UpdateLagerString(const OSVR_PositionReport* cur_report,
+  void UpdateLagerString(const unsigned int sensor_index,
+                         const OSVR_PositionReport* cur_report,
                          const OSVR_TimeValue* time_value, const int snap_theta,
                          const int snap_phi);
 
@@ -354,7 +366,9 @@ class LagerConverter {
    * Takes the current sensor data structure and updates the global movement
    * timers.
    */
-  void UpdateTimers(const OSVR_PositionReport* cur_report, const OSVR_TimeValue* time_value);
+  void UpdateTimers(const unsigned int sensor_index,
+                    const OSVR_PositionReport* cur_report,
+                    const OSVR_TimeValue* time_value);
 
 };
 

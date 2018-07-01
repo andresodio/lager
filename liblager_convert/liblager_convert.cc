@@ -31,15 +31,6 @@ using std::chrono::time_point;
 
 #define MIN_PINCH_VALUE 0.8
 
-#define FIRST_PINCH_INDEX 8
-#define SECOND_PINCH_INDEX 9
-
-#define FIRST_BUTTON_INDEX 1
-#define SECOND_BUTTON_INDEX 9
-
-int first_sensor_index = -1;
-int second_sensor_index = -1;
-
 LagerConverter* LagerConverter::instance_ = NULL;
 
 LagerConverter* LagerConverter::Instance() {
@@ -186,7 +177,8 @@ time_point<system_clock> LagerConverter::GetCurrentMovementTime(
   return current_movement_time;
 }
 
-void LagerConverter::UpdateLagerString(const OSVR_PositionReport* cur_report,
+void LagerConverter::UpdateLagerString(const unsigned int sensor_index,
+                                       const OSVR_PositionReport* cur_report,
                                        const OSVR_TimeValue* time_value,
                                        const int snap_theta,
                                        const int snap_phi) {
@@ -194,7 +186,7 @@ void LagerConverter::UpdateLagerString(const OSVR_PositionReport* cur_report,
   int time_since_sensor_1_last_movement = 0;
   char currentLetter = GetCurrentLetter(snap_theta, snap_phi);
 
-  if (cur_report->sensor == first_sensor_index) {
+  if (sensor_index == 0) {
     last_sensor_0_letter_ = currentLetter;
     time_since_sensor_1_last_movement = GetMillisecondsSinceTrackerTime(
         time_value, sensor_1_last_movement_time_);
@@ -247,12 +239,14 @@ void LagerConverter::UpdateLagerString(const OSVR_PositionReport* cur_report,
   }
 }
 
-void LagerConverter::UpdateTimers(const OSVR_PositionReport* cur_report, const OSVR_TimeValue* time_value) {
+void LagerConverter::UpdateTimers(const unsigned int sensor_index,
+                                  const OSVR_PositionReport* cur_report,
+                                  const OSVR_TimeValue* time_value) {
   time_point < system_clock > current_movement_time = GetCurrentMovementTime(
       time_value);
   UpdateTimePoint(global_last_movement_time_, current_movement_time);
 
-  if (cur_report->sensor == first_sensor_index) {
+  if (sensor_index == 0) {
     UpdateTimePoint(sensor_0_last_movement_time_, current_movement_time);
   } else {
     UpdateTimePoint(sensor_1_last_movement_time_, current_movement_time);
@@ -261,7 +255,19 @@ void LagerConverter::UpdateTimers(const OSVR_PositionReport* cur_report, const O
   //printf("Updated. GLMT: %i, S0LMT: %i, S1LMT: %i\n", GetMillisecondsSinceTrackerTime(tracker, global_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_0_last_movement_time), GetMillisecondsSinceTrackerTime(tracker, sensor_1_last_movement_time));
 }
 
-void LagerConverter::HandleTrackerChange(void *user_data,
+void LagerConverter::HandleTrackerChangeLeft(void *user_data,
+                        const OSVR_TimeValue *time_value,
+                        const OSVR_PositionReport *cur_report) {
+  HandleTrackerChange(0, time_value, cur_report);
+}
+
+void LagerConverter::HandleTrackerChangeRight(void *user_data,
+                        const OSVR_TimeValue *time_value,
+                        const OSVR_PositionReport *cur_report) {
+  HandleTrackerChange(1, time_value, cur_report);
+}
+
+void LagerConverter::HandleTrackerChange(const unsigned int sensor_index,
                         const OSVR_TimeValue *time_value,
                         const OSVR_PositionReport *cur_report) {
   LagerConverter* lager_converter = LagerConverter::Instance();
@@ -271,7 +277,7 @@ void LagerConverter::HandleTrackerChange(void *user_data,
   int snap_theta, snap_phi;
   static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
-  if (cur_report->sensor == first_sensor_index) {
+  if (sensor_index == 0) {
     last_report = &lager_converter->last_report_0_;
   } else {
     last_report = &lager_converter->last_report_1_;
@@ -291,90 +297,41 @@ void LagerConverter::HandleTrackerChange(void *user_data,
       //printSensorCoordinates(last_report, tracker);
     }
 
-    lager_converter->UpdateTimers(cur_report, time_value);
+    lager_converter->UpdateTimers(sensor_index, cur_report, time_value);
 
     lager_converter->CalculateMovementDeltas(cur_report, last_report, deltaX,
                                              deltaY, deltaZ);
     lager_converter->CalculateMovementAngles(theta, phi, snap_theta, snap_phi,
                                              deltaX, deltaY, deltaZ);
 
-    lager_converter->UpdateLagerString(cur_report, time_value, snap_theta, snap_phi);
+    lager_converter->UpdateLagerString(sensor_index, cur_report, time_value, snap_theta, snap_phi);
 
     *last_report = *cur_report;
   }
 }
 
-void LagerConverter::HandleButtonChange(void *user_data, const OSVR_TimeValue *time_value,
+void LagerConverter::HandleButtonChangeLeft(void *user_data, const OSVR_TimeValue *time_value,
                       const OSVR_ButtonReport *cur_report) {
   LagerConverter* lager_converter = LagerConverter::Instance();
-
-  if (cur_report->sensor == FIRST_BUTTON_INDEX) {
-    lager_converter->draw_gestures_1_ = (cur_report->state == 1) ? true : false;
-  } else {
-    lager_converter->draw_gestures_2_ = (cur_report->state == 1) ? true : false;
-  }
+  lager_converter->draw_gestures_1_ = (cur_report->state == 1) ? true : false;
 }
 
-void LagerConverter::HandlePinchChange(void * user_data, const OSVR_TimeValue * time_value,
+void LagerConverter::HandleButtonChangeRight(void *user_data, const OSVR_TimeValue *time_value,
+                      const OSVR_ButtonReport *cur_report) {
+  LagerConverter* lager_converter = LagerConverter::Instance();
+  lager_converter->draw_gestures_2_ = (cur_report->state == 1) ? true : false;
+}
+
+void LagerConverter::HandlePinchChangeLeft(void * user_data, const OSVR_TimeValue * time_value,
                       const OSVR_AnalogReport *cur_report) {
     LagerConverter* lager_converter = LagerConverter::Instance();
-
-    if (cur_report->sensor == FIRST_PINCH_INDEX) {
-      lager_converter->draw_gestures_1_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
-    } else {
-      lager_converter->draw_gestures_2_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
-    }
+    lager_converter->draw_gestures_1_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
 }
 
-void LagerConverter::DummyHandleTrackerChange(void * user_data,
-                        const OSVR_TimeValue * time_value,
-                        const OSVR_PositionReport *cur_report) {
-  int *num_sensors_detected = (int *) user_data;
-  LagerConverter* lager_converter = LagerConverter::Instance();
-  OSVR_PositionReport *last_report;
-
-  if (cur_report->sensor > second_sensor_index) {
-    if (second_sensor_index > first_sensor_index) {
-      first_sensor_index = second_sensor_index;
-      *num_sensors_detected = *num_sensors_detected + 1;
-    }
-    second_sensor_index = cur_report->sensor;
-    *num_sensors_detected = *num_sensors_detected + 1;
-  } else if (cur_report-> sensor != second_sensor_index) {
-    first_sensor_index = cur_report->sensor;
-    *num_sensors_detected = *num_sensors_detected + 1;
-  }
-
-  if (cur_report->sensor == first_sensor_index) {
-    last_report = &lager_converter->last_report_0_;
-  } else {
-    last_report = &lager_converter->last_report_1_;
-  }
-
-  *last_report = *cur_report;
-}
-
-void LagerConverter::DetectTrackerIndexes() {
-  int num_sensors_detected = 0;
-
-  left_tracker_ = context_.getInterface("/me/hands/left");
-  right_tracker_ = context_.getInterface("/me/hands/right");
-
-  left_tracker_.registerCallback(&DummyHandleTrackerChange, &num_sensors_detected);
-  right_tracker_.registerCallback(&DummyHandleTrackerChange, &num_sensors_detected);
-
-  struct timespec sleep_interval = { 0, MAIN_SLEEP_INTERVAL_MICROSECONDS };
-  // Iterate until we detect both sensors
-  while (num_sensors_detected < 2) {
-      nanosleep(&sleep_interval, NULL);
-      context_.update();
-  }
-
-  left_tracker_.free();
-  right_tracker_.free();
-
-  //cout << "First sensor index: " << first_sensor_index << endl;
-  //cout << "Second sensor index: " << second_sensor_index << endl;
+void LagerConverter::HandlePinchChangeRight(void * user_data, const OSVR_TimeValue * time_value,
+                      const OSVR_AnalogReport *cur_report) {
+    LagerConverter* lager_converter = LagerConverter::Instance();
+    lager_converter->draw_gestures_2_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
 }
 
 void LagerConverter::InitializeTrackers() {
@@ -382,22 +339,22 @@ void LagerConverter::InitializeTrackers() {
   left_tracker_ = context_.getInterface("/me/hands/left");
   right_tracker_ = context_.getInterface("/me/hands/right");
 
-  left_tracker_.registerCallback(&HandleTrackerChange, NULL);
-  right_tracker_.registerCallback(&HandleTrackerChange, NULL);
+  left_tracker_.registerCallback(&HandleTrackerChangeLeft, NULL);
+  right_tracker_.registerCallback(&HandleTrackerChangeRight, NULL);
 
   if (use_buttons_) {
     // Initialize the button and pinch handlers
     left_button_ = context_.getInterface("/controller/left/1");
     right_button_ = context_.getInterface("/controller/right/1");
 
-    left_button_.registerCallback(&HandleButtonChange, NULL);
-    right_button_.registerCallback(&HandleButtonChange, NULL);
+    left_button_.registerCallback(&HandleButtonChangeLeft, NULL);
+    right_button_.registerCallback(&HandleButtonChangeRight, NULL);
 
     left_pinch_ = context_.getInterface("/controller/left/trigger");
     right_pinch_ = context_.getInterface("/controller/right/trigger");
 
-    left_pinch_.registerCallback(&HandlePinchChange, NULL);
-    right_pinch_.registerCallback(&HandlePinchChange, NULL);
+    left_pinch_.registerCallback(&HandlePinchChangeLeft, NULL);
+    right_pinch_.registerCallback(&HandlePinchChangeRight, NULL);
   }
 }
 
