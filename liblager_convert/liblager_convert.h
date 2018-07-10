@@ -25,6 +25,8 @@ using std::chrono::time_point;
 
 #define DISTANCE_INTERVAL_SQUARED 0.0004f //0.4 * (1 cm)^2
 
+enum class LCTrackingMode { absolute, relative };
+
 /**
  * Converts the movement of input sensors into LaGeR strings.
  */
@@ -57,6 +59,20 @@ class LagerConverter {
     // If using buttons, will only draw when button is pressed
     draw_gestures_1_ = !use_buttons;
     draw_gestures_2_ = !use_buttons;
+  }
+
+  /**
+   * Sets the tracking_mode_ member variable.
+   *
+   * If set to absolute, sensor tracker reports will be interpreted using
+   * absolute coordinates, and relative movement deltas will be calculated
+   * between reports.
+   *
+   * If set to relative, sensor tracker reports will be interpreted directly as
+   * relative movements. This is needed with devices such as mouses.
+   */
+  void SetTrackingMode (LCTrackingMode tracking_mode) {
+    tracking_mode_ = tracking_mode;
   }
 
   /**
@@ -158,6 +174,12 @@ class LagerConverter {
   OSVR_PositionReport last_report_0_;
   /// Last report for sensor 1
   OSVR_PositionReport last_report_1_;
+
+  /// Whether to interpret sensor tracking with absolute or relative
+  /// coordinates.
+  ///
+  /// Defaults to absolute.
+  LCTrackingMode tracking_mode_ = LCTrackingMode::absolute;
 
   /// Whether to convert sensor movements to LaGeR or not.
   /// Each variable corresponds to one of the sensors.

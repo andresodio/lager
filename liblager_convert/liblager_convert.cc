@@ -43,17 +43,29 @@ LagerConverter* LagerConverter::Instance() {
 
 double LagerConverter::GetDeltaX(const OSVR_PositionReport* last_report,
                                        const OSVR_PositionReport* cur_report) {
-  return (cur_report->xyz.data[2] - last_report->xyz.data[2]);
+  if (LagerConverter::Instance()->tracking_mode_ == LCTrackingMode::absolute) {
+    return (cur_report->xyz.data[2] - last_report->xyz.data[2]);
+  } else {
+    return cur_report->xyz.data[2];
+  }
 }
 
 double LagerConverter::GetDeltaY(const OSVR_PositionReport* last_report,
                                        const OSVR_PositionReport* cur_report) {
-  return (cur_report->xyz.data[0] - last_report->xyz.data[0]);
+  if (LagerConverter::Instance()->tracking_mode_ == LCTrackingMode::absolute) {
+    return (cur_report->xyz.data[0] - last_report->xyz.data[0]);
+  } else {
+    return cur_report->xyz.data[0];
+  }
 }
 
 double LagerConverter::GetDeltaZ(const OSVR_PositionReport* last_report,
                                        const OSVR_PositionReport* cur_report) {
-  return (cur_report->xyz.data[1] - last_report->xyz.data[1]);
+  if (LagerConverter::Instance()->tracking_mode_ == LCTrackingMode::absolute) {
+    return (cur_report->xyz.data[1] - last_report->xyz.data[1]);
+  } else {
+    return cur_report->xyz.data[1];
+  }
 }
 
 double LagerConverter::GetMovementThetaInDegrees(double delta_x,

@@ -48,6 +48,26 @@ bool DetermineArgumentPresent(const int argc, const char** argv,
 }
 
 /**
+ * Reads the program arguments and returns whether sensor tracker reports are
+ * going to be interpreted as absolute coordinates or as relative movements.
+ *
+ * If no mode is specified, absolute tracking is used by default.
+ */
+LCTrackingMode DetermineTrackingMode(const int argc, const char** argv) {
+  LCTrackingMode tracking_mode;
+
+  if (DetermineArgumentPresent(argc, argv, "--relative_tracking")) {
+    cout << "Sensor tracker reports will be interpreted as relative movements." << endl;
+    tracking_mode = LCTrackingMode::relative;
+  } else {
+    cout << "Sensor tracker reports will be interpreted as absolute coordinates." << endl;
+    tracking_mode = LCTrackingMode::absolute;
+  }
+
+  return tracking_mode;
+}
+
+/**
  * Reads the program arguments and returns whether sensor buttons are going to
  * be used to start/stop gesture detection, or whether buttons will be ignored
  * and detection will be active at all times.
@@ -176,6 +196,7 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gestu
  * The main loop of the LaGeR Recognizer.
  */
 int main(int argc, const char *argv[]) {
+  LCTrackingMode tracking_mode = DetermineTrackingMode(argc, argv);
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
   bool print_updates = DetermineUpdatePrinting(argc, argv);
@@ -198,6 +219,7 @@ int main(int argc, const char *argv[]) {
   cout << "                                  " << endl;
 
   lager_converter->SetPrintUpdates(print_updates);
+  lager_converter->SetTrackingMode(tracking_mode);
   lager_converter->SetUseButtons(use_buttons);
   lager_converter->Start();
 
