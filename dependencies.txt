@@ -224,7 +224,7 @@ Add mouse tracker and mouse button devices to the OSVR configuration (/usr/local
 					}
 				},
 				"automaticAliases": {
-					"/me/hands/left": "/MouseTracker/tracker/0"
+					"/me/hands/right": "/MouseTracker/tracker/0"
 				}
 			}
 		},
@@ -238,7 +238,7 @@ Add mouse tracker and mouse button devices to the OSVR configuration (/usr/local
 					}
 				},
 				"automaticAliases": {
-					"/controller/left/1": "/MouseButtons/button/4"
+					"/controller/right/1": "/MouseButtons/button/4"
 				}
 			}
 		}
