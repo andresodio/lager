@@ -200,8 +200,8 @@ vrpn_DevInput           Mouse0          "Logitech G700s Rechargeable Gaming Mous
 
 Add a virtual tracker to the VRPN configuration (/usr/local/etc/vrpn.cfg) that uses the mouse device:
 vrpn_Tracker_AnalogFly Tracker0 60.0 absolute
-X  *Mouse0 0 0.5 0.0 2.0 1.0
-Y  *Mouse0 1 0.5 0.0 2.0 1.0
+X  *Mouse0 0 0.5 0.0 1.0 1.0
+Y  *Mouse0 1 0.5 0.0 -1.0 1.0
 Z  NULL 2 0.0 0.0 1.0 1.0
 RX NULL 3 0.0 0.0 1.0 1.0
 RY NULL 4 0.0 0.0 1.0 1.0
