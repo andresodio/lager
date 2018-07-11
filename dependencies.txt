@@ -109,73 +109,59 @@ Install VRPN:
 Uncomment the following joystick support within the VRPN config file (/usr/local/etc/vrpn.cfg):
 vrpn_Joylin	Joylin0	/dev/input/js0
 
-Add the following lines to the VRPN config file (/usr/local/etc/vrpn.cfg) to create trackers for the controller's joysticks:
-vrpn_Tracker_AnalogFly	Tracker0	60.0	absolute
-X	*Joylin0	0	0.0	0.0	1.0	1.0
-Y	*Joylin0	1	0.0	0.0	-1.0	1.0
-#Z	*Joystick0	6	0.0	0.0	1.0	1.0
-#RX	NULL		3	0.0	0.0	1.0	1.0
-#RY	NULL		4	0.0	0.0	1.0	1.0
-#RZ	*Joystick0	5	0.0	0.0	0.5	1.0
-#RESET	NULL	0
-#CLUTCH	NULL 0
+Add virtual trackers to the VRPN configuration (/usr/local/etc/vrpn.cfg) that use the controller's analog sticks:
+vrpn_Tracker_AnalogFly  Tracker0    60.0    absolute
+X   *Joylin0    0   0.0 0.0 1.0 1.0
+Y   *Joylin0    1   0.0 0.0 -1.0    1.0
 
-vrpn_Tracker_AnalogFly	Tracker1	60.0	absolute
-X	*Joylin0	2	0.0	0.0	1.0	1.0
-Y	*Joylin0	3	0.0	0.0	-1.0	1.0
-#Z	*Joystick0	6	0.0	0.0	1.0	1.0
-#RX	NULL		3	0.0	0.0	1.0	1.0
-#RY	NULL		4	0.0	0.0	1.0	1.0
-#RZ	*Joystick0	5	0.0	0.0	0.5	1.0
-#RESET	NULL	0
-#CLUTCH	NULL 0
+vrpn_Tracker_AnalogFly  Tracker1    60.0    absolute
+X   *Joylin0    2   0.0 0.0 1.0 1.0
+Y   *Joylin0    3   0.0 0.0 -1.0    1.0
 
-Create /usr/local/share/osvrcore/external-devices/device-descriptors/Xbox_Controller360TrackerRight.json with the following contents:
-{
-  "interfaces": {
-    "tracker": {
-      "count": 1
-    }
-  },
-  "automaticAliases": {
-    "/me/hands/left": "tracker/0"
-  }
-}
-
-Create /usr/local/share/osvrcore/external-devices/device-descriptors/Xbox_Controller360TrackerRight.json with the following contents:
-{
-  "interfaces": {
-    "tracker": {
-      "count": 1
-    }
-  },
-  "automaticAliases": {
-    "/me/hands/right": "tracker/0"
-  }
-}
-
-Replace the automatic aliases at the end of /usr/local/share/osvrcore/external-devices/device-descriptors/Xbox_Controller360.json by the following:
-  "automaticAliases": {
-    "/controller/left/1": "semantic/left/bumper",
-    "/controller/right/1": "semantic/right/bumper"
-  }
-
-Add the following configuration to your OSVR config file (/usr/local/share/osvrcore/osvr_server_config.json):
+Add Xbox 360 tracker and button devices to the OSVR configuration (/usr/local/share/osvrcore/osvr_server_config.json):
 	"externalDevices": {
-		"/Xbox_360LinuxDeviceLeftTracker": {
-		"deviceName": "Tracker0",
-		"server": "localhost:3884",
-		"descriptor": "/usr/local/share/osvrcore/external-devices/device-descriptors/Xbox_Controller360TrackerLeft.json"
+		"/Xbox_360_LeftTracker": {
+			"deviceName": "Tracker0",
+			"server": "localhost:3884",
+			"descriptor": {
+				"interfaces": {
+					"tracker": {
+						"count": 1
+					}
+				},
+				"automaticAliases": {
+					"/me/hands/left": "/Xbox_360_LeftTracker/tracker/0"
+				}
+			}
 		},
-		"/Xbox_360LinuxDeviceRightTracker": {
-		"deviceName": "Tracker1",
-		"server": "localhost:3884",
-		"descriptor": "/usr/local/share/osvrcore/external-devices/device-descriptors/Xbox_Controller360TrackerRight.json"
+		"/Xbox_360_RightTracker": {
+			"deviceName": "Tracker1",
+			"server": "localhost:3884",
+			"descriptor": {
+				"interfaces": {
+					"tracker": {
+						"count": 1
+					}
+				},
+				"automaticAliases": {
+					"/me/hands/right": "/Xbox_360_RightTracker/tracker/0"
+				}
+			}
 		},
-		"/Xbox_360LinuxDevice": {
-		"deviceName": "Joylin0",
-		"server": "localhost:3884",
-		"descriptor": "/usr/local/share/osvrcore/external-devices/device-descriptors/Xbox_Controller360.json"
+		"/Xbox_360_Buttons": {
+			"deviceName": "Joylin0",
+			"server": "localhost:3884",
+			"descriptor": {
+				"interfaces": {
+					"button": {
+						"count": 14
+					}
+				},
+				"automaticAliases": {
+					"/controller/left/1": "/Xbox_360_Buttons/button/4",
+					"/controller/right/1": "/Xbox_360_Buttons/button/5"
+				}
+			}
 		}
 	},
 
