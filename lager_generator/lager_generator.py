@@ -28,11 +28,11 @@ def gen_variants(gesture_str):
 	gesture_lst = list(gesture_str)
 	
 	for i, char in enumerate(gesture_lst):
-		if not char.isalnum():
+		if not char.isalpha():
 			continue
 
 		mean = 5
-		std_dev = 1
+		std_dev = 0.5
 		choice = random.normalvariate(mean,std_dev)
 	   
 		# If we are within 1 std_dev of the mean, keep the
