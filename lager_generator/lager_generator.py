@@ -61,6 +61,8 @@ def gen_variants(gesture_str):
 				neighbors = ['a', 'h', 'b', 'p', 'q', 'j']
 			elif (char == 'j'):
 				neighbors = ['i', 'b', 'c', 'q', 'k', 'y', 'r', 's']
+			elif (char == 'k'):
+				neighbors = ['b', 'c', 'd', 'j', 'l', 'r', 's', 't']
 			elif (char == 'l'):
 				neighbors = ['c', 'd', 'e', 'k', 'm', 's', 't', 'u']
 			elif (char == 'm'):
