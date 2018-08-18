@@ -5,7 +5,7 @@
 # Currently keeps only one character per movement (equivalent to single-sensor gestures) 
 
 import sys
-from lager_ml_utils import convert_lager_to_numbers
+from lager_ml_common import convert_lager_to_numbers
 
 if (len(sys.argv) < 3):
 	print("lager_file_to_numbers [GESTURE_FILE] [GESTURE_LABEL]")

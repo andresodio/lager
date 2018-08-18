@@ -20,11 +20,8 @@ import tensorflow as tf
 from tensorflow.python.data import Dataset
 import sys
 import time
-from lager_ml_utils import convert_lager_to_numbers, expand_gesture_to_target
-
-num_classes = 3
-num_features = 96
-max_feature_value = 26
+from lager_ml_common import num_classes, num_features, max_feature_value, convert_lager_to_numbers, expand_gesture_num_to_target
+from skimage.transform import rescale, resize, downscale_local_mean
 
 def construct_feature_columns():
   """Construct the TensorFlow Feature Columns.
@@ -88,8 +85,6 @@ while(True):
 		input_gesture = sys.argv[1]
 		if (not input_gesture[0].isdigit()):
 			input_gesture = convert_lager_to_numbers(input_gesture)
-			print("input as numbers: ", input_gesture)
-			input_gesture = expand_gesture_to_target(input_gesture, num_features, ',')
 	else:
 		print("Enter gesture values:")
 		input_gesture = input()
@@ -97,9 +92,12 @@ while(True):
 	print("Using input gesture: ", input_gesture)
 
 	gesture_values = [int(e) for e in input_gesture.strip().split(',')]
+	gesture_values = np.array([gesture_values],dtype=np.uint8)
 
-	new_samples = np.array([gesture_values],dtype=np.float32)
-	new_samples = new_samples / max_feature_value
+	gesture_values = gesture_values / max_feature_value
+	gesture_values.shape = (1, gesture_values.size)
+
+	new_samples = resize(gesture_values, (1, num_features), anti_aliasing=False)
 
 	predict_input_fn = tf.estimator.inputs.numpy_input_fn(
 		  x={"movements": new_samples},

@@ -30,12 +30,10 @@ from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
 from subprocess import call
+from lager_ml_common import num_classes, num_features, max_feature_value
 
 # Set basic dataset properties
-num_dataset_rows = 15000
-num_classes = 3
-num_features = 96
-max_feature_value = 26
+num_dataset_rows = 30000
 
 # Set logging and display properties
 tf.logging.set_verbosity(tf.logging.ERROR)
