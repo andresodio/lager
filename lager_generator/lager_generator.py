@@ -23,7 +23,7 @@ def generate_variants(gesture_str):
 			continue
 
 		mean = 5
-		std_dev = 1.25
+		std_dev = 1.0
 		choice = random.normalvariate(mean,std_dev)
 	   
 		# If we are within 1 std_dev of the mean, keep the
