@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # This program generates new gesture strings based on an input gesture string.
 #
@@ -11,20 +11,11 @@ import random
 import sys
 
 if (len(sys.argv) < 3):
-	print "lager_training_generator [GESTURE_FILE] [NUM_VARIANTS]"
+	print("lager_training_generator [GESTURE_FILE] [NUM_VARIANTS]")
 	exit()
 
-orig_gesture_file = open(sys.argv[1], "r");
-gesture_str = orig_gesture_file.read()
-orig_gesture_file.close()
+def generate_variants(gesture_str):
 
-print "Generating " +  sys.argv[2] + " variants for gesture: " + gesture_str
-
-variants_filename = sys.argv[1][:-4] + "_variants.dat"
-variants_file = open(variants_filename, "w")
-
-def gen_variants(gesture_str):
-	
 	gesture_lst = list(gesture_str)
 	
 	for i, char in enumerate(gesture_lst):
@@ -94,7 +85,7 @@ def gen_variants(gesture_str):
 			elif (char == 'z'):
 				neighbors = ['r', 's', 't', 'u', 'v', 'w', 'x', 'y']
 			else:
-				print 'Error: Incorrect character found, ' + char
+				print('Error: Incorrect character found, ' + char)
 				exit()
 
 			gesture_lst[i] = random.choice(neighbors)
@@ -102,7 +93,14 @@ def gen_variants(gesture_str):
 	gesture_str = ''.join(gesture_lst)
 	variants_file.write(gesture_str)
 
-for x in range (0, int(sys.argv[2])):
-	gen_variants(gesture_str)
+orig_gesture_file = open(sys.argv[1], "r");
+variants_filename = sys.argv[1][:-4] + "_variants.dat"
+variants_file = open(variants_filename, "w")
 
+for gesture in orig_gesture_file:
+	#print("Generating " +  sys.argv[2] + " variants for gesture: " + gesture)
+	for x in range (0, int(sys.argv[2])):
+		generate_variants(gesture)
+
+orig_gesture_file.close()
 variants_file.close()
