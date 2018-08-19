@@ -59,7 +59,7 @@ def create_nn_classifier():
 	classifier = tf.estimator.DNNClassifier(
 		feature_columns=construct_feature_columns(),
 		n_classes=_NUM_CLASSES,
-		hidden_units=[100, 100],
+		hidden_units=[8, 6],
 		optimizer=my_optimizer,
 		config=tf.estimator.RunConfig(keep_checkpoint_max=1),
 		model_dir="/tmp/lager_model"
