@@ -30,7 +30,7 @@ from sklearn import metrics
 import tensorflow as tf
 from tensorflow.python.data import Dataset
 from subprocess import call
-from lager_ml_common import num_classes, num_features, max_feature_value
+from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEATURE_VALUE
 
 # Set basic dataset properties
 num_dataset_rows = 30000
@@ -71,9 +71,9 @@ def parse_labels_and_features(dataset):
   labels = dataset[0]
 
   # DataFrame.loc index ranges are inclusive at both ends.
-  features = dataset.loc[:,1:num_features]
-  # Scale the data to [0, 1] by dividing out the max value, <max_feature_value>.
-  features = features / max_feature_value
+  features = dataset.loc[:,1:_NUM_FEATURES]
+  # Scale the data to [0, 1] by dividing out the max value, <_MAX_FEATURE_VALUE>.
+  features = features / _MAX_FEATURE_VALUE
 
   return labels, features
 
@@ -87,8 +87,8 @@ def construct_feature_columns():
     A set of feature columns
   """ 
   
-  # There are <num_features> movements in each gesture.
-  return set([tf.feature_column.numeric_column('movements', shape=num_features)])
+  # There are <_NUM_FEATURES> movements in each gesture.
+  return set([tf.feature_column.numeric_column('movements', shape=_NUM_FEATURES)])
 
 def create_training_input_fn(features, labels, batch_size, num_epochs=None, shuffle=True):
   """A custom input_fn for sending MNIST data to the estimator for training.
@@ -190,7 +190,7 @@ def train_linear_classification_model(
   my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
   classifier = tf.estimator.LinearClassifier(
       feature_columns=construct_feature_columns(),
-      n_classes=num_classes,
+      n_classes=_NUM_CLASSES,
       optimizer=my_optimizer,
       config=tf.estimator.RunConfig(keep_checkpoint_max=1),
 	  model_dir="/tmp/lager_model"
@@ -213,12 +213,12 @@ def train_linear_classification_model(
     training_predictions = list(classifier.predict(input_fn=predict_training_input_fn))
     training_probabilities = np.array([item['probabilities'] for item in training_predictions])
     training_pred_class_id = np.array([item['class_ids'][0] for item in training_predictions])
-    training_pred_one_hot = tf.keras.utils.to_categorical(training_pred_class_id,num_classes)
+    training_pred_one_hot = tf.keras.utils.to_categorical(training_pred_class_id,_NUM_CLASSES)
         
     validation_predictions = list(classifier.predict(input_fn=predict_validation_input_fn))
     validation_probabilities = np.array([item['probabilities'] for item in validation_predictions])    
     validation_pred_class_id = np.array([item['class_ids'][0] for item in validation_predictions])
-    validation_pred_one_hot = tf.keras.utils.to_categorical(validation_pred_class_id,num_classes)    
+    validation_pred_one_hot = tf.keras.utils.to_categorical(validation_pred_class_id,_NUM_CLASSES)
     
     # Compute training and validation errors.
     training_log_loss = metrics.log_loss(training_targets, training_pred_one_hot)
@@ -317,14 +317,14 @@ def train_nn_classification_model(
     training_examples, training_targets, batch_size)
   
   # Create feature columns.
-  feature_columns = [tf.feature_column.numeric_column('movements', shape=num_features)]
+  feature_columns = [tf.feature_column.numeric_column('movements', shape=_NUM_FEATURES)]
 
   # Create a DNNClassifier object.
   my_optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate)
   my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
   classifier = tf.estimator.DNNClassifier(
       feature_columns=feature_columns,
-      n_classes=num_classes,
+      n_classes=_NUM_CLASSES,
       hidden_units=hidden_units,
       optimizer=my_optimizer,
       config=tf.contrib.learn.RunConfig(keep_checkpoint_max=1),
@@ -348,12 +348,12 @@ def train_nn_classification_model(
     training_predictions = list(classifier.predict(input_fn=predict_training_input_fn))
     training_probabilities = np.array([item['probabilities'] for item in training_predictions])
     training_pred_class_id = np.array([item['class_ids'][0] for item in training_predictions])
-    training_pred_one_hot = tf.keras.utils.to_categorical(training_pred_class_id,num_classes)
+    training_pred_one_hot = tf.keras.utils.to_categorical(training_pred_class_id,_NUM_CLASSES)
         
     validation_predictions = list(classifier.predict(input_fn=predict_validation_input_fn))
     validation_probabilities = np.array([item['probabilities'] for item in validation_predictions])    
     validation_pred_class_id = np.array([item['class_ids'][0] for item in validation_predictions])
-    validation_pred_one_hot = tf.keras.utils.to_categorical(validation_pred_class_id,num_classes)
+    validation_pred_one_hot = tf.keras.utils.to_categorical(validation_pred_class_id,_NUM_CLASSES)
     
     # Compute training and validation errors.
     training_log_loss = metrics.log_loss(training_targets, training_pred_one_hot)

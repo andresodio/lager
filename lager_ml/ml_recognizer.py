@@ -20,8 +20,8 @@ import tensorflow as tf
 from tensorflow.python.data import Dataset
 import sys
 import time
-from lager_ml_common import num_classes, num_features, max_feature_value, convert_lager_to_numbers, expand_gesture_num_to_target
-from skimage.transform import rescale, resize, downscale_local_mean
+from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEATURE_VALUE, convert_lager_to_numbers, expand_gesture_num_to_target
+from skimage.transform import resize
 
 def construct_feature_columns():
   """Construct the TensorFlow Feature Columns.
@@ -30,8 +30,8 @@ def construct_feature_columns():
     A set of feature columns
   """ 
   
-  # There are <num_features> movements in each image.
-  return set([tf.feature_column.numeric_column('movements', shape=num_features)])
+  # There are <_NUM_FEATURES> movements in each image.
+  return set([tf.feature_column.numeric_column('movements', shape=_NUM_FEATURES)])
 
 def create_linear_classifier():
 	# Create a LinearClassifier object.
@@ -42,7 +42,7 @@ def create_linear_classifier():
 	print("Loading classifier")
 	classifier = tf.estimator.LinearClassifier(
 		feature_columns=construct_feature_columns(),
-		n_classes=num_classes,
+		n_classes=_NUM_CLASSES,
 		optimizer=my_optimizer,
 		config=tf.estimator.RunConfig(keep_checkpoint_max=1),
 		model_dir="/tmp/lager_model"
@@ -57,12 +57,12 @@ def create_nn_classifier():
 	my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
 
 	classifier = tf.estimator.DNNClassifier(
-   		feature_columns=construct_feature_columns(),
-    	n_classes=num_classes,
-    	hidden_units=[100, 100],
-    	optimizer=my_optimizer,
-    	config=tf.contrib.learn.RunConfig(keep_checkpoint_max=1),
-    	model_dir="/tmp/lager_model"
+		feature_columns=construct_feature_columns(),
+		n_classes=_NUM_CLASSES,
+		hidden_units=[100, 100],
+		optimizer=my_optimizer,
+		config=tf.estimator.RunConfig(keep_checkpoint_max=1),
+		model_dir="/tmp/lager_model"
   	)
 
 	return classifier
@@ -71,7 +71,7 @@ def create_nn_classifier():
 classifier = create_nn_classifier()
 
 predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-		  x={"movements": np.array([np.zeros(num_features)],dtype=np.float32)},
+		  x={"movements": np.array([np.zeros(_NUM_FEATURES)],dtype=np.float32)},
 		  num_epochs=1,
 		  shuffle=False)
 
@@ -94,10 +94,10 @@ while(True):
 	gesture_values = [int(e) for e in input_gesture.strip().split(',')]
 	gesture_values = np.array([gesture_values],dtype=np.uint8)
 
-	gesture_values = gesture_values / max_feature_value
+	gesture_values = gesture_values / _MAX_FEATURE_VALUE
 	gesture_values.shape = (1, gesture_values.size)
 
-	new_samples = resize(gesture_values, (1, num_features), anti_aliasing=False)
+	new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, mode='constant')
 
 	predict_input_fn = tf.estimator.inputs.numpy_input_fn(
 		  x={"movements": new_samples},
@@ -110,7 +110,8 @@ while(True):
 
 	predicted_classes = [p["classes"] for p in predictions]
 	for p in predicted_classes:
-	  print("Classified gesture: ", p)
+	  class_label = int(p[0].decode())
+	  print("Classified gesture: ", _GESTURE_LIST[class_label])
 
 	print("Elapsed time: ", int(round((after_time-before_time)*1000)), "ms")
 

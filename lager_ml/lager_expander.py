@@ -4,7 +4,7 @@
 
 import sys
 from io import StringIO
-from lager_ml_common import num_features, convert_lager_to_numbers, convert_numbers_to_lager, expand_gesture_num_to_target
+from lager_ml_common import _NUM_FEATURES, convert_lager_to_numbers, convert_numbers_to_lager, expand_gesture_num_to_target
 
 if (len(sys.argv) < 3):
 	print("lager_expander [GESTURE_FILE] [TARGET_LENGTH]")
@@ -19,7 +19,7 @@ target_length = int(sys.argv[2])
 
 for gesture in orig_gesture_file:
 	gesture_num = convert_lager_to_numbers(gesture)
-	expanded_num = expand_gesture_num_to_target(gesture_num, num_features, ',')
+	expanded_num = expand_gesture_num_to_target(gesture_num, _NUM_FEATURES, ',')
 	expanded_file.write(convert_numbers_to_lager(expanded_num) + "\n")
 
 expanded_file.close()

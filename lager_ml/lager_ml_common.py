@@ -6,9 +6,11 @@ from skimage.transform import resize
 import pprint as pp
 import math
 
-num_classes = 6
-num_features = 384
-max_feature_value = 26
+_GESTURE_LIST = ['triangle', 'square', 'circle', 'horizontal', 'vertical', 'g']
+_NUM_CLASSES = len(_GESTURE_LIST)
+_NUM_FEATURES = 192
+_MAX_FEATURE_VALUE = 26
+
 
 def convert_lager_to_numbers(gesture):
 	new_str = StringIO()
@@ -72,12 +74,12 @@ def expand_gesture_num_to_target(gesture, target_length, divider):
 	gesture_length = len(gesture_movements)
 
 	gesture_values = np.array([gesture_movements],dtype=np.uint8)
-	gesture_values = gesture_values / max_feature_value
+	gesture_values = gesture_values / _MAX_FEATURE_VALUE
 	gesture_values.shape = (1, gesture_values.size)
 
 	image_resized = resize(gesture_values, (1, target_length), anti_aliasing=False, mode='constant')
 
-	new_samples = image_resized * max_feature_value
+	new_samples = image_resized * _MAX_FEATURE_VALUE
 	new_samples = new_samples.round().astype(int)
 
 	return new_samples
