@@ -11,6 +11,8 @@ using std::stringstream;
 #include <vector>
 using std::vector;
 
+#include <Python.h>
+
 #include "liblager_connect.h"
 #include "liblager_convert.h"
 #include "liblager_recognize.h"
@@ -223,11 +225,15 @@ int main(int argc, const char *argv[]) {
   lager_converter->SetUseButtons(use_buttons);
   lager_converter->Start();
 
+  PyObject* python_classifier = lager_recognizer->InitializePythonClassifier();
+
   while(true) {
     string gesture_string = lager_converter->BlockingGetLagerString();
     if (g_subscribed_gestures.size() > 0) {
       SubscribedGesture recognized_gesture = lager_recognizer->RecognizeGesture(
           draw_gestures, gesture_string, match_found);
+
+      lager_recognizer->RecognizeGestureML(python_classifier, gesture_string, match_found);
 
       if (draw_gestures) {
         DrawMatchingGestures(recognized_gesture, gesture_string);

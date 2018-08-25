@@ -1,6 +1,6 @@
-INCLUDE_DIR=../common
+INCLUDE_DIR=../common -I/usr/include/python3.6m
 LDFLAGS=-L/usr/local/lib/
-ARCH_LIBS := -lpthread -lquat
+ARCH_LIBS := -lpython3.6m -lpthread -lquat
 BOOST_LIBS := -lboost_system -lboost_thread -lboost_serialization
 LAGER_LIBS := -llager_connect -llager_convert -llager_recognize
 OSVR_LIBS := -losvrClientKit
