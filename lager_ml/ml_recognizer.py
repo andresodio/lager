@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Licensed under the Apache License, Version 2.0 (the "License");
+#@title Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -12,70 +12,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Machine-learning based LaGeR recognizer using TensorFlow linear and DNN classifiers
-# Partially based on the following: https://colab.research.google.com/notebooks/mlcc/multi-class_classification_of_handwritten_digits.ipynb
+#@title MIT License
+#
+# Copyright (c) 2017 François Chollet
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
 
-import numpy as np
+# Machine-learning based LaGeR recognizer using TensorFlow DNN classifier
+# Partially based on:
+#  https://github.com/tensorflow/models/blob/master/samples/core/tutorials/keras/basic_classification.ipynb
+#  https://colab.research.google.com/notebooks/mlcc/multi-class_classification_of_handwritten_digits.ipynb
+
+# TensorFlow and tf.keras
 import tensorflow as tf
-from tensorflow.python.data import Dataset
+from tensorflow import keras
+
+# Helper libraries
+import numpy as np
+import pandas as pd
+from skimage.transform import resize
 import sys
 import time
+
+# Custom libraries
 from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEATURE_VALUE, convert_lager_to_numbers, expand_gesture_num_to_target
-from skimage.transform import resize
 
-def construct_feature_columns():
-  """Construct the TensorFlow Feature Columns.
+class_names = _GESTURE_LIST
 
-  Returns:
-    A set of feature columns
-  """ 
-  
-  # There are <_NUM_FEATURES> movements in each image.
-  return set([tf.feature_column.numeric_column('movements', shape=_NUM_FEATURES)])
+model = keras.models.load_model('/tmp/lager_model.h5')
 
-def create_linear_classifier():
-	# Create a LinearClassifier object.
-	learning_rate = 0.03
-	my_optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate)
-	my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
-	
-	print("Loading classifier")
-	classifier = tf.estimator.LinearClassifier(
-		feature_columns=construct_feature_columns(),
-		n_classes=_NUM_CLASSES,
-		optimizer=my_optimizer,
-		config=tf.estimator.RunConfig(keep_checkpoint_max=1),
-		model_dir="/tmp/lager_model"
-	)
-
-	return classifier
-
-def create_nn_classifier():
-	# Create a DNNClassifier object.
-	learning_rate = 0.05
-	my_optimizer = tf.train.AdagradOptimizer(learning_rate=learning_rate)
-	my_optimizer = tf.contrib.estimator.clip_gradients_by_norm(my_optimizer, 5.0)
-
-	classifier = tf.estimator.DNNClassifier(
-		feature_columns=construct_feature_columns(),
-		n_classes=_NUM_CLASSES,
-		hidden_units=[8, 5],
-		optimizer=my_optimizer,
-		config=tf.estimator.RunConfig(keep_checkpoint_max=1),
-		model_dir="/tmp/lager_model"
-  	)
-
-	return classifier
-
-# Do fake first pass of classifier for subsequent speed-up
-classifier = create_nn_classifier()
-
-predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-		  x={"movements": np.array([np.zeros(_NUM_FEATURES)],dtype=np.float32)},
-		  num_epochs=1,
-		  shuffle=False)
-
-predictions = list(classifier.predict(input_fn=predict_input_fn))
+dummy_sample = np.array([np.zeros(_NUM_FEATURES)],dtype=np.float32)
+predictions_single = model.predict(dummy_sample)
 
 while(True):
 	single_gesture = 0
@@ -99,20 +82,24 @@ while(True):
 
 	new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, order=0, mode='edge')
 
-	predict_input_fn = tf.estimator.inputs.numpy_input_fn(
-		  x={"movements": new_samples},
-		  num_epochs=1,
-		  shuffle=False)
+	#print(new_samples * _MAX_FEATURE_VALUE)
 	
 	before_time = time.clock()
-	predictions = list(classifier.predict(input_fn=predict_input_fn))
+	prediction = model.predict(new_samples)
 	after_time = time.clock()
 
-	predicted_classes = [p["classes"] for p in predictions]
-	for p in predicted_classes:
-	  class_label = int(p[0].decode())
-	  print("Classified gesture: ", _GESTURE_LIST[class_label])
+	print("")
+	print("Probabilities")
+	print("-------------")
+	class_label = 0
+	for number in prediction[0]:
+		print(" ", _GESTURE_LIST[class_label], ":", round(number * 100, 2),  "%")
+		class_label += 1
 
+	print("")
+
+	class_label = np.argmax(prediction[0])
+	print("Classified gesture: ", _GESTURE_LIST[class_label])
 	print("Elapsed time: ", int(round((after_time-before_time)*1000)), "ms")
 
 	if single_gesture:
