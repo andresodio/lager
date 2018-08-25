@@ -59,7 +59,7 @@ def create_nn_classifier():
 	classifier = tf.estimator.DNNClassifier(
 		feature_columns=construct_feature_columns(),
 		n_classes=_NUM_CLASSES,
-		hidden_units=[8, 6],
+		hidden_units=[8, 5],
 		optimizer=my_optimizer,
 		config=tf.estimator.RunConfig(keep_checkpoint_max=1),
 		model_dir="/tmp/lager_model"
@@ -97,7 +97,7 @@ while(True):
 	gesture_values = gesture_values / _MAX_FEATURE_VALUE
 	gesture_values.shape = (1, gesture_values.size)
 
-	new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, mode='constant')
+	new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, order=0, mode='edge')
 
 	predict_input_fn = tf.estimator.inputs.numpy_input_fn(
 		  x={"movements": new_samples},

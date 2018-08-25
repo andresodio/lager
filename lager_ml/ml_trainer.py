@@ -409,7 +409,7 @@ def train_nn_classification_model(
 
 classifier = train_nn_classification_model(
     learning_rate=0.05,
-    steps=1100,
+    steps=1060,
     batch_size=18,
     hidden_units=[8, 6],
     training_examples=training_examples,
