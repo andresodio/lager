@@ -52,8 +52,6 @@ from skimage.transform import resize
 # Custom libraries
 from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEATURE_VALUE
 
-class_names = _GESTURE_LIST
-
 # Read dataset into dataframe
 dataframe = pd.read_csv(
   "dataset_shuffled.csv",
@@ -85,23 +83,27 @@ def parse_labels_and_features(dataset):
 
   return labels, features
 
-train_labels, train_images = parse_labels_and_features(dataframe[:int(len(dataframe)*3/4)])
-test_labels, test_images = parse_labels_and_features(dataframe[int(len(dataframe)*3/4):len(dataframe)])
+train_labels, train_features = parse_labels_and_features(dataframe[:int(len(dataframe)*3/4)])
+test_labels, test_features = parse_labels_and_features(dataframe[int(len(dataframe)*3/4):len(dataframe)])
+
+num_classes = len(_GESTURE_LIST)
 
 model = keras.Sequential([
 	keras.layers.Flatten(input_shape=(_NUM_FEATURES,)),
     keras.layers.Dense(6, activation=tf.nn.relu),
-    keras.layers.Dense(6, activation=tf.nn.softmax)
+    keras.layers.Dense(num_classes, activation=tf.nn.softmax)
 ])
 
 model.compile(optimizer=tf.keras.optimizers.Adam(),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-model.fit(train_images, train_labels, epochs=5)
+model.fit(train_features, train_labels, epochs=5, validation_data=(test_features, test_labels))
 
-test_loss, test_acc = model.evaluate(test_images, test_labels)
+test_loss, test_acc = model.evaluate(test_features, test_labels)
 
 print('Test accuracy:', test_acc)
+
+model.summary()
 
 model.save('/tmp/lager_model.h5')  # creates a HDF5 file 'my_model.h5'
