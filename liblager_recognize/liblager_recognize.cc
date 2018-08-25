@@ -19,6 +19,7 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::stringstream;
+#include <Python.h>
 
 #include "liblager_connect.h"
 #include "liblager_recognize.h"
@@ -241,4 +242,76 @@ struct SubscribedGesture LagerRecognizer::RecognizeGesture(
                           recognition_start_time, match_found);
 
   return closest_gesture;
+}
+
+PyObject* LagerRecognizer::InitializePythonClassifier() {
+  PyObject *pName, *pModule, *pFunc;
+
+  string python_module_name = "ml_recognizer";
+  string python_function_name = "main";
+
+  Py_Initialize();
+  pName = PyUnicode_DecodeFSDefault(python_module_name.c_str());
+  pModule = PyImport_Import(pName);
+  Py_DECREF(pName);
+
+  if (pModule != NULL) {
+    pFunc = PyObject_GetAttrString(pModule, python_function_name.c_str());
+    /* pFunc is a new reference */
+
+    int num_args = 0;
+    if (pFunc && PyCallable_Check(pFunc)) {
+      return pFunc;
+    }
+    else {
+      if (PyErr_Occurred())
+          PyErr_Print();
+      fprintf(stderr, "Cannot find function \"%s\"\n", python_function_name.c_str());
+      return NULL;
+    }
+  }
+  else {
+    PyErr_Print();
+    fprintf(stderr, "Failed to load \"%s\"\n", python_module_name.c_str());
+    return NULL;
+  }
+}
+
+void LagerRecognizer::RecognizeGestureML(
+    PyObject* python_classifier,
+    string current_gesture,
+    bool& match_found) {
+
+  PyObject *pArgs, *pValue;
+
+  if (python_classifier && PyCallable_Check(python_classifier)) {
+      pArgs = PyTuple_New(1);
+
+      pValue = PyUnicode_FromString(current_gesture.c_str());
+      if (!pValue) {
+          Py_DECREF(pArgs);
+          fprintf(stderr, "Cannot convert argument\n");
+          return;
+      }
+      /* pValue reference stolen here: */
+      PyTuple_SetItem(pArgs, 0, pValue);
+
+      pValue = PyObject_CallObject(python_classifier, pArgs);
+      Py_DECREF(pArgs);
+
+      if (pValue != NULL) {
+          //long result = PyLong_AsLong(pValue);
+          Py_DECREF(pValue);
+      }
+      else {
+          PyErr_Print();
+          fprintf(stderr,"Call failed\n");
+          return;
+      }
+  }
+  else {
+      if (PyErr_Occurred())
+          PyErr_Print();
+      fprintf(stderr, "Cannot find function \n");
+  }
 }

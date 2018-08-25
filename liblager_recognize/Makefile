@@ -1,6 +1,6 @@
-INCLUDE_DIR=../common
-LDFLAGS=-L/usr/local/lib/
-ARCH_LIBS := -lpthread -lquat -lm -lrt
+INCLUDE_DIRS=-I../common -I/usr/include/python3.6m
+LDFLAGS=-L/usr/local/lib/ -L/usr/lib/python3.6/config-3.6m-x86_64-linux-gnu
+ARCH_LIBS := -lpython3.6m -lpthread -lquat -lm -lrt
 #BOOST_LIBS := -lboost_system -lboost_serialization
 BOOST_LIBS :=
 LAGER_LIBS := -llager_connect
@@ -8,7 +8,7 @@ LAGER_LIBS := -llager_connect
 all: liblager_recognize
 
 liblager_recognize: liblager_recognize.cc
-	g++ -fPIC -std=c++11 -I${INCLUDE_DIR} $(LDFLAGS) $(LAGER_LIBS) $(BOOST_LIBS) $(ARCH_LIBS) -c liblager_recognize.cc
+	g++ -fPIC -std=c++11 -c liblager_recognize.cc $(INCLUDE_DIRS) $(LDFLAGS) $(LAGER_LIBS) $(BOOST_LIBS) $(ARCH_LIBS)
 	g++ -shared -o liblager_recognize.so liblager_recognize.o
 
 clean:

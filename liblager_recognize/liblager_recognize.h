@@ -52,6 +52,22 @@ class LagerRecognizer {
                                             string current_gesture,
                                             bool& match_found);
 
+  /**
+    * Initializes and returns a Python classifier function.
+    */
+  PyObject* InitializePythonClassifier();
+
+  /**
+   * Takes a gesture LaGeR string and prints the closest matching subscribed
+   * gesture via a machine learning algorithm.
+   *
+   * If no match is found above a certain probability threshold, it indicates
+   * it by toggling a Boolean parameter.
+   */
+  void RecognizeGestureML(PyObject* python_classifier,
+                          string current_gesture,
+                          bool& match_found);
+
  private:
   /**
    * Private constructor for this class, which takes a pointer to a
