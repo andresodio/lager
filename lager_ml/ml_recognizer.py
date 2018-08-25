@@ -57,50 +57,55 @@ class_names = _GESTURE_LIST
 
 model = keras.models.load_model('/tmp/lager_model.h5')
 
+# Call classifier with dummy predicition to speed up subsequent calls
 dummy_sample = np.array([np.zeros(_NUM_FEATURES)],dtype=np.float32)
 predictions_single = model.predict(dummy_sample)
 
-while(True):
-	single_gesture = 0
+def main(input_gesture = ""):
+	while(True):
+		single_gesture = 0
 
-	if (len(sys.argv) == 2):
-		single_gesture = 1
-		input_gesture = sys.argv[1]
-		if (not input_gesture[0].isdigit()):
-			input_gesture = convert_lager_to_numbers(input_gesture)
-	else:
-		print("Enter gesture values:")
-		input_gesture = input()
-	
-	print("Using input gesture: ", input_gesture)
+		if (len(input_gesture) > 0):
+			single_gesture = 1
+			if (not input_gesture[0].isdigit()):
+				input_gesture = convert_lager_to_numbers(input_gesture)
+		elif (len(sys.argv) == 2):
+			single_gesture = 1
+			input_gesture = sys.argv[1]
+			if (not input_gesture[0].isdigit()):
+				input_gesture = convert_lager_to_numbers(input_gesture)
+		else:
+			print("Enter gesture values:")
+			input_gesture = input()
 
-	gesture_values = [int(e) for e in input_gesture.strip().split(',')]
-	gesture_values = np.array([gesture_values],dtype=np.uint8)
+		gesture_values = [int(e) for e in input_gesture.strip().split(',')]
+		gesture_values = np.array([gesture_values],dtype=np.uint8)
 
-	gesture_values = gesture_values / _MAX_FEATURE_VALUE
-	gesture_values.shape = (1, gesture_values.size)
+		gesture_values = gesture_values / _MAX_FEATURE_VALUE
+		gesture_values.shape = (1, gesture_values.size)
 
-	new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, order=0, mode='edge')
+		new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, order=0, mode='edge')
 
-	#print(new_samples * _MAX_FEATURE_VALUE)
-	
-	before_time = time.clock()
-	prediction = model.predict(new_samples)
-	after_time = time.clock()
+		before_time = time.clock()
+		prediction = model.predict(new_samples)
+		after_time = time.clock()
 
-	print("")
-	print("Probabilities")
-	print("-------------")
-	class_label = 0
-	for number in prediction[0]:
-		print(" ", _GESTURE_LIST[class_label], ":", round(number * 100, 2),  "%")
-		class_label += 1
+		print("")
+		print("Probabilities")
+		print("-------------")
+		class_label = 0
+		for number in prediction[0]:
+			print(" ", _GESTURE_LIST[class_label], ":", round(number * 100, 2),  "%")
+			class_label += 1
 
-	print("")
+		print("")
 
-	class_label = np.argmax(prediction[0])
-	print("Classified gesture: ", _GESTURE_LIST[class_label])
-	print("Elapsed time: ", int(round((after_time-before_time)*1000)), "ms")
+		class_label = np.argmax(prediction[0])
+		print("Classified gesture: ", _GESTURE_LIST[class_label])
+		print("Elapsed time: ", int(round((after_time-before_time)*1000)), "ms")
 
-	if single_gesture:
-		break
+		if single_gesture:
+			return class_label
+
+if __name__ == "__main__":
+    main("")
