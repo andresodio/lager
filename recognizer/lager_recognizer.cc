@@ -13,6 +13,8 @@ using std::vector;
 
 #include <Python.h>
 
+#include <signal.h>
+
 #include "liblager_connect.h"
 #include "liblager_convert.h"
 #include "liblager_recognize.h"
@@ -194,10 +196,25 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gestu
   system(viewer_command.str().c_str());
 }
 
+/* Signal Handler for SIGINT */
+void sigintHandler(int sig_num)
+{
+    /* Reset handler to catch SIGINT next time.
+       Refer http://en.cppreference.com/w/c/program/signal */
+    signal(SIGINT, sigintHandler);
+    printf("\n");
+    fflush(stdout);
+    exit(0);
+}
+
 /**
  * The main loop of the LaGeR Recognizer.
  */
 int main(int argc, const char *argv[]) {
+  /* Set the SIGINT (Ctrl-C) signal handler to sigintHandler
+     Refer http://en.cppreference.com/w/c/program/signal */
+  signal(SIGINT, sigintHandler);
+
   LCTrackingMode tracking_mode = DetermineTrackingMode(argc, argv);
   bool use_buttons = DetermineButtonUse(argc, argv);
   bool use_gestures_file = DetermineGesturesFileUse(argc, argv);
