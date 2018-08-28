@@ -58,7 +58,10 @@ class_names = _GESTURE_LIST
 model = keras.models.load_model('/tmp/lager_model.h5')
 
 # Call classifier with dummy predicition to speed up subsequent calls
-dummy_sample = np.array([np.zeros(_NUM_FEATURES)],dtype=np.float32)
+# The number of zeroes in the dummy is twice the number of features because
+# we have 2 dimensions (2 sensors per movement).
+dummy_sample = np.array([np.zeros(_NUM_FEATURES*2)],dtype=np.float32)
+dummy_sample = dummy_sample.reshape(1,_NUM_FEATURES,2)
 predictions_single = model.predict(dummy_sample)
 
 def main(input_gesture = ""):
@@ -82,9 +85,9 @@ def main(input_gesture = ""):
 		gesture_values = np.array([gesture_values],dtype=np.uint8)
 
 		gesture_values = gesture_values / _MAX_FEATURE_VALUE
-		gesture_values.shape = (1, gesture_values.size)
+		gesture_values.shape = (1, len(gesture_values[0]) // 2, 2)
 
-		new_samples = resize(gesture_values, (1, _NUM_FEATURES), anti_aliasing=False, order=0, mode='edge')
+		new_samples = resize(gesture_values, (1,_NUM_FEATURES, 2), anti_aliasing=False, order=0, mode='edge')
 
 		before_time = time.clock()
 		prediction = model.predict(new_samples)

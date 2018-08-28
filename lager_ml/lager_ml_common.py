@@ -6,11 +6,11 @@ from skimage.transform import resize
 import pprint as pp
 import math
 
-#_GESTURE_LIST = ['OpenChrome', 'NewTab', 'OpenCNN', 'OpenGoogle', 'CloseTab', 'ZoomIn', 'ZoomOut', 'RefreshTab']
+_GESTURE_LIST = ['OpenChrome', 'NewTab', 'OpenCNN', 'OpenGoogle', 'CloseTab', 'RefreshTab', 'ZoomIn', 'ZoomOut']
 #_GESTURE_LIST = ['OpenChrome', 'NewTab', 'OpenCNN', 'OpenGoogle', 'CloseTab', 'RefreshTab']
-_GESTURE_LIST = ['Triangle', 'Square', 'Circle', 'HorizontalLineRight', 'VerticalLineDown', 'G']
+#_GESTURE_LIST = ['Triangle', 'Square', 'Circle', 'HorizontalLineRight', 'VerticalLineDown', 'G']
 _NUM_CLASSES = len(_GESTURE_LIST)
-_NUM_FEATURES = 192
+_NUM_FEATURES = 224
 _MAX_FEATURE_VALUE = 26
 
 
@@ -20,6 +20,10 @@ def convert_lager_to_numbers(gesture):
 	
 	for i, char in enumerate(gesture_lst):
 		if char == '0':
+			new_str.write('0,')
+			continue
+
+		if char == '_':
 			new_str.write('0,')
 			continue
 
@@ -34,13 +38,14 @@ def convert_lager_to_numbers(gesture):
 def convert_numbers_to_lager(gesture):
 	new_str = StringIO()
 
-	for number in np.nditer(gesture):
-		if number == 0:
-			new_str.write('0,')
-			continue
-
-		letter = str(chr(ord('a') + number - 1))
-		new_str.write(letter)
+	for movement in range(len(gesture)):
+		for sensor in range(len(gesture[movement])):
+			number = gesture[movement][sensor]
+			if (number == 0):
+				letter = '_'
+			else:
+				letter = str(chr(ord('a') + number - 1))
+			new_str.write(letter)
 		new_str.write('.')
 
 	return new_str.getvalue()[:-1]
@@ -75,12 +80,11 @@ def expand_gesture_num_to_target(gesture, target_length, divider):
 	gesture_movements = gesture.strip('\n,.').split(divider)
 	gesture_length = len(gesture_movements)
 
-	gesture_values = np.array([gesture_movements],dtype=np.uint8)
+	gesture_values = np.array(gesture_movements,dtype=np.uint8)
 	gesture_values = gesture_values / _MAX_FEATURE_VALUE
-	gesture_values.shape = (1, gesture_values.size)
+	gesture_values = np.reshape(gesture_values, (-1, 2))
 
-	#image_resized = resize(gesture_values, (1, target_length), anti_aliasing=False, mode='constant')
-	image_resized = resize(gesture_values, (1, target_length), anti_aliasing=False, order=0, mode='edge')
+	image_resized = resize(gesture_values, (target_length, 2), anti_aliasing=False, order=0, mode='edge')
 
 	new_samples = image_resized * _MAX_FEATURE_VALUE
 	new_samples = new_samples.round().astype(int)

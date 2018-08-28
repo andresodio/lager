@@ -77,9 +77,11 @@ def parse_labels_and_features(dataset):
   labels = dataset[0]
 
   # DataFrame.loc index ranges are inclusive at both ends.
-  features = dataset.loc[:,1:_NUM_FEATURES]
+  features = dataset.loc[:,1:]
   # Scale the data to [0, 1] by dividing out the max value, <_MAX_FEATURE_VALUE>.
   features = features / _MAX_FEATURE_VALUE
+  # Reshape the data to a multidimensional array with 2 dimensions (sensors) per feature (movement)
+  features = features.values.reshape(-1, _NUM_FEATURES, 2)
 
   return labels, features
 
@@ -89,7 +91,7 @@ test_labels, test_features = parse_labels_and_features(dataframe[int(len(datafra
 num_classes = len(_GESTURE_LIST)
 
 model = keras.Sequential([
-	keras.layers.Flatten(input_shape=(_NUM_FEATURES,)),
+	keras.layers.Flatten(input_shape=(_NUM_FEATURES,2)),
     keras.layers.Dense(8, activation=tf.nn.relu),
 	keras.layers.Dense(3, activation=tf.nn.relu),
     keras.layers.Dense(num_classes, activation=tf.nn.softmax)
