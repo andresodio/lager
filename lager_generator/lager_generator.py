@@ -19,20 +19,27 @@ def generate_variants(gesture_str):
 	gesture_lst = list(gesture_str)
 	
 	for i, char in enumerate(gesture_lst):
-		if not char.isalpha():
+		if char != '_' and not char.isalpha():
 			continue
 
 		mean = 5
 		std_dev = 1.0
 		choice = random.normalvariate(mean,std_dev)
 	   
+		# If the character is an underscore (no sensor movement), we raise the
+		# standard deviation to increase the chance of keeping it unchanged.
+		if (char == '_'):
+			std_dev = 2.0
+
 		# If we are within 1 std_dev of the mean, keep the
 		# original character.
 		# Otherwise, pick a neighbor character at random.
 		if ((mean - std_dev) < choice < (mean + std_dev)):
 			continue
 		else:
-			if (char == 'a'):
+			if (char == '_'):
+				neighbors = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+			elif (char == 'a'):
 				neighbors = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
 			elif (char == 'b'):
 				neighbors = ['h', 'a', 'd', 'i', 'c', 'q', 'j', 'k']
