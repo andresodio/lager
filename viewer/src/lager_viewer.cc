@@ -232,6 +232,12 @@ int main(int argc, char *argv[]) {
   glfwSetInputMode(g_window, GLFW_STICKY_KEYS, GL_TRUE);
   glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+  // Consume spurious initial mouse events and center the mouse in the viewer window
+  for (int i = 0; i < 3; i++) {
+    glfwPollEvents();
+  }
+  glfwSetCursorPos(g_window, 0, 0);
+
   // White background
   glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
