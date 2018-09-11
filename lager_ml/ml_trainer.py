@@ -93,7 +93,6 @@ num_classes = len(_GESTURE_LIST)
 model = keras.Sequential([
 	keras.layers.Flatten(input_shape=(_NUM_FEATURES,2)),
     keras.layers.Dense(5, activation=tf.nn.relu),
-	keras.layers.Dense(3, activation=tf.nn.relu),
     keras.layers.Dense(num_classes, activation=tf.nn.softmax)
 ])
 
