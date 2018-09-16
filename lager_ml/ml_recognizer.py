@@ -81,6 +81,7 @@ def main(input_gesture = ""):
 			print("Enter gesture values:")
 			input_gesture = input()
 
+		before_time = time.clock()
 		gesture_values = [int(e) for e in input_gesture.strip().split(',')]
 		gesture_values = np.array([gesture_values],dtype=np.uint8)
 
@@ -89,7 +90,6 @@ def main(input_gesture = ""):
 
 		new_samples = resize(gesture_values, (1,_NUM_FEATURES, 2), anti_aliasing=False, order=0, mode='edge')
 
-		before_time = time.clock()
 		prediction = model.predict(new_samples)
 		after_time = time.clock()
 
