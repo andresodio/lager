@@ -6,13 +6,12 @@ from skimage.transform import resize
 import pprint as pp
 import math
 
-_GESTURE_LIST = ['OpenChrome', 'NewTab', 'OpenCNN', 'OpenGoogle', 'CloseTab', 'RefreshTab', 'ZoomIn', 'ZoomOut']
-#_GESTURE_LIST = ['OpenChrome', 'NewTab', 'OpenCNN', 'OpenGoogle', 'CloseTab', 'RefreshTab']
+_GESTURE_LIST = ['CloseTab', 'MaximizeWindow', 'NewTab', 'OpenChrome', 'OpenCNN', 'OpenGoogle', 'OpenMusic', 'OpenNetflix', 'OpenVideos', 'OpenWeather', 'RefreshTab', 'RestoreWindow', 'ScrollUp', 'ScrollDown', 'ZoomIn', 'ZoomOut']
+#_GESTURE_LIST = ['CloseTab', 'NewTab', 'OpenChrome', 'OpenCNN', 'OpenGoogle',  'RefreshTab', 'ZoomIn', 'ZoomOut']
 #_GESTURE_LIST = ['Triangle', 'Square', 'Circle', 'HorizontalLineRight', 'VerticalLineDown', 'G']
 _NUM_CLASSES = len(_GESTURE_LIST)
 _NUM_FEATURES = 224
 _MAX_FEATURE_VALUE = 26
-
 
 def convert_lager_to_numbers(gesture):
 	new_str = StringIO()
