@@ -96,11 +96,11 @@ model = keras.Sequential([
     keras.layers.Dense(num_classes, activation=tf.nn.softmax)
 ])
 
-model.compile(optimizer=tf.keras.optimizers.Adam(),
+model.compile(optimizer=tf.keras.optimizers.SGD(),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-model.fit(train_features, train_labels, epochs=5, validation_data=(test_features, test_labels))
+model.fit(train_features, train_labels, epochs=10, validation_data=(test_features, test_labels))
 
 test_loss, test_acc = model.evaluate(test_features, test_labels)
 
