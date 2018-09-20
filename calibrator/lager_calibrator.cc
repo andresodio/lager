@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
-//#include <fstream>
-//#include <sstream>
+#include <fstream>
 #include <time.h> // for nanosleep
 
 #include <osvr/ClientKit/Context.h>
@@ -10,10 +9,8 @@
 using std::cin;
 using std::cout;
 using std::endl;
-//using std::ifstream;
-//using std::ofstream;
+using std::ofstream;
 using std::string;
-using std::stringstream;
 
 #define MIN_PINCH_VALUE 0.8
 
@@ -130,6 +127,21 @@ void InitializeTrackers() {
 }
 
 /**
+ * Writes the scale factor to a file to be used by liblager_convert
+ */
+void WriteScaleToFile(double scale) {
+  ofstream sensor_scale_file;
+
+  sensor_scale_file.open("/tmp/sensor_scale.cfg", std::ofstream::out | std::ofstream::trunc);
+  if (!sensor_scale_file.is_open()) {
+    cout << "Error writing to sensor scale file!" << endl;
+    return;
+  }
+
+  sensor_scale_file << scale << endl;
+}
+
+/**
  * Calibrates a sensor by recording the leftmost and rightmost position values
  * and saving a scaling factor accordingly.
  */
@@ -155,8 +167,10 @@ void CalibrateSensor() {
   }
 
   cout << "Range: " << g_leftmost_position << " - " << g_rightmost_position << endl;
-  double scale = g_rightmost_position - g_leftmost_position;
+  double scale = 0.001 * (g_rightmost_position - g_leftmost_position);
   cout << "Scale: " << scale << endl;
+
+  WriteScaleToFile(scale);
 }
 
 /**

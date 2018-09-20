@@ -23,8 +23,6 @@ using std::stringstream;
 using std::chrono::system_clock;
 using std::chrono::time_point;
 
-#define DISTANCE_INTERVAL_SQUARED 0.0004f //0.4 * (1 cm)^2
-
 enum class LCTrackingMode { absolute, relative };
 
 /**
@@ -85,10 +83,16 @@ class LagerConverter {
   }
 
   /**
+   * Loads the sensor scale factor from a file.
+   */
+  void LoadSensorScaleFactor();
+
+  /**
    * Initializes the movement tracking callbacks and starts processing sensor
    * events.
    */
   void Start() {
+    LoadSensorScaleFactor();
     InitializeTrackers();
     processing_thread_ = boost::thread(&LagerConverter::ProcessSensorEvents, this);
   }
@@ -180,6 +184,10 @@ class LagerConverter {
   ///
   /// Defaults to absolute.
   LCTrackingMode tracking_mode_ = LCTrackingMode::absolute;
+
+  /// The minimum length in normalized sensor units which is considered to
+  /// constitute a movement.
+  double minimum_movement_distance_ = 0;
 
   /// Whether to convert sensor movements to LaGeR or not.
   /// Each variable corresponds to one of the sensors.

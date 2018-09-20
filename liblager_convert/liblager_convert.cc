@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <time.h>     // for nanosleep
 
@@ -17,6 +18,7 @@
 using std::cout;
 using std::endl;
 using std::string;
+using std::ifstream;
 
 using std::chrono::duration;
 using std::chrono::microseconds;
@@ -39,6 +41,21 @@ LagerConverter* LagerConverter::Instance() {
   }
 
   return instance_;
+}
+
+void LagerConverter::LoadSensorScaleFactor() {
+  ifstream sensor_scale_file;
+  string current_line;
+
+  sensor_scale_file.open("/tmp/sensor_scale.cfg");
+  if (!sensor_scale_file.is_open()) {
+    cout << "Error opening sensor scale file!" << endl;
+    return;
+  }
+
+  getline(sensor_scale_file, current_line);
+  stringstream ss(current_line);
+  ss >> LagerConverter::Instance()->minimum_movement_distance_;
 }
 
 double LagerConverter::GetDeltaX(const OSVR_PositionReport* last_report,
@@ -287,7 +304,6 @@ void LagerConverter::HandleTrackerChange(const unsigned int sensor_index,
   double deltaX, deltaY, deltaZ;
   double theta, phi;
   int snap_theta, snap_phi;
-  static float dist_interval_sq = DISTANCE_INTERVAL_SQUARED;
 
   if (sensor_index == 0) {
     last_report = &lager_converter->last_report_0_;
@@ -301,7 +317,7 @@ void LagerConverter::HandleTrackerChange(const unsigned int sensor_index,
   }
 
   if (lager_converter->GetDistanceSquared(last_report, cur_report)
-      > dist_interval_sq) {
+      > lager_converter->minimum_movement_distance_) {
     if (lager_converter->print_updates_) {
       printf("Update for sensor: %i at time: %ld.%06d\n", cur_report->sensor,
                time_value->seconds, time_value->microseconds);
