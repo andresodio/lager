@@ -83,7 +83,7 @@ def main(input_gesture = ""):
 
 		before_time = time.clock()
 		gesture_values = [int(e) for e in input_gesture.strip().split(',')]
-		gesture_values = np.array([gesture_values],dtype=np.uint8)
+		gesture_values = np.array([gesture_values],dtype=np.uint32)
 
 		gesture_values = gesture_values / _MAX_FEATURE_VALUE
 		gesture_values.shape = (1, len(gesture_values[0]) // 2, 2)

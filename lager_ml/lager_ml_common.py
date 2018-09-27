@@ -79,7 +79,7 @@ def expand_gesture_num_to_target(gesture, target_length, divider):
 	gesture_movements = gesture.strip('\n,.').split(divider)
 	gesture_length = len(gesture_movements)
 
-	gesture_values = np.array(gesture_movements,dtype=np.uint8)
+	gesture_values = np.array(gesture_movements,dtype=np.uint32)
 	gesture_values = gesture_values / _MAX_FEATURE_VALUE
 	gesture_values = np.reshape(gesture_values, (-1, 2))
 
