@@ -91,9 +91,9 @@ test_labels, test_features = parse_labels_and_features(dataframe[int(len(datafra
 num_classes = len(_GESTURE_LIST)
 
 model = keras.Sequential([
-	keras.layers.Flatten(input_shape=(_NUM_FEATURES,2)),
+    keras.layers.Flatten(input_shape=(_NUM_FEATURES,2)),
     keras.layers.Dense(100, activation=tf.nn.relu),
-	keras.layers.Dense(100, activation=tf.nn.relu),
+    keras.layers.Dense(100, activation=tf.nn.relu),
     keras.layers.Dense(num_classes, activation=tf.nn.softmax)
 ])
 
@@ -101,7 +101,7 @@ model.compile(optimizer=tf.keras.optimizers.SGD(lr=0.001, decay=0.0001),
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-model.fit(train_features, train_labels, epochs=20, validation_data=(test_features, test_labels))
+model.fit(train_features, train_labels, epochs=25, validation_data=(test_features, test_labels))
 
 test_loss, test_acc = model.evaluate(test_features, test_labels)
 
