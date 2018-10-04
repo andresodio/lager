@@ -188,12 +188,17 @@ void DrawMatchingGestures(const SubscribedGesture& closest_gesture, string gestu
                  << hide_output_suffix;
   system(viewer_command.str().c_str());
 
+  /*
+   * Does not apply to machine learning-based recognition since there is
+   * no canonical representation of the closest gesture match.
+   *
   cout << "Drawing gesture match..." << endl;
 
   viewer_command.str("");
   viewer_command << viewer_command_prefix << closest_gesture.lager
                  << hide_output_suffix;
   system(viewer_command.str().c_str());
+  */
 }
 
 /* Signal Handler for SIGINT */
@@ -247,17 +252,21 @@ int main(int argc, const char *argv[]) {
   while(true) {
     string gesture_string = lager_converter->BlockingGetLagerString();
     if (g_subscribed_gestures.size() > 0) {
-      SubscribedGesture recognized_gesture = lager_recognizer->RecognizeGesture(
+      lager_recognizer->RecognizeGesture(
           draw_gestures, gesture_string, match_found);
 
-      lager_recognizer->RecognizeGestureML(python_classifier, gesture_string, match_found);
+      long gesture_index = lager_recognizer->RecognizeGestureML(python_classifier, gesture_string, match_found);
+      if (gesture_index >= 0) {
+        SubscribedGesture recognized_gesture = g_subscribed_gestures[gesture_index];
 
-      if (draw_gestures) {
-        DrawMatchingGestures(recognized_gesture, gesture_string);
-      }
-      if (match_found && (!use_gestures_file && recognized_gesture.pid != 0)) {
-        SendDetectedGestureMessage(recognized_gesture.name,
-                                   recognized_gesture.pid);
+        if (draw_gestures) {
+          DrawMatchingGestures(recognized_gesture, gesture_string);
+        }
+        if (match_found && (!use_gestures_file && recognized_gesture.pid != 0)) {
+          cout << "Sending detected gesture" << endl;
+          SendDetectedGestureMessage(recognized_gesture.name,
+                                     recognized_gesture.pid);
+        }
       }
     }
   }

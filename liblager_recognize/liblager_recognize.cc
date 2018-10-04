@@ -277,12 +277,14 @@ PyObject* LagerRecognizer::InitializePythonClassifier() {
   }
 }
 
-void LagerRecognizer::RecognizeGestureML(
+long LagerRecognizer::RecognizeGestureML(
     PyObject* python_classifier,
     string current_gesture,
     bool& match_found) {
 
   PyObject *pArgs, *pValue;
+  match_found = false;
+  long result = -1;
 
   if (python_classifier && PyCallable_Check(python_classifier)) {
       pArgs = PyTuple_New(1);
@@ -291,7 +293,7 @@ void LagerRecognizer::RecognizeGestureML(
       if (!pValue) {
           Py_DECREF(pArgs);
           fprintf(stderr, "Cannot convert argument\n");
-          return;
+          return result;
       }
       /* pValue reference stolen here: */
       PyTuple_SetItem(pArgs, 0, pValue);
@@ -300,13 +302,14 @@ void LagerRecognizer::RecognizeGestureML(
       Py_DECREF(pArgs);
 
       if (pValue != NULL) {
-          //long result = PyLong_AsLong(pValue);
+          match_found = true;
+          cout << "Python result: " << PyLong_AsLong(pValue) << endl;
+          result = PyLong_AsLong(pValue);
           Py_DECREF(pValue);
       }
       else {
           PyErr_Print();
           fprintf(stderr,"Call failed\n");
-          return;
       }
   }
   else {
@@ -314,4 +317,6 @@ void LagerRecognizer::RecognizeGestureML(
           PyErr_Print();
       fprintf(stderr, "Cannot find function \n");
   }
+
+  return result;
 }

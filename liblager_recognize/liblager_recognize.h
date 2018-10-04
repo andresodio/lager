@@ -58,13 +58,13 @@ class LagerRecognizer {
   PyObject* InitializePythonClassifier();
 
   /**
-   * Takes a gesture LaGeR string and prints the closest matching subscribed
-   * gesture via a machine learning algorithm.
+   * Takes a gesture LaGeR string, finds the closest matching subscribed
+   * gesture via a machine learning algorithm, prints and returns its index.
    *
    * If no match is found above a certain probability threshold, it indicates
    * it by toggling a Boolean parameter.
    */
-  void RecognizeGestureML(PyObject* python_classifier,
+  long RecognizeGestureML(PyObject* python_classifier,
                           string current_gesture,
                           bool& match_found);
 
