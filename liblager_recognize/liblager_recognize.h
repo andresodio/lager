@@ -19,6 +19,16 @@ using std::vector;
 #define RECOGNIZER_ERROR -1
 #define RECOGNIZER_NO_ERROR 0
 
+#define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 25
+#define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 35
+#define ML_RECOGNITION_THRESHOLD_PCT 55
+
+struct PythonClassifierResult {
+  long gesture_index;
+  double probability;
+  long elapsed_time;
+};
+
 /**
  * Recognizes an input LaGeR gesture by comparing it to a list of subscribed
  * gesture candidates and finding the closest match.
@@ -53,28 +63,30 @@ class LagerRecognizer {
                                             bool& match_found);
 
   /**
-    * Initializes and returns a Python classifier function.
-    */
-  PyObject* InitializePythonClassifier();
-
-  /**
    * Takes a gesture LaGeR string, finds the closest matching subscribed
-   * gesture via a machine learning algorithm, prints and returns its index.
+   * gesture via a machine learning algorithm, and returns it.
    *
    * If no match is found above a certain probability threshold, it indicates
    * it by toggling a Boolean parameter.
    */
-  long RecognizeGestureML(PyObject* python_classifier,
-                          string current_gesture,
-                          bool& match_found);
+  struct SubscribedGesture RecognizeGestureML(string current_gesture,
+                                              bool& match_found);
+
+  /**
+    * Initializes and returns a Python classifier function.
+    */
+  PyObject* InitializePythonClassifier();
+
 
  private:
   /**
    * Private constructor for this class, which takes a pointer to a
    * SubscribedGesture vector and assigns it to a member variable.
+   * Also initializes the ML classifier.
    */
   LagerRecognizer(vector<struct SubscribedGesture>* subscribed_gestures)
       : subscribed_gestures_(subscribed_gestures) {
+    ml_classifier_ = InitializePythonClassifier();
   }
   ;
 
@@ -116,6 +128,16 @@ class LagerRecognizer {
                                bool match_found);
 
   /**
+   * Prints the ML recognition results including the classified gesture,
+   * the probability assigned to it, and the elapsed time.
+   */
+  void PrintMlRecognitionResults(struct SubscribedGesture& closest_gesture,
+                                 long recognition_probability,
+                                 int gesture_probability_threshold_pct,
+                                 long recognition_time,
+                                 bool match_found);
+
+  /**
    * Takes a reference to a SubscribedGesture and the LaGeR string of the input
    * gesture being recognized, then updates the SubscribedGesture's distance
    * members.
@@ -131,11 +153,20 @@ class LagerRecognizer {
    */
   void UpdateSubscribedGestureDistances(string current_gesture);
 
+  /**
+   * Calls a Python classifier function and returns the results.
+   */
+  struct PythonClassifierResult CallPythonClassifier(PyObject* python_classifier,
+                                                     string current_gesture);
+
   /// Pointer to an instance of this class
   static LagerRecognizer* instance_;
 
   /// Pointer to vector of SubscribedGestures
   vector<struct SubscribedGesture>* subscribed_gestures_;
+
+  /// Pointer to a Python ML classifier
+  PyObject* ml_classifier_;
 };
 
 #endif /* LIBLAGER_RECOGNIZE_H_ */

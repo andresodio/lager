@@ -247,26 +247,38 @@ int main(int argc, const char *argv[]) {
   lager_converter->SetUseButtons(use_buttons);
   lager_converter->Start();
 
-  PyObject* python_classifier = lager_recognizer->InitializePythonClassifier();
+
 
   while(true) {
     string gesture_string = lager_converter->BlockingGetLagerString();
     if (g_subscribed_gestures.size() > 0) {
+
+      cout << " ________________________________ " << endl;
+      cout << "|                                |" << endl;
+      cout << "|          INPUT LAGER           |" << endl;
+      cout << "|________________________________|" << endl;
+      cout << "                                  " << endl;
+
+      cout << gesture_string << endl << endl;
+
       lager_recognizer->RecognizeGesture(
           draw_gestures, gesture_string, match_found);
 
-      long gesture_index = lager_recognizer->RecognizeGestureML(python_classifier, gesture_string, match_found);
-      if (gesture_index >= 0) {
-        SubscribedGesture recognized_gesture = g_subscribed_gestures[gesture_index];
+      SubscribedGesture recognized_gesture = lager_recognizer->RecognizeGestureML(
+          gesture_string, match_found);
 
-        if (draw_gestures) {
-          DrawMatchingGestures(recognized_gesture, gesture_string);
-        }
-        if (match_found && (!use_gestures_file && recognized_gesture.pid != 0)) {
-          cout << "Sending detected gesture" << endl;
-          SendDetectedGestureMessage(recognized_gesture.name,
-                                     recognized_gesture.pid);
-        }
+      if (!match_found) {
+        continue;
+      }
+
+      if (draw_gestures) {
+        DrawMatchingGestures(recognized_gesture, gesture_string);
+      }
+
+      if (!use_gestures_file && recognized_gesture.pid != 0) {
+        cout << "Sending detected gesture" << endl;
+        SendDetectedGestureMessage(recognized_gesture.name,
+                                    recognized_gesture.pid);
       }
     }
   }

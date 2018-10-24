@@ -104,11 +104,15 @@ def main(input_gesture = ""):
 		print("")
 
 		class_label = np.argmax(prediction[0])
-		print("Classified gesture: ", _GESTURE_LIST[class_label])
-		print("Elapsed time: ", int(round((after_time-before_time)*1000)), "ms")
+		probability = np.max(prediction[0])
+		probability = round(probability * 100, 2)
+		elapsed_time = int(round((after_time-before_time)*1000))
+		#print("Classified gesture: ", _GESTURE_LIST[class_label])
+		#print("Probability: ", probability, "%")
+		#print("Elapsed time: ", elapsed_time, "ms")
 
 		if single_gesture:
-			return class_label
+			return class_label, probability, elapsed_time
 
 if __name__ == "__main__":
     main("")

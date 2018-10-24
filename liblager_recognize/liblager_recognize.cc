@@ -25,9 +25,6 @@ using std::stringstream;
 #include "liblager_recognize.h"
 #include "string_tokenizer.h"
 
-#define SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 25
-#define DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT 35
-
 LagerRecognizer* LagerRecognizer::instance_ = NULL;
 
 LagerRecognizer* LagerRecognizer::Instance(vector<struct SubscribedGesture>* subscribed_gestures) {
@@ -185,6 +182,7 @@ void LagerRecognizer::PrintRecognitionResults(
   if (match_found) {
     cout << " ________________________________ " << endl;
     cout << "|                                |" << endl;
+    cout << "|      DAMERAU-LEVENSHTEIN       |" << endl;
     cout << "|          MATCH FOUND!          |" << endl;
     cout << "|________________________________|" << endl;
     cout << "                                  " << endl;
@@ -205,10 +203,46 @@ void LagerRecognizer::PrintRecognitionResults(
   cout << endl << endl << endl;
 }
 
+void LagerRecognizer::PrintMlRecognitionResults(
+    struct SubscribedGesture& closest_gesture,
+    long recognition_probability,
+    int gesture_probability_threshold_pct,
+    long recognition_time,
+    bool match_found) {
+
+  if (match_found) {
+    cout << " ________________________________ " << endl;
+    cout << "|                                |" << endl;
+    cout << "|         DEEP LEARNING          |" << endl;
+    cout << "|          MATCH FOUND!          |" << endl;
+    cout << "|________________________________|" << endl;
+    cout << "                                  " << endl;
+  } else {
+    cout << endl;
+    cout << "NO MATCH." << endl;
+  }
+
+  cout << endl;
+  cout << "Closest gesture:\t" << closest_gesture.name << endl;
+  cout << endl;
+  cout << "Probability:\t\t" << recognition_probability << "%" << endl;
+  cout << "Threshold:\t\t" << gesture_probability_threshold_pct << "%" << endl;
+  cout << endl;
+  cout << "Recognition time: \t" << recognition_time << "ms" << endl;
+  cout << endl << endl << endl;
+}
+
 struct SubscribedGesture LagerRecognizer::RecognizeGesture(
     bool draw_gestures, string current_gesture,
     bool& match_found) {
   int lowestDistance;
+
+  cout << " ________________________________ " << endl;
+  cout << "|                                |" << endl;
+  cout << "|      DAMERAU-LEVENSHTEIN       |" << endl;
+  cout << "|          RECOGNIZER            |" << endl;
+  cout << "|________________________________|" << endl;
+  cout << "                                  " << endl;
 
   time_point<system_clock> recognition_start_time = system_clock::now();
   int gesture_distance_threshold_pct =
@@ -218,16 +252,8 @@ struct SubscribedGesture LagerRecognizer::RecognizeGesture(
 
   cout << " ________________________________ " << endl;
   cout << "|                                |" << endl;
-  cout << "|          INPUT LAGER           |" << endl;
-  cout << "|________________________________|" << endl;
-  cout << "                                  " << endl;
-
-  cout << current_gesture << endl << endl;
-
-  cout << " ________________________________ " << endl;
-  cout << "|                                |" << endl;
-  cout << "|           EVALUATING           |" << endl;
-  cout << "|           CANDIDATES...        |" << endl;
+  cout << "|          CALCULATING           |" << endl;
+  cout << "|          DISTANCES...          |" << endl;
   cout << "|________________________________|" << endl;
   cout << "                                  " << endl;
 
@@ -242,6 +268,33 @@ struct SubscribedGesture LagerRecognizer::RecognizeGesture(
                           recognition_start_time, match_found);
 
   return closest_gesture;
+}
+
+struct SubscribedGesture LagerRecognizer::RecognizeGestureML(
+    string current_gesture,
+    bool& match_found) {
+
+  cout << " ________________________________ " << endl;
+  cout << "|                                |" << endl;
+  cout << "|         DEEP LEARNING          |" << endl;
+  cout << "|           RECOGNIZER           |" << endl;
+  cout << "|________________________________|" << endl;
+  cout << "                                  " << endl;
+
+  struct PythonClassifierResult result = CallPythonClassifier(ml_classifier_, current_gesture);
+
+  match_found = ((result.gesture_index >= 0) && (result.probability > ML_RECOGNITION_THRESHOLD_PCT));
+
+  if (result.gesture_index < 0) {
+    cout << "Error returned from ML classifier. Gesture index: " << result.gesture_index;
+    result.gesture_index = 0;
+  }
+
+  SubscribedGesture recognized_gesture = (*subscribed_gestures_)[result.gesture_index];
+
+  PrintMlRecognitionResults(recognized_gesture, result.probability, ML_RECOGNITION_THRESHOLD_PCT, result.elapsed_time, match_found);
+
+  return recognized_gesture;
 }
 
 PyObject* LagerRecognizer::InitializePythonClassifier() {
@@ -275,16 +328,18 @@ PyObject* LagerRecognizer::InitializePythonClassifier() {
     fprintf(stderr, "Failed to load \"%s\"\n", python_module_name.c_str());
     return NULL;
   }
+
 }
 
-long LagerRecognizer::RecognizeGestureML(
+struct PythonClassifierResult LagerRecognizer::CallPythonClassifier(
     PyObject* python_classifier,
-    string current_gesture,
-    bool& match_found) {
+    string current_gesture) {
 
   PyObject *pArgs, *pValue;
-  match_found = false;
-  long result = -1;
+  PyObject *pReturnValue;
+  struct PythonClassifierResult result;
+  result.gesture_index = -1;
+  result.probability = 0.0;
 
   if (python_classifier && PyCallable_Check(python_classifier)) {
       pArgs = PyTuple_New(1);
@@ -301,10 +356,10 @@ long LagerRecognizer::RecognizeGestureML(
       pValue = PyObject_CallObject(python_classifier, pArgs);
       Py_DECREF(pArgs);
 
-      if (pValue != NULL) {
-          match_found = true;
-          cout << "Python result: " << PyLong_AsLong(pValue) << endl;
-          result = PyLong_AsLong(pValue);
+      if ((pValue != NULL) && PyTuple_Check(pValue) && (PyTuple_Size(pValue) == 3)){
+          result.gesture_index = PyLong_AsLong(PyTuple_GetItem(pValue, 0));
+          result.probability = PyFloat_AsDouble(PyTuple_GetItem(pValue, 1));
+          result.elapsed_time = PyLong_AsLong(PyTuple_GetItem(pValue, 2));
           Py_DECREF(pValue);
       }
       else {
