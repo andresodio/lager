@@ -29,7 +29,7 @@ gesture_expanded_filename = gesture_name + "_expanded.dat"
 gesture_variants_filename = gesture_name + "_expanded_variants.dat"
 gesture_numbers_filename = gesture_name + "_expanded_variants_numbers.csv"
 
-call(['./lager_expander.py', orig_gesture_filename, num_features])
-call(['../lager_generator/lager_generator.py', gesture_expanded_filename, num_variants])
-call(['./lager_file_to_numbers.py', gesture_variants_filename, gesture_label])
-call('cat ' + gesture_numbers_filename + ' >>'+ ' dataset.csv', shell=True)
+call(['./lager_expander.py', 'gestures/' + orig_gesture_filename, num_features])
+call(['../lager_generator/lager_generator.py', 'gestures/' + gesture_expanded_filename, num_variants])
+call(['./lager_file_to_numbers.py', "gestures/" + gesture_variants_filename, gesture_label])
+call('cat ' + 'gestures/' + gesture_numbers_filename + ' >>'+ ' gestures/dataset.csv', shell=True)

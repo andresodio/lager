@@ -20,9 +20,9 @@ print("Gestures filename: ", gestures_filename)
 print("Number of features: ", num_features)
 print("Number of variants: ", num_variants)
 
-call('rm *_*.dat', shell=True)
-call('rm *_*.csv', shell=True)
-call('rm dataset*', shell=True)
+call('rm gestures/*_*.dat', shell=True)
+call('rm gestures/*_*.csv', shell=True)
+call('rm gestures/dataset*', shell=True)
 
 gestures_file = open(gestures_filename, "r");
 
@@ -34,4 +34,4 @@ for line in gestures_file:
 
 gestures_file.close()
 
-call('shuf dataset.csv -o dataset_shuffled.csv', shell=True)
+call('shuf gestures/dataset.csv -o gestures/dataset_shuffled.csv', shell=True)

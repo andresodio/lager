@@ -54,7 +54,7 @@ from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEA
 
 # Read dataset into dataframe
 dataframe = pd.read_csv(
-  "dataset_shuffled.csv",
+  "gestures/dataset_shuffled.csv",
   sep=",",
   header=None)
 
