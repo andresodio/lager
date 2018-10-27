@@ -44,6 +44,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 # Helper libraries
+import os
 import numpy as np
 import pandas as pd
 import time
@@ -109,4 +110,4 @@ print('Test accuracy:', test_acc)
 
 model.summary()
 
-model.save('/tmp/lager_model.h5')  # creates a HDF5 file 'my_model.h5'
+model.save(os.environ["HOME"] + '/lager_model.h5')  # creates a HDF5 file to save the model

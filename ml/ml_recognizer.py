@@ -44,6 +44,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 # Helper libraries
+import os
 import numpy as np
 import pandas as pd
 from skimage.transform import resize
@@ -55,7 +56,7 @@ from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEA
 
 class_names = _GESTURE_LIST
 
-model = keras.models.load_model('/tmp/lager_model.h5')
+model = keras.models.load_model(os.environ["HOME"] + '/lager_model.h5') # loads the model from an HDF5 file
 
 # Call classifier with dummy predicition to speed up subsequent calls
 # The number of zeroes in the dummy is twice the number of features because
