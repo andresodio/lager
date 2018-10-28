@@ -99,7 +99,7 @@ def main(input_gesture = ""):
 		print("-------------")
 		class_label = 0
 		for number in prediction[0]:
-			print(" ", _GESTURE_LIST[class_label], ":", round(number * 100, 2),  "%")
+			print('{:<1} {:<15} {:<1} {:>5} {:<1}'.format("  ", _GESTURE_LIST[class_label], ": ", "%.2f" % (number * 100),  "%"))
 			class_label += 1
 
 		print("")

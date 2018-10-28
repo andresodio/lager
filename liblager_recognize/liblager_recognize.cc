@@ -19,6 +19,9 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::stringstream;
+using std::fixed;
+#include <iomanip>
+using std::setprecision;
 #include <Python.h>
 
 #include "liblager_connect.h"
@@ -124,12 +127,6 @@ void LagerRecognizer::UpdateSubscribedGestureDistance(
 
   subscribed_gesture.distance_pct = (subscribed_gesture.distance * 100.0f)
       / subscribed_gesture.expanded_lager.length();
-
-  cout << subscribed_gesture.name << endl << "\t" << subscribed_gesture.lager
-      << endl;
-  cout << "Distance: " << subscribed_gesture.distance_pct << "% ("
-      << subscribed_gesture.distance << " D-L ops)" << endl;
-  cout << endl;
 }
 
 void LagerRecognizer::UpdateSubscribedGestureDistances(string current_gesture) {
@@ -178,6 +175,19 @@ void LagerRecognizer::PrintRecognitionResults(
     time_point<system_clock> recognition_start_time, bool match_found) {
   unsigned int num_milliseconds_since_recognition_start =
       GetMillisecondsUntilNow(recognition_start_time);
+
+  cout << "Distances" << endl;
+  cout << "---------" << endl;
+
+  for (vector<SubscribedGesture>::iterator it = subscribed_gestures_->begin();
+       it < subscribed_gestures_->end(); ++it) {
+    cout << "  "
+         << std::left << std::setw(15)
+         << it->name << " : "
+         << setprecision (2) << fixed
+         << it->distance_pct << "% ("
+         << it->distance << " D-L ops)" << endl;
+  }
 
   if (match_found) {
     cout << " ________________________________ " << endl;
@@ -249,13 +259,6 @@ struct SubscribedGesture LagerRecognizer::RecognizeGesture(
       IsSingleSensorGesture(current_gesture) ?
           SINGLE_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT :
           DUAL_SENSOR_GESTURE_DISTANCE_THRESHOLD_PCT;
-
-  cout << " ________________________________ " << endl;
-  cout << "|                                |" << endl;
-  cout << "|          CALCULATING           |" << endl;
-  cout << "|          DISTANCES...          |" << endl;
-  cout << "|________________________________|" << endl;
-  cout << "                                  " << endl;
 
   UpdateSubscribedGestureDistances(current_gesture);
 

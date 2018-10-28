@@ -236,12 +236,6 @@ int main(int argc, const char *argv[]) {
     boost::thread subscription_updater(AddSubscribedGestures, &g_subscribed_gestures);
   }
 
-  cout << " ________________________________ " << endl;
-  cout << "|                                |" << endl;
-  cout << "|       COLLECTING DATA...       |" << endl;
-  cout << "|________________________________|" << endl;
-  cout << "                                  " << endl;
-
   lager_converter->SetPrintUpdates(print_updates);
   lager_converter->SetTrackingMode(tracking_mode);
   lager_converter->SetUseButtons(use_buttons);
@@ -252,6 +246,8 @@ int main(int argc, const char *argv[]) {
   while(true) {
     string gesture_string = lager_converter->BlockingGetLagerString();
     if (g_subscribed_gestures.size() > 0) {
+
+      cout << endl;
 
       cout << " ________________________________ " << endl;
       cout << "|                                |" << endl;

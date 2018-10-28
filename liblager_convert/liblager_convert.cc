@@ -413,12 +413,6 @@ void LagerConverter::ProcessSensorEvents() {
         }
       }
 
-      cout << " ________________________________ " << endl;
-      cout << "|                                |" << endl;
-      cout << "|       COLLECTING DATA...       |" << endl;
-      cout << "|________________________________|" << endl;
-      cout << "                                  " << endl;
-
       ResetLagerString();
     }
 
