@@ -185,9 +185,11 @@ void LagerRecognizer::PrintRecognitionResults(
          << std::left << std::setw(15)
          << it->name << " : "
          << setprecision (2) << fixed
-         << it->distance_pct << "% ("
+         << it->distance_pct << " % ("
          << it->distance << " D-L ops)" << endl;
   }
+
+  cout << endl;
 
   if (match_found) {
     cout << " ________________________________ " << endl;
@@ -204,13 +206,13 @@ void LagerRecognizer::PrintRecognitionResults(
   cout << endl;
   cout << "Closest gesture:\t" << closest_gesture.name << endl;
   cout << endl;
-  cout << "Distance:\t\t" << closest_gesture.distance_pct << "% ("
+  cout << "Distance:\t\t" << closest_gesture.distance_pct << " % ("
       << closest_gesture.distance << " D-L ops)" << endl;
-  cout << "Threshold:\t\t" << gesture_distance_threshold_pct << "%" << endl;
+  cout << "Threshold:\t\t" << gesture_distance_threshold_pct << " %" << endl;
   cout << endl;
   cout << "Recognition time: \t" << num_milliseconds_since_recognition_start
-       << "ms" << endl;
-  cout << endl << endl << endl;
+       << " ms" << endl;
+  cout << endl << endl;
 }
 
 void LagerRecognizer::PrintMlRecognitionResults(
@@ -235,10 +237,10 @@ void LagerRecognizer::PrintMlRecognitionResults(
   cout << endl;
   cout << "Closest gesture:\t" << closest_gesture.name << endl;
   cout << endl;
-  cout << "Probability:\t\t" << recognition_probability << "%" << endl;
-  cout << "Threshold:\t\t" << gesture_probability_threshold_pct << "%" << endl;
+  cout << "Probability:\t\t" << recognition_probability << " %" << endl;
+  cout << "Threshold:\t\t" << gesture_probability_threshold_pct << " %" << endl;
   cout << endl;
-  cout << "Recognition time: \t" << recognition_time << "ms" << endl;
+  cout << "Recognition time: \t" << recognition_time << " ms" << endl;
   cout << endl << endl << endl;
 }
 

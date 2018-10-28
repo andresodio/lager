@@ -94,7 +94,6 @@ def main(input_gesture = ""):
 		prediction = model.predict(new_samples)
 		after_time = time.clock()
 
-		print("")
 		print("Probabilities")
 		print("-------------")
 		class_label = 0
