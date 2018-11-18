@@ -106,15 +106,6 @@ Install VRPN:
 ~$ cd vrpn
 ~/vrpn$ mkdir build && cd build && cmake .. && make && sudo make install
 
-Add virtual trackers to the VRPN configuration (/usr/local/etc/vrpn.cfg) that use the controller's analog sticks:
-vrpn_Tracker_AnalogFly  Tracker0    60.0    absolute
-X   *Joylin0    0   0.0 0.0 1.0 1.0
-Y   *Joylin0    1   0.0 0.0 -1.0    1.0
-
-vrpn_Tracker_AnalogFly  Tracker1    60.0    absolute
-X   *Joylin0    2   0.0 0.0 1.0 1.0
-Y   *Joylin0    3   0.0 0.0 -1.0    1.0
-
 Start the Xbox 360 controller driver:
 ~$ sudo xboxdrv --detach-kernel-driver --daemon
 
@@ -124,6 +115,15 @@ Check the ID assigned by the system to the controller ("js0" or "js1"):
 Uncomment the following joystick support within the VRPN config file (/usr/local/etc/vrpn.cfg),
 making sure that the ID matches the one obtained before ("js0" or "js1"):
 vrpn_Joylin	Joylin0	/dev/input/js0
+
+Add virtual trackers to the VRPN configuration (/usr/local/etc/vrpn.cfg) that use the controller's analog sticks:
+vrpn_Tracker_AnalogFly  Tracker0    60.0    absolute
+X   *Joylin0    0   0.0 0.0 1.0 1.0
+Y   *Joylin0    1   0.0 0.0 -1.0    1.0
+
+vrpn_Tracker_AnalogFly  Tracker1    60.0    absolute
+X   *Joylin0    2   0.0 0.0 1.0 1.0
+Y   *Joylin0    3   0.0 0.0 -1.0    1.0
 
 Add Xbox 360 tracker and button devices to the OSVR configuration (/usr/local/share/osvrcore/osvr_server_config.json):
 	"externalDevices": {
