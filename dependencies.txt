@@ -251,8 +251,8 @@ vrpn_DevInput           Wacom0          "Wacom Intuos PT S Pen" absolute 1920
 
 Add a virtual tracker to the VRPN configuration (/usr/local/etc/vrpn.cfg) that uses the Wacom device:
 vrpn_Tracker_AnalogFly Tracker0 60.0 absolute
-X  *Wacom0 0 0.5 0.0 1.0 1.0
-Y  *Wacom0 1 0.5 0.0 -1.0 1.0
+X  *Wacom0 0 0.0 0.0 1.0 1.0
+Y  *Wacom0 1 0.0 0.0 -1.0 1.0
 Z  NULL 2 0.0 0.0 1.0 1.0
 RX NULL 3 0.0 0.0 1.0 1.0
 RY NULL 4 0.0 0.0 1.0 1.0
