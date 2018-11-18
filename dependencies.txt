@@ -199,9 +199,6 @@ RZ NULL 5 0.0 0.0 1.0 1.0
 RESET NULL 0
 CLUTCH NULL 0
 
-Start the VRPN server on port 3884 so it doesn't clash with the OSVR server's default port:
-~$ sudo vrpn_server -f /usr/local/etc/vrpn.cfg 3884
-
 Add mouse tracker and mouse button devices to the OSVR configuration (/usr/local/share/osvrcore/osvr_server_config.json):
 	"externalDevices": {
 		"/MouseTracker": {
@@ -236,6 +233,9 @@ Add mouse tracker and mouse button devices to the OSVR configuration (/usr/local
 
 In the example above, we used mouse button 4, but you can use any button on your mouse.
 
+Start the VRPN server on port 3884 so it doesn't clash with the OSVR server's default port:
+~$ sudo vrpn_server -f /usr/local/etc/vrpn.cfg 3884
+
 Start the OSVR server:
 ~$ sudo osvr_server /usr/local/share/osvrcore/osvr_server_config.json
 
@@ -259,9 +259,6 @@ RY NULL 4 0.0 0.0 1.0 1.0
 RZ NULL 5 0.0 0.0 1.0 1.0
 RESET NULL 0
 CLUTCH NULL 0
-
-Start the VRPN server on port 3884 so it doesn't clash with the OSVR server's default port:
-~$ sudo vrpn_server -f /usr/local/etc/vrpn.cfg 3884
 
 Add Wacom tracker and Wacom button devices to the OSVR configuration (/usr/local/share/osvrcore/osvr_server_config.json):
 	"externalDevices": {
@@ -296,6 +293,9 @@ Add Wacom tracker and Wacom button devices to the OSVR configuration (/usr/local
 	}
 
 In the example above, we used Wacom button 59, which corresponds to our Wacom pen's main button, but you can use any button on your device.
+
+Start the VRPN server on port 3884 so it doesn't clash with the OSVR server's default port:
+~$ sudo vrpn_server -f /usr/local/etc/vrpn.cfg 3884
 
 Start the OSVR server:
 ~$ sudo osvr_server /usr/local/share/osvrcore/osvr_server_config.json
