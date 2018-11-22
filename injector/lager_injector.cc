@@ -77,38 +77,13 @@ void NewTab(Display* display) {
 }
 
 /**
- * Sends X Server a series of key presses to bring up the open application
- * dialog in Unity and start Google Chrome.
+ * Sends X Server a series of key presses to start Google Chrome via
+ * a system shortcut. Note that the number below corresponds to the
+ * position of the Google Chrome favorite on GNOME Shell dock.
  */
 void OpenChrome(Display* display) {
-  struct timespec sleep_interval = { 0, 750000 };  // microseconds
-
-  // Alt + F2 brings up the open application dialog on Ubuntu Unity
-  SendKey(display, XK_F2, XK_Alt_L);
-
-  // Give it time to open
-  sleep(1);
-
-  // Delete any old entries
-  SendKey(display, XK_BackSpace, 0);
-
-  // Enter google-chrome
-  SendKey(display, XK_G, 0);
-  SendKey(display, XK_O, 0);
-  SendKey(display, XK_O, 0);
-  SendKey(display, XK_G, 0);
-  SendKey(display, XK_L, 0);
-  SendKey(display, XK_E, 0);
-  SendKey(display, XK_minus, 0);
-  SendKey(display, XK_C, 0);
-  SendKey(display, XK_H, 0);
-  SendKey(display, XK_R, 0);
-  SendKey(display, XK_O, 0);
-  SendKey(display, XK_M, 0);
-  SendKey(display, XK_E, 0);
-
-  // Press Enter
-  SendKey(display, XK_Return, 0);
+  // Windows + 1
+  SendKey(display, XK_1, XK_Super_L);
 }
 
 /**
