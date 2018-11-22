@@ -49,6 +49,7 @@ import numpy as np
 import pandas as pd
 import time
 from skimage.transform import resize
+import matplotlib.pyplot as plt
 
 # Custom libraries
 from lager_ml_common import _GESTURE_LIST, _NUM_CLASSES, _NUM_FEATURES, _MAX_FEATURE_VALUE
@@ -106,8 +107,28 @@ model.fit(train_features, train_labels, epochs=25, validation_data=(test_feature
 
 test_loss, test_acc = model.evaluate(test_features, test_labels)
 
+print ('Test loss:', test_loss)
 print('Test accuracy:', test_acc)
 
+# Plot loss history
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+
+# Plot accuracy history
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+
+# Print summary of model
 model.summary()
 
 model.save(os.environ["HOME"] + '/lager_model.h5')  # creates a HDF5 file to save the model
