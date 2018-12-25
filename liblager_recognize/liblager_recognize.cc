@@ -241,7 +241,7 @@ void LagerRecognizer::PrintMlRecognitionResults(
   cout << "Threshold:\t\t" << gesture_probability_threshold_pct << " %" << endl;
   cout << endl;
   cout << "Recognition time: \t" << recognition_time << " ms" << endl;
-  cout << endl << endl << endl;
+  cout << endl;
 }
 
 struct SubscribedGesture LagerRecognizer::RecognizeGesture(
