@@ -79,6 +79,20 @@ Apply the following patch to fix a compilation error:
  
         osvrDeviceTrackerConfigure(pOptions, &mTrackerInterface);
 
+Apply the following patch to change the trigger action from pinching to grabbing, which is more reliable:
+--- a/com_osvr_LeapMotion.json
++++ b/com_osvr_LeapMotion.json
+@@ -421,7 +421,7 @@
+     "/me/hands/left/skeleton": "semantic/skeleton/dataAvailable/leftHand",
+     "/me/hands/right/skeleton": "semantic/skeleton/dataAvailable/rightHand",
+     "/me/skeleton/joints": "semantic/skeleton/joints/*",
+-    "/controller/left/trigger": "semantic/arms/left/hand/pinchStrength",
+-    "/controller/right/trigger": "semantic/arms/right/hand/pinchStrength"
++    "/controller/left/trigger": "semantic/arms/left/hand/grabStrength",
++    "/controller/right/trigger": "semantic/arms/right/hand/grabStrength"
+   }
+ }
+
 Compile and Install OSVR-Leap-Motion:
 ~/OSVR-Leap-Motion$ mkdir build
 ~/OSVR-Leap-Motion$ cd build
