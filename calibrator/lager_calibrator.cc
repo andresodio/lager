@@ -119,10 +119,10 @@ void InitializeTrackers() {
   g_left_button.registerCallback(&HandleButtonChange, NULL);
   g_right_button.registerCallback(&HandleButtonChange, NULL);
 
-  g_left_grab = g_context.getInterface("/controller/left/trigger");
+  //g_left_grab = g_context.getInterface("/controller/left/trigger");
   g_right_grab = g_context.getInterface("/controller/right/trigger");
 
-  g_left_grab.registerCallback(&HandleGrabChange, NULL);
+  //g_left_grab.registerCallback(&HandleGrabChange, NULL);
   g_right_grab.registerCallback(&HandleGrabChange, NULL);
 }
 
