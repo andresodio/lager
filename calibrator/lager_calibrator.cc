@@ -12,7 +12,7 @@ using std::endl;
 using std::ofstream;
 using std::string;
 
-#define MIN_GRAB_VALUE 0.8
+#define MIN_GRAB_VALUE 0.82
 
 /* Globals */
 

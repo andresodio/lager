@@ -31,7 +31,7 @@ using std::chrono::time_point;
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define MOVEMENT_GROUPING_TIME_MILLISECONDS 200
 
-#define MIN_GRAB_VALUE 0.8
+#define MIN_GRAB_VALUE 0.82
 
 LagerConverter* LagerConverter::instance_ = NULL;
 
