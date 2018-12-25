@@ -31,7 +31,7 @@ using std::chrono::time_point;
 #define GESTURE_PAUSE_TIME_MILLISECONDS 500
 #define MOVEMENT_GROUPING_TIME_MILLISECONDS 200
 
-#define MIN_PINCH_VALUE 0.8
+#define MIN_GRAB_VALUE 0.8
 
 LagerConverter* LagerConverter::instance_ = NULL;
 
@@ -350,16 +350,16 @@ void LagerConverter::HandleButtonChangeRight(void *user_data, const OSVR_TimeVal
   lager_converter->draw_gestures_2_ = (cur_report->state == 1) ? true : false;
 }
 
-void LagerConverter::HandlePinchChangeLeft(void * user_data, const OSVR_TimeValue * time_value,
+void LagerConverter::HandleGrabChangeLeft(void * user_data, const OSVR_TimeValue * time_value,
                       const OSVR_AnalogReport *cur_report) {
     LagerConverter* lager_converter = LagerConverter::Instance();
-    lager_converter->draw_gestures_1_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
+    lager_converter->draw_gestures_1_ = (cur_report->state > MIN_GRAB_VALUE) ? true : false;
 }
 
-void LagerConverter::HandlePinchChangeRight(void * user_data, const OSVR_TimeValue * time_value,
+void LagerConverter::HandleGrabChangeRight(void * user_data, const OSVR_TimeValue * time_value,
                       const OSVR_AnalogReport *cur_report) {
     LagerConverter* lager_converter = LagerConverter::Instance();
-    lager_converter->draw_gestures_2_ = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
+    lager_converter->draw_gestures_2_ = (cur_report->state > MIN_GRAB_VALUE) ? true : false;
 }
 
 void LagerConverter::InitializeTrackers() {
@@ -371,18 +371,18 @@ void LagerConverter::InitializeTrackers() {
   right_tracker_.registerCallback(&HandleTrackerChangeRight, NULL);
 
   if (use_buttons_) {
-    // Initialize the button and pinch handlers
+    // Initialize the button and grab handlers
     left_button_ = context_.getInterface("/controller/left/1");
     right_button_ = context_.getInterface("/controller/right/1");
 
     left_button_.registerCallback(&HandleButtonChangeLeft, NULL);
     right_button_.registerCallback(&HandleButtonChangeRight, NULL);
 
-    left_pinch_ = context_.getInterface("/controller/left/trigger");
-    right_pinch_ = context_.getInterface("/controller/right/trigger");
+    left_grab_ = context_.getInterface("/controller/left/trigger");
+    right_grab_ = context_.getInterface("/controller/right/trigger");
 
-    left_pinch_.registerCallback(&HandlePinchChangeLeft, NULL);
-    right_pinch_.registerCallback(&HandlePinchChangeRight, NULL);
+    left_grab_.registerCallback(&HandleGrabChangeLeft, NULL);
+    right_grab_.registerCallback(&HandleGrabChangeRight, NULL);
   }
 }
 

@@ -12,7 +12,7 @@ using std::endl;
 using std::ofstream;
 using std::string;
 
-#define MIN_PINCH_VALUE 0.8
+#define MIN_GRAB_VALUE 0.8
 
 /* Globals */
 
@@ -30,14 +30,14 @@ osvr::clientkit::Interface g_right_tracker;
 osvr::clientkit::Interface g_left_button;
 osvr::clientkit::Interface g_right_button;
 
-/// Pointer to the current pinch structures
-osvr::clientkit::Interface g_left_pinch;
-osvr::clientkit::Interface g_right_pinch;
+/// Pointer to the current grab structures
+osvr::clientkit::Interface g_left_grab;
+osvr::clientkit::Interface g_right_grab;
 
 /// Boolean to determine whether we should save movement positions
 bool save_positions = false;
 
-/// Boolean to keep track of the button (or pinch) release
+/// Boolean to keep track of the button (or grab) release
 bool button_released = false;
 
 /**
@@ -93,12 +93,12 @@ void HandleButtonChange(void *user_data, const OSVR_TimeValue *time_value,
 }
 
 /**
- * Callback that handles changes to a sensor pinch state.
+ * Callback that handles changes to a sensor grab state.
  */
-void HandlePinchChange(void *user_data, const OSVR_TimeValue *time_value,
+void HandleGrabChange(void *user_data, const OSVR_TimeValue *time_value,
                       const OSVR_AnalogReport *cur_report) {
   bool previously_saved_positions = save_positions;
-  save_positions = (cur_report->state > MIN_PINCH_VALUE) ? true : false;
+  save_positions = (cur_report->state > MIN_GRAB_VALUE) ? true : false;
   if (previously_saved_positions && !save_positions) {
     button_released = true;
   }
@@ -112,18 +112,18 @@ void InitializeTrackers() {
   g_left_tracker.registerCallback(&HandleTrackerChange, NULL);
   g_right_tracker.registerCallback(&HandleTrackerChange, NULL);
 
-  // Initialize the button and pinch handlers
+  // Initialize the button and grab handlers
   g_left_button = g_context.getInterface("/controller/left/1");
   g_right_button = g_context.getInterface("/controller/right/1");
 
   g_left_button.registerCallback(&HandleButtonChange, NULL);
   g_right_button.registerCallback(&HandleButtonChange, NULL);
 
-  g_left_pinch = g_context.getInterface("/controller/left/trigger");
-  g_right_pinch = g_context.getInterface("/controller/right/trigger");
+  g_left_grab = g_context.getInterface("/controller/left/trigger");
+  g_right_grab = g_context.getInterface("/controller/right/trigger");
 
-  g_left_pinch.registerCallback(&HandlePinchChange, NULL);
-  g_right_pinch.registerCallback(&HandlePinchChange, NULL);
+  g_left_grab.registerCallback(&HandleGrabChange, NULL);
+  g_right_grab.registerCallback(&HandleGrabChange, NULL);
 }
 
 /**
@@ -147,7 +147,7 @@ void WriteScaleToFile(double scale) {
  */
 void CalibrateSensor() {
   cout << "Move your sensor as far left as you will comfortably use it, then"
-      " hold its button (or pinch it) while you move it as far right as you will"
+      " hold its button (or grab it) while you move it as far right as you will"
       " comfortably use it." << endl << std::flush;
 
   InitializeTrackers();
